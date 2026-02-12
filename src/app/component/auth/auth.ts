@@ -32,7 +32,16 @@ export class AuthComponent {
 
   onSubmit() {
   if (this.isLoginMode) {
-    // לוגיקה של לוגין...
+    this.userService.login(this.loginData).subscribe({
+      next: (user) => {
+        this.userService.saveUserToStorage(user);
+        this.messageService.add({ severity: 'success', summary: 'התחברות', detail: `שלום ${user.fullName}!` });
+        // כאן כדאי להוסיף ניתוב לדף הבית: this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'אימייל או סיסמה שגויים' });
+      }
+    });
   } else {
     this.userService.register(this.registerData).subscribe({
       next: (res) => {
