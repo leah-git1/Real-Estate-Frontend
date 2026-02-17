@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+.luxury-header {
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  color: #1a237e;
+}
+
+.logo-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a237e;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: #3949ab;
+  }
+}
+
+.nav-center {
+  display: flex;
+  gap: 3.5rem;
+  flex: 1;
+  justify-content: center;
+  
+  > a {
+    color: #263238;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 0;
+    letter-spacing: 0.3px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #1a237e, #3949ab);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+    
+    &:hover::after, &.active::after {
+      width: 100%;
+    }
+    
+    &:hover, &.active {
+      color: #1a237e;
+    }
+  }
+}
+
+.nav-item-dropdown {
+  position: relative;
+  display: inline-block;
+  
+  &:hover .dropdown-content {
+    display: block;
+  }
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #263238;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.5rem 0;
+  letter-spacing: 0.3px;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1a237e, #3949ab);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+  }
+  
+  &:hover::after {
+    width: 100%;
+  }
+  
+  &:hover {
+    color: #1a237e;
+  }
+  
+  i {
+    font-size: 0.85rem;
+  }
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  min-width: 220px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  border-radius: 8px;
+  padding: 10px 0;
+  margin-top: 0;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 12px 20px;
+  color: #263238;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  
+  &::after {
+    display: none !important;
+  }
+  
+  &:hover {
+    background-color: #f5f5f5;
+    color: #1a237e;
+    padding-left: 25px;
+  }
+}
+
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+::ng-deep .cta-button {
+  background: linear-gradient(135deg, #2e7d32, #388e3c) !important;
+  border: none !important;
+  border-radius: 25px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3) !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #388e3c, #43a047) !important;
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4) !important;
+    transform: translateY(-2px);
+  }
+  
+  .p-button-label {
+    font-family: 'Montserrat', sans-serif !important;
+  }
+}
+
+.icon-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  color: #263238;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  i {
+    font-size: 1.25rem;
+  }
+  
+  &:hover {
+    background: #1a237e;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+  }
+}
+
+.cart-link {
+  position: relative;
+}

@@ -1,0 +1,37 @@
+<header class="luxury-header">
+  <div class="header-wrapper">
+    <div class="logo-section">
+      <i class="pi pi-home logo-icon"></i>
+      <a routerLink="/" class="logo-text">RealEstate</a>
+    </div>
+    
+    <nav class="nav-center">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">בית</a>
+      <a routerLink="/about" routerLinkActive="active">אודות</a>
+      <div class="nav-item-dropdown">
+        <a class="nav-link">
+          נדל"ן
+          <i class="pi pi-angle-down"></i>
+        </a>
+        <div class="dropdown-content">
+          <a *ngFor="let category of categories" 
+             [routerLink]="['/products']"
+             [queryParams]="{categoryIds: category.categoryId}"
+             class="dropdown-item">
+            {{ category.categoryName }}
+          </a>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="actions-section">
+      <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button"></p-button>
+      <a routerLink="/auth" class="icon-link">
+        <i class="pi pi-user"></i>
+      </a>
+      <a routerLink="/cart" class="icon-link cart-link" pBadge [value]="cartItemCount.toString()" severity="danger">
+        <i class="pi pi-shopping-cart"></i>
+      </a>
+    </div>
+  </div>
+</header>

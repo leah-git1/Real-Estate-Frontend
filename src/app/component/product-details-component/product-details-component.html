@@ -32,8 +32,7 @@
 
       <div class="mb-4" *ngIf="product.dealType !== 'מכירה'">
         <label class="block font-bold mb-2">בחירת תאריכים:</label>
-        <p-calendar [(ngModel)]="rangeDates" selectionMode="range" [readonlyInput]="true" 
-                    [minDate]="minDate" placeholder="בחר תאריכי שהייה" styleClass="w-full" [showIcon]="true"></p-calendar>
+        <input type="text" class="w-full p-3 border-1 border-300 border-round" placeholder="בחר תאריכי שהייה" readonly />
       </div>
 
       <div class="surface-50 p-4 border-round mb-4 flex-grow-1">

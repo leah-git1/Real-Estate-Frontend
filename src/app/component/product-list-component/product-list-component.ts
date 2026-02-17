@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../services/product-service'; 
 import { ProductSummaryDTOModel } from '../../models/product/product-model'; 
 import { CommonModule } from '@angular/common';
@@ -22,14 +23,22 @@ import { PaginatorModule } from 'primeng/paginator';
 export class ProductListComponent implements OnInit {
   products: ProductSummaryDTOModel[] = [];
   totalRecords: number = 0;
-  rows: number = 9; // כמות מוצרים בדף
-  currentPage: number = 1; // דף נוכחי
+  rows: number = 9;
+  currentPage: number = 1;
   currentFilters: any = {};
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.loadProducts();
+    this.route.queryParams.subscribe(params => {
+      if (params['categoryIds']) {
+        this.currentFilters.categoryIds = [+params['categoryIds']];
+      }
+      this.loadProducts();
+    });
   }
 
   // פונקציה המופעלת כשהבן (Filter) שולח נתוני סינון חדשים

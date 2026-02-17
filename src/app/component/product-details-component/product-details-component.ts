@@ -4,13 +4,12 @@ import { ProductService } from '../../services/product-service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { GalleriaModule } from 'primeng/galleria';
-import { CalendarModule } from 'primeng/calendar';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, CalendarModule, FormsModule],
+  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, FormsModule],
   templateUrl: './product-details-component.html',
   styleUrl: './product-details-component.scss'
 })
