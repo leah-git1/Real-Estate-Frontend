@@ -14,6 +14,7 @@ export class ProductModel {
   city: string = '';
   rooms?: number;
   beds?: number;
+  TransactionType: string = ''; // "מכירה", "השכרה", "נופש"
   // רשימת תמונות נוספות מה-Entity
   productImages: ProductImageModel[] = [];
 }
@@ -25,6 +26,9 @@ export class ProductSummaryDTOModel {
     imageUrl: string = '';
     city: string = '';
     beds?: number;
+    rooms?: number;
+    categoryCategoryName: string = '';
+    transactionType: string = '';
     categoryId?: number;
 }
 
@@ -40,6 +44,7 @@ export class ProductDetailsDTOModel {
     rooms?: number;
     categoryId?: number;
     ownerId?: number;
+    transactionType: string = '';
 }
 
 export class ProductCreateDTOModel {
@@ -53,6 +58,7 @@ export class ProductCreateDTOModel {
     city: string = '';
     beds: number = 0;
     rooms: number = 0;
+    transactionType: string = '';
 }
 
 export class ProductUpdateDTOModel {
@@ -61,7 +67,9 @@ export class ProductUpdateDTOModel {
     price: number = 0;
     mainImageUrl: string = '';
     additionalImages: string[] = [];
-    categoryID: number = 0;
+    categoryId: number = 0;
     city: string = '';
     beds: number = 0;
+    rooms: number = 0;
+    transactionType: string = '';
 }

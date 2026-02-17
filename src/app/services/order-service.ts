@@ -1,0 +1,19 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { OccupiedDatesResponseDTOModel } from '../models/order/order-model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class OrderService {
+  private apiUrl = 'https://localhost:44305/api/order';
+
+  constructor(private http: HttpClient) {}
+
+  getOccupiedDates(productId: number, month: number, year: number): Observable<OccupiedDatesResponseDTOModel> {
+    return this.http.get<OccupiedDatesResponseDTOModel>(`${this.apiUrl}/occupied-dates/${productId}`, {
+      params: { month: month.toString(), year: year.toString() }
+    });
+  }
+}

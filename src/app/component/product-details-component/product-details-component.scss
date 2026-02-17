@@ -1,0 +1,39 @@
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+/* עיצוב ל-tooltip של תאריכים תפוסים */
+::ng-deep .p-datepicker-calendar td.p-disabled[title] {
+  position: relative;
+}
+
+::ng-deep .p-datepicker-calendar td.p-disabled[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+::ng-deep .p-datepicker-calendar td.p-disabled[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  border: 5px solid transparent;
+  border-top-color: #333;
+  z-index: 1000;
+}

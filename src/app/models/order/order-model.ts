@@ -30,3 +30,10 @@ export class OrderStatusUpdateDTOModel {
     orderId: number = 0;
     status: string = '';
 }
+
+export class OccupiedDatesResponseDTOModel {
+    productId: number = 0;
+    month: number = 0;
+    year: number = 0;
+    occupiedDates: string[] = [];
+}

@@ -8,10 +8,14 @@ export class OrderItemModel {
 export class OrderItemDTOModel {
     productId: number = 0;
     priceAtPurchase: number = 0;
+    startDate?: Date;
+    endDate?: Date;
 }
 
 export class OrderItemViewDTOModel {
     productId: number = 0;
     priceAtPurchase: number = 0;
     product?: { imageUrl: string; title: string }; 
+    startDate?: Date;
+    endDate?: Date;
 }

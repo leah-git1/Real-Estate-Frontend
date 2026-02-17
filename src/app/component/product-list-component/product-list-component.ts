@@ -29,7 +29,7 @@ export class ProductListComponent implements OnInit {
   constructor(private productService: ProductService) {}
 
   ngOnInit() {
-    this.loadProducts();
+    this.handleFilter({}); // טוען את כל המוצרים עם פילטר ריק
   }
 
   // פונקציה המופעלת כשהבן (Filter) שולח נתוני סינון חדשים
