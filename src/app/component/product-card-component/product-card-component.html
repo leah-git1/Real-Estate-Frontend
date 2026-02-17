@@ -1,6 +1,6 @@
 <div class="product-card shadow-2 p-3 border-round mb-4 bg-white">
   <div class="text-center mb-3 relative">
-    <img [src]="product.imageUrl" [alt]="product.title" 
+    <img [src]="getFullImageUrl(product.imageUrl)" [alt]="product.title" 
          style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" 
          class="border-round"
          (click)="viewDetails(product.productId)">

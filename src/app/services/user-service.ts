@@ -39,7 +39,16 @@ export class UserService {
    *  בדיקה אם המשתמש מחובר
    */
   isLoggedIn(): boolean {
-    return localStorage.getItem('currentUser') !== null;
+    const user = this.getCurrentUser();
+    return user !== null && user.userId > 0;
+  }
+
+  /**
+   * קבלת המשתמש המחובר
+   */
+  getCurrentUser(): UserProfileDTOModel | null {
+    const userStr = localStorage.getItem('currentUser');
+    return userStr ? JSON.parse(userStr) : null;
   }
 
   /**

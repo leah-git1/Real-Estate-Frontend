@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductSummaryDTOModel } from '../models/product/product-model';
+import { ProductSummaryDTOModel, ProductCreateDTOModel } from '../models/product/product-model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private apiUrl = 'https://localhost:44305/api/product';
+  private serverUrl = 'https://localhost:44305';
 
   constructor(private http: HttpClient) {}
 
@@ -50,5 +51,19 @@ export class ProductService {
       .set('end', endDate.toISOString());
     
     return this.http.get<boolean>(`${this.apiUrl}/check-availability`, { params });
+  }
+
+  createProduct(product: ProductCreateDTOModel): Observable<any> {
+    return this.http.post<any>(this.apiUrl, product);
+  }
+
+  uploadImage(formData: FormData): Observable<string> {
+    return this.http.post('https://localhost:44305/api/productimage/upload', formData, { responseType: 'text' });
+  }
+
+  getFullImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return this.serverUrl + imageUrl;
   }
 }

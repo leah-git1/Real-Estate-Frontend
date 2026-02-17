@@ -26,9 +26,12 @@ export class ProductCardComponent {
   // פונקציית המעבר לדף פרטים נוספים
   viewDetails(productId: number) {
     console.log('מעבר לדף פרטים עבור מוצר מספר:', productId);
-    
-    // הפקודה שמעבירה לדף החדש. 
-    // ודאי שיש לך נתיב (Route) מוגדר ב-app.routes.ts עבור 'product-details'
     this.router.navigate(['/product-details', productId]);
+  }
+
+  getFullImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return 'https://localhost:44305' + imageUrl;
   }
 }

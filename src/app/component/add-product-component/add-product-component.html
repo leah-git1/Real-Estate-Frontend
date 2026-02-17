@@ -1,0 +1,101 @@
+<div class="container p-5">
+  <h1 class="text-3xl font-bold mb-4">פרסום מוצר חדש</h1>
+  
+  <form (ngSubmit)="onSubmit()" #productForm="ngForm">
+    <div class="grid">
+      <div class="col-12 md:col-8">
+        <p-card>
+          <div class="field mb-4">
+            <label class="block font-bold mb-2">כותרת *</label>
+            <input type="text" pInputText [(ngModel)]="product.title" name="title" required class="w-full" />
+          </div>
+
+          <div class="field mb-4">
+            <label class="block font-bold mb-2">תיאור *</label>
+            <textarea [(ngModel)]="product.description" name="description" required rows="5" class="w-full p-3 border-1 border-300 border-round"></textarea>
+          </div>
+
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="field mb-4">
+                <label class="block font-bold mb-2">מחיר *</label>
+                <input type="number" [(ngModel)]="product.price" name="price" required min="0" class="w-full p-3 border-1 border-300 border-round" placeholder="מחיר ב-₪" />
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="field mb-4">
+                <label class="block font-bold mb-2">עיר *</label>
+                <input type="text" pInputText [(ngModel)]="product.city" name="city" required class="w-full" />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="col-12 md:col-4">
+              <div class="field mb-4">
+                <label class="block font-bold mb-2">קטגוריה *</label>
+                <select [(ngModel)]="product.categoryId" name="categoryId" required class="w-full p-3 border-1 border-300 border-round">
+                  <option value="" disabled selected>בחר קטגוריה</option>
+                  <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.categoryName }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-4">
+              <div class="field mb-4">
+                <label class="block font-bold mb-2">חדרים</label>
+                <input type="number" [(ngModel)]="product.rooms" name="rooms" min="0" class="w-full p-3 border-1 border-300 border-round" />
+              </div>
+            </div>
+
+            <div class="col-12 md:col-4">
+              <div class="field mb-4">
+                <label class="block font-bold mb-2">מיטות</label>
+                <input type="number" [(ngModel)]="product.beds" name="beds" min="0" class="w-full p-3 border-1 border-300 border-round" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field mb-4">
+            <label class="block font-bold mb-2">סוג עסקה *</label>
+            <select [(ngModel)]="product.transactionType" name="transactionType" required class="w-full p-3 border-1 border-300 border-round">
+              <option value="" disabled selected>בחר סוג עסקה</option>
+              <option *ngFor="let type of transactionTypes" [value]="type.value">{{ type.label }}</option>
+            </select>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="col-12 md:col-4">
+        <p-card header="תמונות">
+          <div class="field mb-4">
+            <label class="block font-bold mb-2">תמונה ראשית *</label>
+            <input type="file" #mainImageInput (change)="onMainImageSelect($event)" accept="image/*" class="hidden" />
+            <button type="button" pButton label="בחר תמונה ראשית" icon="pi pi-upload" (click)="mainImageInput.click()" class="w-full mb-2"></button>
+            <img *ngIf="mainImagePreview" [src]="mainImagePreview" class="w-full border-round" style="max-height: 200px; object-fit: cover;" />
+          </div>
+
+          <div class="field">
+            <label class="block font-bold mb-2">תמונות נוספות</label>
+            <input type="file" #additionalImagesInput (change)="onAdditionalImagesSelect($event)" accept="image/*" multiple class="hidden" />
+            <button type="button" pButton label="הוסף תמונות" icon="pi pi-images" (click)="additionalImagesInput.click()" class="w-full mb-2"></button>
+            
+            <div class="grid" *ngIf="additionalImagesPreviews.length > 0">
+              <div class="col-6" *ngFor="let preview of additionalImagesPreviews; let i = index">
+                <div class="relative">
+                  <img [src]="preview" class="w-full border-round" style="height: 100px; object-fit: cover;" />
+                  <button type="button" pButton icon="pi pi-times" class="p-button-rounded p-button-danger p-button-sm absolute" style="top: 5px; right: 5px;" (click)="removeAdditionalImage(i)"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <button type="submit" pButton label="פרסם מוצר" icon="pi pi-check" [disabled]="!productForm.valid || !mainImageFile" class="w-full mt-3 p-button-success p-button-lg"></button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<p-toast></p-toast>

@@ -54,12 +54,16 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   setupGallery(data: any) {
-    this.images = [{ itemImageSrc: data.imageUrl, thumbnailImageSrc: data.imageUrl }];
+    const serverUrl = 'https://localhost:44305';
+    const mainImageUrl = data.imageUrl.startsWith('http') ? data.imageUrl : serverUrl + data.imageUrl;
+    
+    this.images = [{ itemImageSrc: mainImageUrl, thumbnailImageSrc: mainImageUrl }];
     if (data.productImages && data.productImages.length > 0) {
       data.productImages.forEach((img: any) => {
+        const additionalImageUrl = img.additionalImageUrl.startsWith('http') ? img.additionalImageUrl : serverUrl + img.additionalImageUrl;
         this.images.push({ 
-          itemImageSrc: img.additionalImageUrl, 
-          thumbnailImageSrc: img.additionalImageUrl 
+          itemImageSrc: additionalImageUrl, 
+          thumbnailImageSrc: additionalImageUrl 
         });
       });
     }
