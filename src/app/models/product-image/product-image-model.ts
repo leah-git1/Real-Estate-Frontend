@@ -5,16 +5,10 @@ export class ProductImageModel {
 }
 
 export class ProductImageUrlDTOModel {
-    additionalImageUrl: string = '';
-}
-
-export class ProductImageDTOModel {
-    imageId: number = 0;
-    productId: number = 0;
-    additionalImageUrl: string = '';
+  additionalImageUrl: string = '';
 }
 
 export class ProductImageCreateDTOModel {
-    productId: number = 0;
-    additionalImageUrl: string = '';
+  productId: number = 0;
+  additionalImageUrl: string = '';
 }

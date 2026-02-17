@@ -39,8 +39,16 @@ export class ProductService {
     return this.http.get<any>(this.apiUrl, { params });
   }
 
-getProductById(id: number): Observable<any> {
-  // לפי ה-Swagger ששלחת:
-  return this.http.get<any>(`${this.apiUrl}/${id}`);
-}
+  getProductById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  checkAvailability(productId: number, startDate: Date, endDate: Date): Observable<boolean> {
+    let params = new HttpParams()
+      .set('productId', productId.toString())
+      .set('start', startDate.toISOString())
+      .set('end', endDate.toISOString());
+    
+    return this.http.get<boolean>(`${this.apiUrl}/check-availability`, { params });
+  }
 }
