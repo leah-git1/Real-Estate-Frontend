@@ -2,7 +2,6 @@
   <button pButton icon="pi pi-arrow-right" label="חזרה לקטלוג" routerLink="/products" class="p-button-text mb-4"></button>
 
   <div class="grid shadow-4 border-round bg-white overflow-hidden" style="min-height: 550px;">
-    
     <div class="col-12 md:col-7 p-0 bg-white border-left-1 border-100">
       <div class="flex" style="height: 100%;">
         <div class="flex-grow-1 flex align-items-center justify-content-center relative" style="background: #f8f9fa;">
@@ -36,6 +35,7 @@
     </div>
 
     <div class="col-12 md:col-5 p-5 flex flex-column">
+      
       <div class="mb-3">
         <div class="flex justify-content-between align-items-start mb-2">
           <h1 class="text-3xl font-bold text-900 m-0">{{ product.title }}</h1>
@@ -43,7 +43,6 @@
         </div>
         <p class="text-600 text-lg m-0"><i class="pi pi-map-marker mr-2"></i>{{ product.city }}</p>
       </div>
-      
       <div class="text-4xl font-bold text-primary mb-4">₪{{ product.price | number }}</div>
 
       <div class="grid text-center border-1 border-200 border-round mb-4 p-3" *ngIf="product.transactionType !== 'Sale'">
