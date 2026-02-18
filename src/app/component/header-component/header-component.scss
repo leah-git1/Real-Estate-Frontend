@@ -323,4 +323,18 @@
       background: #fee;
     }
   }
+  
+  &.admin-item {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1565c0;
+    font-weight: 600;
+    
+    i {
+      color: #1565c0;
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, #bbdefb, #90caf9);
+    }
+  }
 }

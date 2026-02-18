@@ -38,6 +38,10 @@ export class HeaderComponent implements OnInit {
     this.currentUser = this.userService.getCurrentUser();
   }
 
+  isAdmin(): boolean {
+    return this.currentUser?.isAdmin || false;
+  }
+
   trackByCategory(index: number, category: CategoryDTOModel): number {
     return category.categoryId;
   }

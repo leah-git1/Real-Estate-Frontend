@@ -1,0 +1,139 @@
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <h1><i class="pi pi-shield"></i> לוח בקרה - מנהל</h1>
+  </div>
+
+  <div class="statistics-grid">
+    <p-card class="stat-card users-card" (click)="scrollToSection('users')">
+      <div class="stat-content">
+        <i class="pi pi-users stat-icon"></i>
+        <div class="stat-details">
+          <h3>{{ statistics.totalUsers }}</h3>
+          <p>משתמשים</p>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card products-card" (click)="scrollToSection('products')">
+      <div class="stat-content">
+        <i class="pi pi-box stat-icon"></i>
+        <div class="stat-details">
+          <h3>{{ statistics.totalProducts }}</h3>
+          <p>מוצרים</p>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card orders-card" (click)="scrollToSection('orders')">
+      <div class="stat-content">
+        <i class="pi pi-shopping-cart stat-icon"></i>
+        <div class="stat-details">
+          <h3>{{ statistics.totalOrders }}</h3>
+          <p>הזמנות</p>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <p-card class="table-card" id="users">
+    <ng-template pTemplate="header">
+      <h2><i class="pi pi-users"></i> ניהול משתמשים</h2>
+    </ng-template>
+    <p-table [value]="users" [loading]="loading" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>מזהה</th>
+          <th>שם מלא</th>
+          <th>טלפון</th>
+          <th>כתובת</th>
+          <th>סטטוס</th>
+          <th>פעולות</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.userId }}</td>
+          <td>{{ user.fullName }}</td>
+          <td>{{ user.phone }}</td>
+          <td>{{ user.address }}</td>
+          <td>
+            <p-tag [value]="user.isAdmin ? 'מנהל' : 'משתמש'" [severity]="user.isAdmin ? 'success' : 'info'"></p-tag>
+          </td>
+          <td>
+            <p-button *ngIf="!user.isAdmin" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteUser(user.userId)"></p-button>
+            <span *ngIf="user.isAdmin" style="color: #999; font-size: 0.9rem;">לא ניתן למחוק</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-card class="table-card" id="products">
+    <ng-template pTemplate="header">
+      <h2><i class="pi pi-box"></i> ניהול מוצרים</h2>
+    </ng-template>
+    <p-table [value]="products" [loading]="loading" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>מזהה</th>
+          <th>כותרת</th>
+          <th>מחיר</th>
+          <th>עיר</th>
+          <th>זמין</th>
+          <th>פעולות</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <td>{{ product.productId }}</td>
+          <td>{{ product.title }}</td>
+          <td>{{ product.price | currency:'ILS':'symbol':'1.0-0' }}</td>
+          <td>{{ product.city }}</td>
+          <td>
+            <p-tag [value]="product.isAvailable ? 'זמין' : 'לא זמין'" [severity]="product.isAvailable ? 'success' : 'danger'"></p-tag>
+          </td>
+          <td>
+            <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteProduct(product.productId)"></p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-card class="table-card" id="orders">
+    <ng-template pTemplate="header">
+      <h2><i class="pi pi-shopping-cart"></i> ניהול הזמנות</h2>
+    </ng-template>
+    <p-table [value]="orders" [loading]="loading" styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>מזהה הזמנה</th>
+          <th>מזהה משתמש</th>
+          <th>שם משתמש</th>
+          <th>תאריך</th>
+          <th>סכום</th>
+          <th>סטטוס</th>
+          <th>פעולות</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-order>
+        <tr>
+          <td>{{ order.orderId }}</td>
+          <td>{{ order.userId }}</td>
+          <td>{{ order.userName }}</td>
+          <td>{{ order.orderDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ order.totalAmount | currency:'ILS':'symbol':'1.0-0' }}</td>
+          <td>
+            <p-tag [value]="order.status" [severity]="order.status === 'delivered' ? 'success' : 'warn'"></p-tag>
+          </td>
+          <td>
+            <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteOrder(order.orderId)"></p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>

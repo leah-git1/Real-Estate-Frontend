@@ -53,6 +53,10 @@
             <i class="pi pi-box"></i>
             <span>המוצרים שלי</span>
           </a>
+          <a *ngIf="isAdmin()" routerLink="/admin" (click)="showUserMenu=false" class="menu-item admin-item">
+            <i class="pi pi-shield"></i>
+            <span>ניהול מערכת</span>
+          </a>
           <a routerLink="/add-product" (click)="showUserMenu=false" class="menu-item highlight">
             <i class="pi pi-plus-circle"></i>
             <span>הוסף מוצר חדש</span>
