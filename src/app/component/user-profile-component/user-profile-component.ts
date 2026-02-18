@@ -77,25 +77,18 @@ export class UserProfileComponent implements OnInit {
   }
 
   loadMyProducts() {
-    console.log('Loading products for user:', this.currentUser.userId);
     this.isLoadingProducts = true;
     this.productService.getProductsByOwnerId(this.currentUser.userId).subscribe({
       next: (data) => {
-        console.log('Products loaded successfully:', data);
-        console.log('Number of products:', data.length);
         this.myProducts = data.map(product => ({
           ...product,
           imageUrl: this.getFullImageUrl(product.imageUrl)
         }));
-        console.log('Products with fixed URLs:', this.myProducts);
         this.isLoadingProducts = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading products - Full error:', err);
-        console.error('Error status:', err.status);
-        console.error('Error message:', err.message);
-        console.error('Error details:', err.error);
+        console.error('Error loading products:', err);
         this.isLoadingProducts = false;
         this.myProducts = [];
         this.cdr.detectChanges();
@@ -159,6 +152,22 @@ export class UserProfileComponent implements OnInit {
     this.router.navigate(['/product-details', productId], { 
       queryParams: { returnTo: 'profile', tab: 2 } 
     });
+  }
+
+  deleteProduct(productId: number) {
+    if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
+      const updateData = { isAvailable: false };
+      this.productService.updateProduct(productId, updateData).subscribe({
+        next: () => {
+          alert('המוצר נמחק בהצלחה');
+          this.loadMyProducts();
+        },
+        error: (err) => {
+          console.error('Error deleting product:', err);
+          alert('שגיאה במחיקת המוצר');
+        }
+      });
+    }
   }
 
   addNewProduct() {

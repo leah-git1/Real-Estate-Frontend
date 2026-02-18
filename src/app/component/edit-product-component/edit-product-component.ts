@@ -21,6 +21,9 @@ import { ProductUpdateDTOModel } from '../../models/product/product-model';
 export class EditProductComponent implements OnInit {
   productId: number = 0;
   product: ProductUpdateDTOModel = {};
+  currentMainImage: string = '';
+  currentAdditionalImages: Array<{imageId: number, url: string}> = [];
+  imagesToDelete: number[] = [];
   categories: any[] = [];
   transactionTypes = [
     { label: 'מכירה', value: 'Sale' },
@@ -30,6 +33,8 @@ export class EditProductComponent implements OnInit {
   showImageSection: boolean = false;
   mainImageFile: File | null = null;
   mainImagePreview: string | null = null;
+  additionalImagesFiles: File[] = [];
+  additionalImagesPreviews: string[] = [];
 
   constructor(
     private productService: ProductService,
@@ -57,6 +62,11 @@ export class EditProductComponent implements OnInit {
           categoryId: data.categoryId,
           transactionType: data.transactionType
         };
+        this.currentMainImage = data.imageUrl;
+        this.currentAdditionalImages = data.productImages?.map((img: any) => ({
+          imageId: img.imageId,
+          url: img.additionalImageUrl
+        })) || [];
       },
       error: (err) => console.error('Error loading product:', err)
     });
@@ -71,37 +81,30 @@ export class EditProductComponent implements OnInit {
 
   onSubmit() {
     console.log('onSubmit called');
-    console.log('mainImageFile:', this.mainImageFile);
+    // תמיד נעדכן את הנתונים הבסיסיים תחילה
     if (this.mainImageFile) {
-      const formData = new FormData();
-      formData.append('file', this.mainImageFile);
-      console.log('Uploading image...');
-      this.productService.uploadImage(formData).subscribe({
-        next: (imageUrl) => {
-          console.log('Image uploaded successfully, URL:', imageUrl);
-          this.product.imageUrl = imageUrl;
-          console.log('Product before update:', this.product);
-          this.updateProduct();
-        },
-        error: (err) => {
-          console.error('Error uploading image:', err);
-          alert('שגיאה בהעלאת התמונה');
-        }
-      });
+      this.uploadMainImage();
     } else {
-      console.log('No image file, updating product without image');
-      this.updateProduct();
+      this.updateBasicData();
     }
   }
 
-  updateProduct() {
-    console.log('updateProduct called with:', this.product);
-    console.log('Product ID:', this.productId);
-    this.productService.updateProduct(this.productId, this.product).subscribe({
-      next: (response) => {
-        console.log('Update response:', response);
-        alert('המוצר עודכן בהצלחה!');
-        this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+  updateBasicData() {
+    const updateData: any = {
+      title: this.product.title,
+      description: this.product.description,
+      price: this.product.price,
+      city: this.product.city,
+      categoryId: this.product.categoryId,
+      transactionType: this.product.transactionType
+    };
+    if (this.product.rooms !== undefined) updateData.rooms = this.product.rooms;
+    if (this.product.beds !== undefined) updateData.beds = this.product.beds;
+    if (this.product.imageUrl) updateData.imageUrl = this.product.imageUrl;
+
+    this.productService.updateProduct(this.productId, updateData).subscribe({
+      next: () => {
+        this.deleteMarkedImages();
       },
       error: (err) => {
         console.error('Error updating product:', err);
@@ -110,7 +113,73 @@ export class EditProductComponent implements OnInit {
     });
   }
 
-  onMainImageSelect(event: any) {
+  deleteMarkedImages() {
+    if (this.imagesToDelete.length === 0) {
+      if (this.additionalImagesFiles.length > 0) {
+        this.uploadAdditionalImages();
+      } else {
+        alert('המוצר עודכן בהצלחה!');
+        this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+      }
+      return;
+    }
+
+    const deletePromises = this.imagesToDelete.map(id => 
+      this.productService.deleteProductImage(id).toPromise()
+    );
+
+    Promise.all(deletePromises).then(() => {
+      if (this.additionalImagesFiles.length > 0) {
+        this.uploadAdditionalImages();
+      } else {
+        alert('המוצר עודכן בהצלחה!');
+        this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+      }
+    }).catch(err => {
+      console.error('Error deleting images:', err);
+      alert('שגיאה במחיקת תמונות');
+    });
+  }
+
+  uploadMainImage() {
+    const formData = new FormData();
+    formData.append('file', this.mainImageFile!);
+    this.productService.uploadImage(formData).subscribe({
+      next: (imageUrl) => {
+        this.product.imageUrl = imageUrl;
+        this.updateBasicData();
+      },
+      error: (err) => {
+        console.error('Error uploading main image:', err);
+        alert('שגיאה בהעלאת התמונה');
+      }
+    });
+  }
+
+  uploadAdditionalImages() {
+    const uploadPromises = this.additionalImagesFiles.map(file => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return this.productService.uploadImage(formData).toPromise();
+    });
+
+    Promise.all(uploadPromises).then(urls => {
+      // הוספת תמונות חדשות דרך ProductImage API
+      const addImagePromises = urls.map(url => {
+        const imageData = { productId: this.productId, additionalImageUrl: url || '' };
+        return this.productService.addProductImage(imageData).toPromise();
+      });
+      return Promise.all(addImagePromises);
+    }).then(() => {
+      alert('המוצר עודכן בהצלחה!');
+      this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+    }).catch(err => {
+      console.error('Error uploading additional images:', err);
+      alert('שגיאה בהעלאת תמונות נוספות');
+    });
+  }
+
+onMainImageSelect(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.mainImageFile = file;
@@ -122,11 +191,41 @@ export class EditProductComponent implements OnInit {
     }
   }
 
+  onAdditionalImagesSelect(event: any) {
+    const files = Array.from(event.target.files) as File[];
+    files.forEach(file => {
+      this.additionalImagesFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.additionalImagesPreviews.push(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  removeAdditionalImage(index: number) {
+    this.additionalImagesFiles.splice(index, 1);
+    this.additionalImagesPreviews.splice(index, 1);
+  }
+
+  removeExistingImage(index: number) {
+    const imageToDelete = this.currentAdditionalImages[index];
+    this.imagesToDelete.push(imageToDelete.imageId);
+    this.currentAdditionalImages.splice(index, 1);
+  }
+
   toggleImageSection() {
     this.showImageSection = !this.showImageSection;
   }
 
   cancel() {
     this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+  }
+
+  getFullImageUrl(imageUrl: string | {imageId: number, url: string}): string {
+    const url = typeof imageUrl === 'string' ? imageUrl : imageUrl.url;
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return 'https://localhost:44305' + url;
   }
 }

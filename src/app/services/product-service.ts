@@ -61,7 +61,15 @@ export class ProductService {
     return this.http.post('https://localhost:44305/api/productimage/upload', formData, { responseType: 'text' });
   }
 
-  getFullImageUrl(imageUrl: string): string {
+  addProductImage(imageData: any): Observable<any> {
+    return this.http.post('https://localhost:44305/api/productimage', imageData);
+  }
+
+  deleteProductImage(imageId: number): Observable<any> {
+    return this.http.delete(`https://localhost:44305/api/productimage/${imageId}`);
+  }
+
+getFullImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
     if (imageUrl.startsWith('http')) return imageUrl;
     return this.serverUrl + imageUrl;

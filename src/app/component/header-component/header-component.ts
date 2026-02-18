@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
@@ -24,15 +24,22 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private categoryService: CategoryService,
-    private userService: UserService
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.categoryService.getCategories().subscribe({
-      next: (data) => this.categories = data,
+      next: (data) => {
+        this.categories = data;
+      },
       error: (err) => console.error('Error fetching categories:', err)
     });
     this.currentUser = this.userService.getCurrentUser();
+  }
+
+  trackByCategory(index: number, category: CategoryDTOModel): number {
+    return category.categoryId;
   }
 
   isLoggedIn(): boolean {

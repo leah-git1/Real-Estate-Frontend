@@ -30,6 +30,7 @@ export class ProductSummaryDTOModel {
     categoryCategoryName: string = '';
     transactionType: string = '';
     categoryId?: number;
+    isAvailable?: boolean | number;
 }
 
 export class ProductDetailsDTOModel {
@@ -66,10 +67,11 @@ export class ProductUpdateDTOModel {
     description?: string;
     price?: number;
     imageUrl?: string;
-    additionalImages?: string[];
+    additionalImages?: ProductImageUrlDTOModel[];
     categoryId?: number;
     city?: string;
     beds?: number;
     rooms?: number;
     transactionType?: string;
+    isAvailable?: boolean;
 }

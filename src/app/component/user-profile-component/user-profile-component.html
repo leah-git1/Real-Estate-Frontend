@@ -181,10 +181,16 @@
             <div class="flex gap-2">
               <p-button icon="pi pi-pencil" 
                         (onClick)="editProduct(product.productId)" 
-                        styleClass="p-button-rounded p-button-warning"></p-button>
+                        styleClass="p-button-rounded p-button-warning"
+                        pTooltip="עריכה"></p-button>
+              <p-button icon="pi pi-trash" 
+                        (onClick)="deleteProduct(product.productId)" 
+                        styleClass="p-button-rounded p-button-danger"
+                        pTooltip="מחיקה"></p-button>
               <p-button icon="pi pi-eye" 
                         (onClick)="viewProduct(product.productId)" 
-                        styleClass="p-button-rounded p-button-info"></p-button>
+                        styleClass="p-button-rounded p-button-info"
+                        pTooltip="צפייה"></p-button>
             </div>
           </div>
           </div>

@@ -74,11 +74,10 @@ export class ProductListComponent implements OnInit {
       this.rows
     ).subscribe({
       next: (response) => {
-        // הדפסת התגובה המלאה לבדיקה ב-Console
         console.log('תגובה מה-API בתוך ה-Component:', response);
         
         if (response && response.data) {
-          this.products = response.data;
+          this.products = response.data.filter((p: any) => p.title !== 'deleted');
           this.totalRecords = response.totalItems;
           console.log('מערך המוצרים עודכן בהצלחה. כמות:', this.products.length);
         } else {
