@@ -31,7 +31,7 @@ export class ProductCardComponent {
 
   getFullImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) return imageUrl;
-    return 'https://localhost:44305' + imageUrl;
+    if (imageUrl.startsWith('http')) return imageUrl + '?t=' + Date.now();
+    return 'https://localhost:44305' + imageUrl + '?t=' + Date.now();
   }
 }

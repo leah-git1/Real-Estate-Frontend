@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserLoginDTOModel, UserRegisterDTOModel, UserProfileDTOModel } from '../models/user/user-model';
+import { UserLoginDTOModel, UserRegisterDTOModel, UserProfileDTOModel, UserUpdateDTOModel } from '../models/user/user-model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private apiUrl = 'https://localhost:44305/api/users'; // כתובת ה-API שלך
+  private apiUrl = 'https://localhost:44305/api/users';
 
   constructor(private http: HttpClient) { }
 
@@ -56,5 +56,12 @@ export class UserService {
    */
   logout(): void {
     localStorage.removeItem('currentUser');
+  }
+
+  /**
+   * עדכון פרטי משתמש
+   */
+  updateUser(id: number, userData: UserUpdateDTOModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, userData);
   }
 }

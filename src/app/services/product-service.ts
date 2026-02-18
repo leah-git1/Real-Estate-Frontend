@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductSummaryDTOModel, ProductCreateDTOModel } from '../models/product/product-model';
+import { ProductSummaryDTOModel, ProductCreateDTOModel, ProductUpdateDTOModel } from '../models/product/product-model';
 
 @Injectable({
   providedIn: 'root'
@@ -65,5 +65,16 @@ export class ProductService {
     if (!imageUrl) return '';
     if (imageUrl.startsWith('http')) return imageUrl;
     return this.serverUrl + imageUrl;
+  }
+
+  updateProduct(id: number, productData: ProductUpdateDTOModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, productData);
+  }
+
+  getProductsByOwnerId(ownerId: number): Observable<ProductSummaryDTOModel[]> {
+    console.log('ProductService: Fetching products for owner:', ownerId);
+    const url = `${this.apiUrl}/owner/${ownerId}`;
+    console.log('ProductService: Request URL:', url);
+    return this.http.get<ProductSummaryDTOModel[]>(url);
   }
 }

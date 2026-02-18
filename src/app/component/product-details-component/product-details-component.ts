@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
 import { CommonModule } from '@angular/common';
@@ -27,15 +27,26 @@ export class ProductDetailsComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
   availabilityMessage: string = '';
   isRangeAvailable: boolean = false;
+  returnUrl: string = '/products';
+  returnTab: number = 0;
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private productService: ProductService,
     private orderService: OrderService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // קרא query params לחזרה
+    this.route.queryParams.subscribe(params => {
+      if (params['returnTo'] === 'profile') {
+        this.returnUrl = '/profile';
+        this.returnTab = params['tab'] ? +params['tab'] : 0;
+      }
+    });
+    
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
       this.productService.getProductById(id).subscribe({
@@ -53,14 +64,23 @@ export class ProductDetailsComponent implements OnInit {
     }
   }
 
+  goBack() {
+    if (this.returnUrl === '/profile') {
+      this.router.navigate([this.returnUrl], { queryParams: { tab: this.returnTab } });
+    } else {
+      this.router.navigate([this.returnUrl]);
+    }
+  }
+
   setupGallery(data: any) {
     const serverUrl = 'https://localhost:44305';
-    const mainImageUrl = data.imageUrl.startsWith('http') ? data.imageUrl : serverUrl + data.imageUrl;
+    const timestamp = '?t=' + Date.now();
+    const mainImageUrl = data.imageUrl.startsWith('http') ? data.imageUrl + timestamp : serverUrl + data.imageUrl + timestamp;
     
     this.images = [{ itemImageSrc: mainImageUrl, thumbnailImageSrc: mainImageUrl }];
     if (data.productImages && data.productImages.length > 0) {
       data.productImages.forEach((img: any) => {
-        const additionalImageUrl = img.additionalImageUrl.startsWith('http') ? img.additionalImageUrl : serverUrl + img.additionalImageUrl;
+        const additionalImageUrl = img.additionalImageUrl.startsWith('http') ? img.additionalImageUrl + timestamp : serverUrl + img.additionalImageUrl + timestamp;
         this.images.push({ 
           itemImageSrc: additionalImageUrl, 
           thumbnailImageSrc: additionalImageUrl 

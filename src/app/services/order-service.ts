@@ -16,4 +16,8 @@ export class OrderService {
       params: { month: month.toString(), year: year.toString() }
     });
   }
+
+  getOrdersByUserId(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`);
+  }
 }

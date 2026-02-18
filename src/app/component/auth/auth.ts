@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/user-service';
 import { UserLoginDTOModel, UserRegisterDTOModel } from '../../models/user/user-model';
 import { CardModule } from 'primeng/card';
@@ -15,50 +16,71 @@ import { ToastModule } from 'primeng/toast';
   standalone: true,
   imports: [CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, PasswordModule, ToastModule],
   providers: [MessageService],
-  templateUrl: './auth.html',    // מחקנו את ה-'.component' כדי שיתאים לשם הקובץ
-  styleUrl: './auth.scss'        // כנ"ל כאן
+  templateUrl: './auth.html',
+  styleUrl: './auth.scss'
 })
 export class AuthComponent {
-  isLoginMode = true; // משתנה שקובע אם אנחנו בלוגין או הרשמה
+  isLoginMode = true;
 
   loginData: UserLoginDTOModel = new UserLoginDTOModel();
   registerData: UserRegisterDTOModel = new UserRegisterDTOModel();
 
-  constructor(private userService: UserService, private messageService: MessageService) {}
+  constructor(
+    private userService: UserService,
+    private messageService: MessageService,
+    private router: Router
+  ) {}
 
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
   }
 
   onSubmit() {
-  if (this.isLoginMode) {
-    this.userService.login(this.loginData).subscribe({
-      next: (user) => {
-        this.userService.saveUserToStorage(user);
-        this.messageService.add({ severity: 'success', summary: 'התחברות', detail: `שלום ${user.fullName}!` });
-        // כאן כדאי להוסיף ניתוב לדף הבית: this.router.navigate(['/']);
-      },
-      error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'אימייל או סיסמה שגויים' });
-      }
-    });
-  } else {
-    this.userService.register(this.registerData).subscribe({
-      next: (res) => {
-        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'נרשמת בהצלחה!' });
-        // מעבר לדף הבית או לוגין
-      },
-      error: (err) => {
-        // כאן אנחנו שואבים את ההודעה שהשרת שלח (ex.Message)
-        const errorMessage = err.error?.message || "קרתה שגיאה לא צפויה";
-        
-        this.messageService.add({ 
-          severity: 'error', 
-          summary: 'שגיאת רישום', 
-          detail: errorMessage 
-        });
-      }
-    });
+    if (this.isLoginMode) {
+      console.log('Login attempt:', this.loginData);
+      const loginPayload = {
+        ...this.loginData,
+        email: this.loginData.email.toLowerCase()
+      };
+      this.userService.login(loginPayload).subscribe({
+        next: (user) => {
+          console.log('Login success:', user);
+          this.userService.saveUserToStorage(user);
+          this.messageService.add({ severity: 'success', summary: 'התחברות', detail: `שלום ${user.fullName}!` });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+          this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'אימייל או סיסמה שגויים' });
+        }
+      });
+    } else {
+      console.log('Register attempt:', this.registerData);
+      const registerPayload = {
+        ...this.registerData,
+        email: this.registerData.email.toLowerCase()
+      };
+      this.userService.register(registerPayload).subscribe({
+        next: (res) => {
+          console.log('Register success:', res);
+          this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'נרשמת בהצלחה! עבור להתחברות' });
+          setTimeout(() => {
+            this.isLoginMode = true;
+            this.registerData = new UserRegisterDTOModel();
+          }, 1500);
+        },
+        error: (err) => {
+          console.error('Register error:', err);
+          const errorMessage = err.error?.message || err.error || "קרתה שגיאה לא צפויה";
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'שגיאת רישום', 
+            detail: errorMessage 
+          });
+        }
+      });
+    }
   }
-}
 }

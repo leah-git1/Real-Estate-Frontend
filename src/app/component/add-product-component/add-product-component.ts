@@ -168,8 +168,8 @@ export class AddProductComponent implements OnInit {
       next: (response) => {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'המוצר פורסם בהצלחה!' });
         setTimeout(() => {
-          this.router.navigate(['/products']);
-        }, 2000);
+          this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+        }, 1500);
       },
       error: (err) => {
         console.error('Error creating product:', err);

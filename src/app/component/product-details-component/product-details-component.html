@@ -1,5 +1,6 @@
 <div class="container p-5" *ngIf="product; else loading">
-  <button pButton icon="pi pi-arrow-right" label="חזרה לקטלוג" routerLink="/products" class="p-button-text mb-4"></button>
+  <button pButton icon="pi pi-arrow-right" [label]="returnUrl === '/profile' ? 'חזרה למוצרים שלי' : 'חזרה לקטלוג'" 
+          (click)="goBack()" class="p-button-text mb-4"></button>
 
   <div class="grid shadow-4 border-round bg-white overflow-hidden" style="min-height: 550px;">
     <div class="col-12 md:col-7 p-0 bg-white border-left-1 border-100">

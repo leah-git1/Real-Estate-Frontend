@@ -62,14 +62,14 @@ export class ProductCreateDTOModel {
 }
 
 export class ProductUpdateDTOModel {
-    title: string = '';
-    description: string = '';
-    price: number = 0;
-    mainImageUrl: string = '';
-    additionalImages: string[] = [];
-    categoryId: number = 0;
-    city: string = '';
-    beds: number = 0;
-    rooms: number = 0;
-    transactionType: string = '';
+    title?: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+    additionalImages?: string[];
+    categoryId?: number;
+    city?: string;
+    beds?: number;
+    rooms?: number;
+    transactionType?: string;
 }

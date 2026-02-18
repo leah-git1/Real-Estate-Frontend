@@ -1,0 +1,207 @@
+<div class="container p-5" *ngIf="currentUser">
+  <div class="mb-4">
+    <h1 class="text-3xl font-bold">שלום, {{ currentUser.fullName }}</h1>
+    <p class="text-600">ברוך הבא לאיזור האישי שלך</p>
+  </div>
+
+  <div class="tabs-container">
+    <div class="tabs-header flex gap-2 mb-4 border-bottom-1 border-200">
+      <button class="tab-button" [class.active]="activeTab === 0" (click)="setActiveTab(0)">
+        <i class="pi pi-user"></i> עדכון פרטים
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 1" (click)="setActiveTab(1)">
+        <i class="pi pi-shopping-bag"></i> ההזמנות שלי
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 2" (click)="setActiveTab(2)">
+        <i class="pi pi-box"></i> המוצרים שלי
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 3" (click)="setActiveTab(3)">
+        <i class="pi pi-shopping-cart"></i> הסל שלי
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 4" (click)="setActiveTab(4)">
+        <i class="pi pi-sign-out"></i> התנתקות
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <div *ngIf="activeTab === 0" class="card p-4">
+        <div class="profile-header mb-4">
+          <i class="pi pi-user-edit" style="font-size: 3rem; color: var(--primary-color);"></i>
+          <div>
+            <h3 class="m-0">עדכון פרטי משתמש</h3>
+            <p class="text-600 m-0">עדכן את הפרטים האישיים שלך</p>
+          </div>
+        </div>
+        
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label class="block mb-2 font-semibold">
+                <i class="pi pi-user mr-2"></i>שם מלא *
+              </label>
+              <input pInputText [(ngModel)]="userForm.fullName" class="w-full" required placeholder="השם המלא שלך" />
+            </div>
+          </div>
+
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label class="block mb-2 font-semibold">
+                <i class="pi pi-phone mr-2"></i>טלפון *
+              </label>
+              <input pInputText [(ngModel)]="userForm.phone" class="w-full" required placeholder="050-0000000" />
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="field">
+              <label class="block mb-2 font-semibold">
+                <i class="pi pi-map-marker mr-2"></i>כתובת *
+              </label>
+              <input pInputText [(ngModel)]="userForm.address" class="w-full" required placeholder="רחוב, עיר" />
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="surface-100 border-round p-3 mb-3">
+              <p class="text-sm text-600 m-0">
+                <i class="pi pi-info-circle mr-2"></i>
+                אימייל וסיסמה הם אופציונליים - מלא רק אם אתה רוצה לשנות אותם
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label class="block mb-2 font-semibold">
+                <i class="pi pi-envelope mr-2"></i>אימייל (אופציונלי)
+              </label>
+              <input pInputText type="email" [(ngModel)]="userForm.email" 
+                     #emailInput="ngModel" email
+                     class="w-full" placeholder="השאר ריק ללא שינוי" />
+              <small class="text-red-500" *ngIf="emailInput.invalid && emailInput.touched && userForm.email">
+                נא להזין כתובת אימייל תקינה
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 md:col-6">
+            <div class="field">
+              <label class="block mb-2 font-semibold">
+                <i class="pi pi-lock mr-2"></i>סיסמה חדשה (אופציונלי)
+              </label>
+              <input pInputText type="password" [(ngModel)]="userForm.password" 
+                     #passwordInput="ngModel" minlength="8"
+                     class="w-full" placeholder="השאר ריק ללא שינוי" />
+              <small class="text-red-500" *ngIf="passwordInput.invalid && passwordInput.touched && userForm.password">
+                הסיסמה חייבת להכיל לפחות 8 תווים
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <p-button label="שמור שינויים" icon="pi pi-check" 
+                      (onClick)="updateProfile()" class="w-full" 
+                      styleClass="p-button-lg"></p-button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 1" class="card p-4">
+        <h3 class="mb-4">ההזמנות שלי</h3>
+        <div *ngIf="orders.length === 0" class="text-center p-5">
+          <i class="pi pi-inbox text-6xl text-400 mb-3"></i>
+          <p class="text-600">אין לך הזמנות עדיין</p>
+        </div>
+        <div *ngFor="let order of orders" class="border-1 border-200 border-round p-3 mb-3">
+          <div class="flex justify-content-between">
+            <div>
+              <p class="font-bold">הזמנה #{{ order.orderId }}</p>
+              <p class="text-600">תאריך: {{ order.orderDate | date:'dd/MM/yyyy' }}</p>
+              <p class="text-600">סטטוס: {{ order.status }}</p>
+            </div>
+            <div class="text-left">
+              <p class="text-2xl font-bold text-primary">₪{{ order.totalPrice | number }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 2" class="card p-4">
+        <div class="flex justify-content-between align-items-center mb-4">
+          <div>
+            <h3 class="m-0">המוצרים שלי</h3>
+            <p class="text-600 m-0">נהל את המוצרים שפרסמת ({{ myProducts.length }})</p>
+          </div>
+          <p-button label="הוסף מוצר חדש" icon="pi pi-plus" 
+                    (onClick)="addNewProduct()" 
+                    styleClass="p-button-success"></p-button>
+        </div>
+        
+        <div *ngIf="isLoadingProducts" class="text-center p-5">
+          <i class="pi pi-spin pi-spinner text-primary" style="font-size: 3rem;"></i>
+          <p class="text-600 mt-3">טוען מוצרים...</p>
+        </div>
+        
+        <div *ngIf="!isLoadingProducts && myProducts.length === 0" class="text-center p-5">
+          <i class="pi pi-box text-6xl text-400 mb-3"></i>
+          <p class="text-600 mb-3">לא פרסמת מוצרים עדיין</p>
+          <p-button label="פרסם מוצר ראשון" icon="pi pi-plus" 
+                    (onClick)="addNewProduct()" 
+                    styleClass="p-button-success"></p-button>
+        </div>
+        
+        
+        <div *ngIf="!isLoadingProducts" class="products-list">
+          <div *ngFor="let product of myProducts" class="product-row mb-3">
+          <div class="flex align-items-center gap-3 p-3 border-1 border-200 border-round hover:shadow-2 transition-all transition-duration-300">
+            <img [src]="product.imageUrl" [alt]="product.title" 
+                 class="product-thumbnail border-round" />
+            
+            <div class="flex-grow-1">
+              <h4 class="m-0 mb-1 text-900">{{ product.title }}</h4>
+              <div class="flex align-items-center gap-3 text-600 text-sm">
+                <span><i class="pi pi-map-marker mr-1"></i>{{ product.city }}</span>
+                <span *ngIf="product.rooms"><i class="pi pi-home mr-1"></i>{{ product.rooms }} חדרים</span>
+                <span *ngIf="product.beds"><i class="pi pi-moon mr-1"></i>{{ product.beds }} מיטות</span>
+                <span class="p-tag" [ngClass]="{
+                  'p-tag-info': product.transactionType === 'Sale',
+                  'p-tag-success': product.transactionType === 'Rent',
+                  'p-tag-warning': product.transactionType === 'Vacation'
+                }">
+                  {{ product.transactionType === 'Sale' ? 'מכירה' : 
+                     product.transactionType === 'Rent' ? 'השכרה' : 'נופש' }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="text-left">
+              <p class="text-2xl font-bold text-primary m-0">₪{{ product.price | number }}</p>
+            </div>
+            
+            <div class="flex gap-2">
+              <p-button icon="pi pi-pencil" 
+                        (onClick)="editProduct(product.productId)" 
+                        styleClass="p-button-rounded p-button-warning"></p-button>
+              <p-button icon="pi pi-eye" 
+                        (onClick)="viewProduct(product.productId)" 
+                        styleClass="p-button-rounded p-button-info"></p-button>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 3" class="card p-4">
+        <h3 class="mb-4">הסל שלי</h3>
+        <p class="text-600 mb-3">כאן יוצגו המוצרים שהוספת לסל</p>
+        <p-button label="עבור לסל" icon="pi pi-shopping-cart" (onClick)="goToCart()"></p-button>
+      </div>
+
+      <div *ngIf="activeTab === 4" class="card p-4 text-center">
+        <i class="pi pi-sign-out text-6xl text-400 mb-3"></i>
+        <h3 class="mb-3">האם אתה בטוח שברצונך להתנתק?</h3>
+        <p-button label="התנתק" icon="pi pi-sign-out" severity="danger" (onClick)="logout()"></p-button>
+      </div>
+    </div>
+  </div>
+</div>

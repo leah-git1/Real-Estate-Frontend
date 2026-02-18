@@ -26,9 +26,55 @@
     
     <div class="actions-section">
       <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button" routerLink="/add-product"></p-button>
-      <a routerLink="/auth" class="icon-link">
-        <i class="pi pi-user"></i>
-      </a>
+      
+      <div class="user-menu" *ngIf="isLoggedIn(); else loginLink" style="position: relative;">
+        <a class="icon-link user-link" (click)="toggleUserMenu()" style="cursor: pointer; display: flex; align-items: center; gap: 5px; position: relative;">
+          <i class="pi pi-user" style="font-size: 1.2rem;"></i>
+          <span class="user-badge" style="position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid white;"></span>
+        </a>
+        <div *ngIf="showUserMenu" class="user-dropdown-menu">
+          <div class="user-info">
+            <i class="pi pi-user-edit" style="font-size: 2rem; color: var(--primary-color);"></i>
+            <div>
+              <p class="user-name">{{ currentUser?.fullName }}</p>
+              <p class="user-role">משתמש רשום</p>
+            </div>
+          </div>
+          <div class="menu-divider"></div>
+          <a routerLink="/profile" [queryParams]="{tab: 0}" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-user"></i>
+            <span>איזור אישי</span>
+          </a>
+          <a routerLink="/profile" [queryParams]="{tab: 1}" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-shopping-bag"></i>
+            <span>ההזמנות שלי</span>
+          </a>
+          <a routerLink="/profile" [queryParams]="{tab: 2}" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-box"></i>
+            <span>המוצרים שלי</span>
+          </a>
+          <a routerLink="/add-product" (click)="showUserMenu=false" class="menu-item highlight">
+            <i class="pi pi-plus-circle"></i>
+            <span>הוסף מוצר חדש</span>
+          </a>
+          <div class="menu-divider"></div>
+          <a routerLink="/cart" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-shopping-cart"></i>
+            <span>הסל שלי</span>
+          </a>
+          <a routerLink="/profile" [queryParams]="{tab: 4}" (click)="showUserMenu=false" class="menu-item danger">
+            <i class="pi pi-sign-out"></i>
+            <span>התנתקות</span>
+          </a>
+        </div>
+      </div>
+      
+      <ng-template #loginLink>
+        <a routerLink="/auth" class="icon-link">
+          <i class="pi pi-user"></i>
+        </a>
+      </ng-template>
+      
       <a routerLink="/cart" class="icon-link cart-link" pBadge [value]="cartItemCount.toString()" severity="danger">
         <i class="pi pi-shopping-cart"></i>
       </a>
