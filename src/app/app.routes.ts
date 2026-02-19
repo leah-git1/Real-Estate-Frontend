@@ -9,11 +9,13 @@ import { EditProductComponent } from './component/edit-product-component/edit-pr
 import { UserProfileComponent } from './component/user-profile-component/user-profile-component';
 import { AdminDashboardComponent } from './component/admin-dashboard-component/admin-dashboard-component';
 import { CartComponent } from './component/cart-component/cart-component';
+import { ContactComponent } from './component/contact-component/contact-component';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'about', component: AboutComponent },
+  { path: 'contact', component: ContactComponent },
   { path: 'products', component: ProductListComponent },
   { path: 'auth', component: AuthComponent },
   { path: 'cart', component: CartComponent },

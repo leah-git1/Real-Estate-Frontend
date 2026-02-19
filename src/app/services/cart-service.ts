@@ -19,7 +19,7 @@ export class CartService {
   }
 
   addToCart(cartItem: CartItem) {
-    // בדיקה אם מוצר למכירה כבר קיים בסל
+    // במכירה - לא לאפשר להוסיף את אותו מוצר פעמיים
     if (cartItem.transactionType === 'מכירה') {
       const exists = this.cartItems.find(item => 
         item.productId === cartItem.productId && item.transactionType === 'מכירה'
@@ -29,9 +29,29 @@ export class CartService {
         return;
       }
     }
+    // בהשכרה/נופש - בדיקה שאין חפיפה בתאריכים
+    else {
+      const overlapping = this.cartItems.find(item => 
+        item.productId === cartItem.productId &&
+        item.startDate && item.endDate && cartItem.startDate && cartItem.endDate &&
+        this.datesOverlap(item.startDate, item.endDate, cartItem.startDate, cartItem.endDate)
+      );
+      if (overlapping) {
+        alert('אין אפשרות להוסיף את אותו מוצר עם תאריכים חופפים');
+        return;
+      }
+    }
     this.cartItems.push(cartItem);
     this.saveCart();
     this.showCart();
+  }
+
+  private datesOverlap(start1: Date, end1: Date, start2: Date, end2: Date): boolean {
+    const s1 = new Date(start1).getTime();
+    const e1 = new Date(end1).getTime();
+    const s2 = new Date(start2).getTime();
+    const e2 = new Date(end2).getTime();
+    return s1 <= e2 && s2 <= e1;
   }
 
   removeFromCart(productId: number) {

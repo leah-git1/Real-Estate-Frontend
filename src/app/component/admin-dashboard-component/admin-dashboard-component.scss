@@ -112,3 +112,54 @@
     }
   }
 }
+
+.details-dialog {
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    strong {
+      color: #475569;
+      font-weight: 600;
+      min-width: 120px;
+    }
+    
+    span {
+      color: #1e293b;
+      flex: 1;
+      text-align: left;
+    }
+  }
+  
+  .order-items {
+    flex: 1;
+    
+    .order-item {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      p {
+        margin: 0.5rem 0;
+        color: #475569;
+        
+        strong {
+          color: #1e293b;
+          margin-left: 0.5rem;
+        }
+      }
+    }
+  }
+}

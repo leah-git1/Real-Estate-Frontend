@@ -14,6 +14,7 @@ import { UserService } from '../../services/user-service';
 import { ProductCreateDTOModel } from '../../models/product/product-model';
 import { CategoryDTOModel } from '../../models/category/category-model';
 import { ProductImageUrlDTOModel } from '../../models/product-image/product-image-model';
+import { calculateSellerCommission, calculateSellerReceives, getCommissionText, calculateBuyerCommission } from '../../config/commission.config';
 
 @Component({
   selector: 'app-add-product',
@@ -177,5 +178,41 @@ export class AddProductComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בפרסום המוצר' });
       }
     });
+  }
+
+  getSellerCommission(): number {
+    return calculateSellerCommission(this.product.price || 0, this.product.transactionType || 'Sale');
+  }
+
+  getSellerReceives(): number {
+    return calculateSellerReceives(this.product.price || 0, this.product.transactionType || 'Sale');
+  }
+
+  getCommissionInfo(): string {
+    return getCommissionText(this.product.transactionType || 'Sale');
+  }
+
+  getSellerRate(): string {
+    const type = this.product.transactionType?.toUpperCase();
+    switch(type) {
+      case 'SALE': return '1%';
+      case 'RENT': return '0%';
+      case 'VACATION': return '5%';
+      default: return '5%';
+    }
+  }
+
+  getBuyerRate(): string {
+    const type = this.product.transactionType?.toUpperCase();
+    switch(type) {
+      case 'SALE': return '1%';
+      case 'RENT': return 'חודש שלם';
+      case 'VACATION': return '3%';
+      default: return '2%';
+    }
+  }
+
+  getBuyerCommission(): number {
+    return calculateBuyerCommission(this.product.price || 0, this.product.transactionType || 'Sale');
   }
 }

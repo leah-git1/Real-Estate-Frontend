@@ -10,6 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ProductService } from '../../services/product-service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
+import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 
 @Component({
   selector: 'app-product-card',
@@ -63,7 +64,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
       const cartItem: CartItem = {
         productId: product.productId,
         title: product.title,
-        price: product.price,
+        price: calculateTotalPrice(product.price, 'Sale'),
         imageUrl: this.imageUrl,
         city: product.city,
         transactionType: product.transactionType,
@@ -88,6 +89,15 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   addToCartWithDates() {
     if (this.selectedDates && this.selectedDates[0] && this.selectedDates[1]) {
+      // בדיקה להשכרה - רק חודשים שלמים
+      if (this.product.transactionType === 'השכרה') {
+        if (!this.isFullMonths(this.selectedDates[0], this.selectedDates[1])) {
+          alert('⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים.\nלדוגמה: 12.02 - 12.03 (חודש אחד)');
+          this.selectedDates = undefined;
+          return;
+        }
+      }
+      
       // בדיקת זמינות לפני הוספה לסל
       this.productService.checkAvailability(
         this.product.productId,
@@ -96,10 +106,24 @@ export class ProductCardComponent implements OnInit, OnChanges {
       ).subscribe({
         next: (isAvailable) => {
           if (isAvailable) {
+            const transactionType = this.product.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+            
+            let finalPrice = this.product.price;
+            // חישוב מחיר לפי תקופה
+            if (this.product.transactionType === 'נופש') {
+              const nights = this.calculateNights(this.selectedDates![0], this.selectedDates![1]);
+              finalPrice = this.product.price * nights;
+            } else if (this.product.transactionType === 'השכרה') {
+              const months = this.calculateMonths(this.selectedDates![0], this.selectedDates![1]);
+              finalPrice = this.product.price * months;
+            }
+            
+            const totalWithCommission = calculateTotalPrice(finalPrice, transactionType);
+            
             const cartItem: CartItem = {
               productId: this.product.productId,
               title: this.product.title,
-              price: this.product.price,
+              price: totalWithCommission,
               imageUrl: this.imageUrl,
               city: this.product.city,
               transactionType: this.product.transactionType,
@@ -119,6 +143,38 @@ export class ProductCardComponent implements OnInit, OnChanges {
         }
       });
     }
+  }
+
+  isFullMonths(start: Date, end: Date): boolean {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                       (endDate.getMonth() - startDate.getMonth());
+    
+    return monthsDiff >= 1 && startDate.getDate() === endDate.getDate();
+  }
+
+  calculateMonths(start: Date, end: Date): number {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    let months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+    months += endDate.getMonth() - startDate.getMonth();
+    
+    if (startDate.getDate() === endDate.getDate()) {
+      months++;
+    }
+    
+    return months;
+  }
+
+  calculateNights(start: Date, end: Date): number {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   }
 
   onDialogHide() {
@@ -146,5 +202,29 @@ export class ProductCardComponent implements OnInit, OnChanges {
     // אם זה נתיב יחסי, הוסף את כתובת השרת
     const serverUrl = 'https://localhost:44305';
     return serverUrl + '/' + imageUrl;
+  }
+
+  getCommissionRate(): string {
+    const type = this.product?.transactionType;
+    switch(type) {
+      case 'מכירה': return '1%';
+      case 'השכרה': return 'חודש שלם';
+      case 'נופש': return '3%';
+      default: return '2%';
+    }
+  }
+
+  getBuyerCommission(): number {
+    if (!this.productDetails) return 0;
+    const type = this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    return calculateBuyerCommission(this.productDetails.price, type);
+  }
+
+  getTotalPrice(): number {
+    if (!this.productDetails) return 0;
+    const type = this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    return calculateTotalPrice(this.productDetails.price, type);
   }
 }

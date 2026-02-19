@@ -6,16 +6,20 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AdminService } from '../../services/admin-service';
 import { AdminStatisticsModel } from '../../models/admin/admin-model';
 import { UserProfileDTOModel } from '../../models/user/user-model';
 import { ProductModel } from '../../models/product/product-model';
+import { UserService } from '../../services/user-service';
+import { OrderService } from '../../services/order-service';
+import { ProductDetailsComponent } from '../product-details-component/product-details-component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule],
+  imports: [CommonModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, ProductDetailsComponent],
   providers: [ConfirmationService, MessageService],
   templateUrl: './admin-dashboard-component.html',
   styleUrl: './admin-dashboard-component.scss'
@@ -27,8 +31,17 @@ export class AdminDashboardComponent implements OnInit {
   orders: any[] = [];
   loading = true;
 
+  displayUserDialog = false;
+  displayProductDialog = false;
+  displayOrderDialog = false;
+  selectedUser: any = null;
+  selectedProductId: number | null = null;
+  selectedOrder: any = null;
+
   constructor(
     private adminService: AdminService,
+    private userService: UserService,
+    private orderService: OrderService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -147,6 +160,50 @@ export class AdminDashboardComponent implements OnInit {
             console.error('Error deleting order:', err);
           }
         });
+      }
+    });
+  }
+
+  viewUserDetails(userId: number): void {
+    this.userService.getUserById(userId).subscribe({
+      next: (data) => {
+        this.selectedUser = data;
+        setTimeout(() => {
+          this.displayUserDialog = true;
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בטעינת פרטי המשתמש' });
+        console.error('Error loading user details:', err);
+      }
+    });
+  }
+
+  viewProductDetails(productId: number): void {
+    if (!productId || productId <= 0) {
+      this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'מזהה מוצר לא תקין' });
+      return;
+    }
+    setTimeout(() => {
+      this.selectedProductId = productId;
+      this.displayProductDialog = true;
+      this.cdr.detectChanges();
+    });
+  }
+
+  viewOrderDetails(orderId: number): void {
+    this.orderService.getOrderById(orderId).subscribe({
+      next: (data) => {
+        this.selectedOrder = data;
+        setTimeout(() => {
+          this.displayOrderDialog = true;
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בטעינת פרטי ההזמנה' });
+        console.error('Error loading order details:', err);
       }
     });
   }

@@ -64,4 +64,11 @@ export class UserService {
   updateUser(id: number, userData: UserUpdateDTOModel): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, userData);
   }
+
+  /**
+   * קבלת פרטי משתמש לפי ID
+   */
+  getUserById(id: number): Observable<UserProfileDTOModel> {
+    return this.http.get<UserProfileDTOModel>(`${this.apiUrl}/${id}`);
+  }
 }

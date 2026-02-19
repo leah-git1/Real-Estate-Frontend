@@ -1,8 +1,8 @@
 <div class="container p-5" *ngIf="product; else loading">
-  <button pButton icon="pi pi-arrow-right" [label]="returnUrl === '/profile' ? 'חזרה למוצרים שלי' : 'חזרה לקטלוג'" 
+  <button *ngIf="!isEmbedded" pButton icon="pi pi-arrow-right" [label]="returnUrl === '/profile' ? 'חזרה למוצרים שלי' : 'חזרה לקטלוג'" 
           (click)="goBack()" class="p-button-text mb-4"></button>
 
-  <div class="grid shadow-4 border-round bg-white overflow-hidden" style="min-height: 550px;">
+  <div class="grid shadow-4 border-round bg-white overflow-hidden" [style.min-height]="isEmbedded ? 'auto' : '550px'">
     <div class="col-12 md:col-7 p-0 bg-white border-left-1 border-100">
       <div class="flex" style="height: 100%;">
         <div class="flex-grow-1 flex align-items-center justify-content-center relative" style="background: #f8f9fa;">
@@ -44,7 +44,27 @@
         </div>
         <p class="text-600 text-lg m-0"><i class="pi pi-map-marker mr-2"></i>{{ product.city }}</p>
       </div>
-      <div class="text-4xl font-bold text-primary mb-4">₪{{ product.price | number }}</div>
+      <div class="text-4xl font-bold text-primary mb-2">₪{{ product.price | number }}</div>
+      <div class="bg-orange-50 border-2 border-orange-300 p-3 border-round mb-4">
+        <div class="flex align-items-center gap-2 mb-2">
+          <i class="pi pi-info-circle text-orange-600"></i>
+          <span class="font-bold text-orange-800">פירוט תשלום</span>
+        </div>
+        <div class="flex justify-content-between text-sm mb-1">
+          <span class="text-600">מחיר בסיס:</span>
+          <span class="font-semibold">₪{{ product.price | number }}</span>
+        </div>
+        <div class="flex justify-content-between text-sm mb-1">
+          <span class="text-600">עמלת שירות ({{ getCommissionRate() }}):</span>
+          <span class="font-semibold text-orange-600">₪{{ getBuyerCommission() | number }}</span>
+        </div>
+        <div class="border-top-1 border-orange-200 pt-2 mt-2">
+          <div class="flex justify-content-between">
+            <span class="font-bold text-lg">סה"כ לתשלום:</span>
+            <span class="font-bold text-primary text-2xl">₪{{ getTotalPrice() | number }}</span>
+          </div>
+        </div>
+      </div>
 
       <div class="grid text-center border-1 border-200 border-round mb-4 p-3" *ngIf="product.transactionType !== 'Sale'">
         <div class="col-6 border-left-1 border-200">
@@ -93,7 +113,7 @@
         </div>
       </div>
 
-      <div class="flex flex-column gap-2 mt-auto">
+      <div class="flex flex-column gap-2 mt-auto" *ngIf="!isEmbedded">
         <button pButton label="הוספה לסל" icon="pi pi-shopping-cart" 
                 class="w-full p-2 font-bold"
                 [disabled]="!canAddToCart()" (click)="addToCart()"></button>
@@ -107,6 +127,13 @@
 
 <ng-template #loading>
   <div class="flex justify-content-center align-items-center p-8">
-    <i class="pi pi-spin pi-spinner text-primary" style="font-size: 3rem"></i>
+    <div *ngIf="product === null; else spinner" class="text-center">
+      <i class="pi pi-exclamation-triangle" style="font-size: 3rem; color: #f59e0b;"></i>
+      <p class="mt-3 text-xl">המוצר לא נמצא</p>
+      <button *ngIf="!isEmbedded" pButton label="חזרה" (click)="goBack()" class="mt-3"></button>
+    </div>
+    <ng-template #spinner>
+      <i class="pi pi-spin pi-spinner text-primary" style="font-size: 3rem"></i>
+    </ng-template>
   </div>
 </ng-template>

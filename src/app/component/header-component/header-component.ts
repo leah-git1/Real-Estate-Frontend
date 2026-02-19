@@ -34,6 +34,7 @@ export class HeaderComponent implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (data) => {
         this.categories = data;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching categories:', err)
     });

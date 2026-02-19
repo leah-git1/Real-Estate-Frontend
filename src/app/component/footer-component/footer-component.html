@@ -30,10 +30,14 @@
     <div class="footer-section">
       <h4 class="section-title">סוגי נכסים</h4>
       <ul class="footer-links">
-        <li><a class="footer-link"><i class="pi pi-angle-left"></i>דירות למכירה</a></li>
-        <li><a class="footer-link"><i class="pi pi-angle-left"></i>דירות להשכרה</a></li>
-        <li><a class="footer-link"><i class="pi pi-angle-left"></i>נכסי נופש</a></li>
-        <li><a class="footer-link"><i class="pi pi-angle-left"></i>בתים פרטיים</a></li>
+        <li *ngIf="categories.length === 0">
+          <a class="footer-link"><i class="pi pi-angle-left"></i>טוען קטגוריות...</a>
+        </li>
+        <li *ngFor="let category of categories">
+          <a (click)="navigateToCategory(category.categoryId)" class="footer-link" style="cursor: pointer;">
+            <i class="pi pi-angle-left"></i>{{ category.categoryName }}
+          </a>
+        </li>
       </ul>
     </div>
 

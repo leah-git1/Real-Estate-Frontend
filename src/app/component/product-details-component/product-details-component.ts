@@ -1,12 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Input, OnChanges, SimpleChanges, Injector } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
+import { CartService } from '../../services/cart-service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { GalleriaModule } from 'primeng/galleria';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
+import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 
 @Component({
   selector: 'app-product-details',
@@ -15,7 +17,10 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './product-details-component.html',
   styleUrl: './product-details-component.scss'
 })
-export class ProductDetailsComponent implements OnInit {
+export class ProductDetailsComponent implements OnInit, OnChanges {
+  @Input() productId: number | null = null;
+  @Input() isEmbedded: boolean = false;
+  
   product: any = null;
   images: any[] = [];
   activeIndex: number = 0;
@@ -35,33 +40,51 @@ export class ProductDetailsComponent implements OnInit {
     private router: Router,
     private productService: ProductService,
     private orderService: OrderService,
-    private cdr: ChangeDetectorRef
+    private cartService: CartService,
+    private cdr: ChangeDetectorRef,
+    private injector: Injector
   ) {}
 
   ngOnInit(): void {
-    // קרא query params לחזרה
-    this.route.queryParams.subscribe(params => {
-      if (params['returnTo'] === 'profile') {
-        this.returnUrl = '/profile';
-        this.returnTab = params['tab'] ? +params['tab'] : 0;
+    if (!this.isEmbedded) {
+      this.route.queryParams.subscribe(params => {
+        if (params['returnTo'] === 'profile') {
+          this.returnUrl = '/profile';
+          this.returnTab = params['tab'] ? +params['tab'] : 0;
+        }
+      });
+      
+      const id = Number(this.route.snapshot.paramMap.get('id'));
+      if (id) {
+        this.loadProduct(id);
+      }
+    } else if (this.productId) {
+      this.loadProduct(this.productId);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['productId'] && this.productId && this.isEmbedded) {
+      this.loadProduct(this.productId);
+    }
+  }
+
+  loadProduct(id: number): void {
+    this.productService.getProductById(id).subscribe({
+      next: (data) => {
+        this.product = data;
+        this.setupGallery(data);
+        if (data.transactionType !== 'Sale' && !this.isEmbedded) {
+          this.loadOccupiedDates();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching product:', err);
+        this.product = null;
+        this.cdr.detectChanges();
       }
     });
-    
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.productService.getProductById(id).subscribe({
-        next: (data) => {
-          this.product = data;
-          this.setupGallery(data);
-          if (data.transactionType !== 'Sale') {
-            console.log('מוצר לא למכירה, טוען תאריכים תפוסים');
-            this.loadOccupiedDates();
-          }
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error fetching product:', err)
-      });
-    }
   }
 
   goBack() {
@@ -120,6 +143,18 @@ export class ProductDetailsComponent implements OnInit {
   onDateChange(dates: Date[] | undefined) {
     console.log('onDateChange נקרא עם:', dates);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
+      // בדיקה להשכרה - רק חודשים שלמים
+      if (this.product.transactionType === 'Rent') {
+        if (!this.isFullMonths(dates[0], dates[1])) {
+          this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. לדוגמה: 12.02 - 12.03';
+          this.isRangeAvailable = false;
+          setTimeout(() => {
+            this.rangeDates = undefined;
+            this.cdr.detectChanges();
+          }, 2000);
+          return;
+        }
+      }
       console.log('בודק זמינות עבור טווח:', dates[0], 'עד', dates[1]);
       this.checkRangeAvailability(dates[0], dates[1]);
     } else {
@@ -127,6 +162,39 @@ export class ProductDetailsComponent implements OnInit {
       this.availabilityMessage = '';
       this.isRangeAvailable = false;
     }
+  }
+
+  isFullMonths(start: Date, end: Date): boolean {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                       (endDate.getMonth() - startDate.getMonth());
+    
+    return monthsDiff >= 1 && startDate.getDate() === endDate.getDate();
+  }
+
+  calculateMonths(start: Date, end: Date): number {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    let months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+    months += endDate.getMonth() - startDate.getMonth();
+    
+    // אם היום בחודש הסיום זהה ליום בחודש ההתחלה, זה חודש שלם
+    if (startDate.getDate() === endDate.getDate()) {
+      months++;
+    }
+    
+    return months;
+  }
+
+  calculateNights(start: Date, end: Date): number {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   }
 
   checkRangeAvailability(startDate: Date, endDate: Date) {
@@ -199,5 +267,56 @@ export class ProductDetailsComponent implements OnInit {
 
   addToCart() {
     console.log('הוספה לסל:', this.product.title, 'תאריכים:', this.rangeDates);
+    
+    let finalPrice = this.product.price;
+    
+    // חישוב מחיר לפי סוג עסקה
+    if (this.rangeDates && this.rangeDates[0] && this.rangeDates[1]) {
+      if (this.product.transactionType === 'Vacation') {
+        // נופש - מחיר לפי מספר לילות
+        const nights = this.calculateNights(this.rangeDates[0], this.rangeDates[1]);
+        finalPrice = this.product.price * nights;
+      } else if (this.product.transactionType === 'Rent') {
+        // השכרה - מחיר לפי מספר חודשים
+        const months = this.calculateMonths(this.rangeDates[0], this.rangeDates[1]);
+        finalPrice = this.product.price * months;
+      }
+    }
+    
+    // הוספת עמלה
+    const totalWithCommission = calculateTotalPrice(finalPrice, this.product.transactionType);
+    
+    const cartItem = {
+      productId: this.product.productId,
+      title: this.product.title,
+      price: totalWithCommission,
+      imageUrl: this.product.imageUrl,
+      city: this.product.city,
+      transactionType: this.product.transactionType === 'Sale' ? 'מכירה' : 
+                       this.product.transactionType === 'Rent' ? 'השכרה' : 'נופש',
+      startDate: this.rangeDates?.[0],
+      endDate: this.rangeDates?.[1],
+      quantity: 1
+    };
+    
+    this.cartService.addToCart(cartItem);
+  }
+
+  getBuyerCommission(): number {
+    return calculateBuyerCommission(this.product?.price || 0, this.product?.transactionType || 'Sale');
+  }
+
+  getTotalPrice(): number {
+    return calculateTotalPrice(this.product?.price || 0, this.product?.transactionType || 'Sale');
+  }
+
+  getCommissionRate(): string {
+    const type = this.product?.transactionType?.toUpperCase();
+    switch(type) {
+      case 'SALE': return '1%';
+      case 'RENT': return 'חודש שלם';
+      case 'VACATION': return '3%';
+      default: return '2%';
+    }
   }
 }
