@@ -77,9 +77,10 @@ export class ProductListComponent implements OnInit {
         console.log('תגובה מה-API בתוך ה-Component:', response);
         
         if (response && response.data) {
-          this.products = response.data.filter((p: any) => p.title !== 'deleted');
+          this.products = response.data;
           this.totalRecords = response.totalItems;
           console.log('מערך המוצרים עודכן בהצלחה. כמות:', this.products.length);
+          console.log('דוגמה למוצר:', this.products[0]);
         } else {
           console.warn('ה-API החזיר תשובה תקינה אך ללא נתונים במערך ה-data');
           this.products = [];

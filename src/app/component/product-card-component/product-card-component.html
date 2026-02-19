@@ -1,17 +1,19 @@
 <div class="product-card shadow-2 p-3 border-round mb-4 bg-white">
   <div class="text-center mb-3 relative">
-    <img [src]="getFullImageUrl(product.imageUrl)" [alt]="product.title" 
+    <img [src]="imageUrl" [alt]="product.title" 
          style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" 
          class="border-round"
          (click)="viewDetails(product.productId)">
     <span class="absolute top-0 right-0 m-2 px-3 py-1 border-round text-white font-semibold text-sm"
           [ngClass]="{
-            'bg-blue-500': product.transactionType === 'Sale',
-            'bg-green-500': product.transactionType === 'Rent',
-            'bg-orange-500': product.transactionType === 'Vacation'
+            'bg-blue-500': product.transactionType === 'מכירה',
+            'bg-green-500': product.transactionType === 'השכרה',
+            'bg-orange-500': product.transactionType === 'נופש'
           }">
-      {{ product.transactionType === 'Sale' ? 'למכירה' : 
-         product.transactionType === 'Rent' ? 'להשכרה' : 'נופש' }}
+      {{ product.transactionType }}
+    </span>
+    <span *ngIf="isMyProduct" class="absolute top-0 left-0 m-2 px-3 py-1 border-round bg-purple-600 text-white font-semibold text-sm">
+      <i class="pi pi-user mr-1"></i>המוצר שלי
     </span>
   </div>
 
@@ -20,11 +22,18 @@
 
   <div class="flex gap-2">
     
-    <button pButton pRipple 
+    <button *ngIf="!isMyProduct" pButton pRipple 
             icon="pi pi-shopping-cart" 
             label="הוסף לסל" 
             class="p-button-success flex-grow-1"
             (click)="addToCart(product)">
+    </button>
+    
+    <button *ngIf="isMyProduct" pButton pRipple 
+            icon="pi pi-pencil" 
+            label="ערוך מוצר" 
+            class="p-button-warning flex-grow-1"
+            (click)="editProduct()">
     </button>
     
     <button pButton pRipple 
@@ -36,3 +45,57 @@
 
   </div>
 </div>
+
+<p-dialog [(visible)]="showDetailsDialog" [modal]="true" [style]="{width: '800px'}" 
+          [maximizable]="true" (onHide)="onDialogHide()">
+  <ng-template pTemplate="header">
+    <h3>{{ productDetails?.title }}</h3>
+  </ng-template>
+  
+  <div *ngIf="productDetails" class="p-4">
+    <img [src]="getFullImageUrl(productDetails.imageUrl)" [alt]="productDetails.title" 
+         class="w-full border-round mb-3" style="height: 300px; object-fit: cover;">
+    
+    <div class="grid mb-3">
+      <div class="col-12">
+        <h4 class="text-primary font-bold text-2xl mb-2">₪{{ productDetails.price | number }} / לילה</h4>
+        <p class="text-600 mb-2">
+          <i class="pi pi-map-marker mr-2"></i>{{ productDetails.city }}
+        </p>
+        <p *ngIf="productDetails.rooms" class="text-600 mb-2">
+          <i class="pi pi-home mr-2"></i>{{ productDetails.rooms }} חדרים
+        </p>
+        <p *ngIf="productDetails.beds" class="text-600 mb-2">
+          <i class="pi pi-moon mr-2"></i>{{ productDetails.beds }} מיטות
+        </p>
+      </div>
+      
+      <div class="col-12">
+        <p class="text-700">{{ productDetails.description }}</p>
+      </div>
+    </div>
+
+    <div class="border-top-1 border-200 pt-3">
+      <h4 class="mb-3">בחר תאריכים</h4>
+      <p-datepicker [(ngModel)]="selectedDates" selectionMode="range" [inline]="true" 
+                    [minDate]="minDate" dateFormat="dd/mm/yy" class="w-full"></p-datepicker>
+      
+      <div *ngIf="selectedDates && selectedDates[0] && selectedDates[1]" 
+           class="mt-3 p-3 bg-green-50 border-round">
+        <p class="text-green-700 font-semibold m-0">
+          <i class="pi pi-check-circle mr-2"></i>
+          תאריכים נבחרו: {{ selectedDates[0] | date:'dd/MM/yyyy' }} - {{ selectedDates[1] | date:'dd/MM/yyyy' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" (click)="onDialogHide()" 
+            class="p-button-text"></button>
+    <button pButton label="הוסף לסל" icon="pi pi-shopping-cart" 
+            (click)="addToCartWithDates()" 
+            [disabled]="!selectedDates || !selectedDates[0] || !selectedDates[1]" 
+            class="p-button-success"></button>
+  </ng-template>
+</p-dialog>

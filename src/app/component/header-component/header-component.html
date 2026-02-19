@@ -6,7 +6,7 @@
     </div>
     
     <nav class="nav-center">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">בית</a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">דף הבית</a>
       <a routerLink="/about" routerLinkActive="active">אודות</a>
       <div class="nav-item-dropdown">
         <a class="nav-link">
@@ -26,6 +26,7 @@
     
     <div class="actions-section">
       <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button" routerLink="/add-product"></p-button>
+      <p-button *ngIf="isAdmin()" label="ניהול מערכת" icon="pi pi-shield" styleClass="cta-button" routerLink="/admin"></p-button>
       
       <div class="user-menu" *ngIf="isLoggedIn(); else loginLink" style="position: relative;">
         <a class="icon-link user-link" (click)="toggleUserMenu()" style="cursor: pointer; display: flex; align-items: center; gap: 5px; position: relative;">

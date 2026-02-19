@@ -1,0 +1,103 @@
+<div class="home-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">מצא את הבית של החלומות שלך</h1>
+      <p class="hero-subtitle">אלפי נכסים מובחרים למכירה ולהשכרה בכל רחבי הארץ</p>
+      <button pButton label="התחל לחפש" icon="pi pi-search" 
+              class="hero-button" (click)="goToProducts()"></button>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="grid">
+        <div class="col-12 md:col-4 text-center p-4">
+          <i class="pi pi-home feature-icon"></i>
+          <h3>מגוון רחב</h3>
+          <p class="text-600">אלפי נכסים למכירה, השכרה ונופש</p>
+        </div>
+        <div class="col-12 md:col-4 text-center p-4">
+          <i class="pi pi-shield feature-icon"></i>
+          <h3>אמינות מלאה</h3>
+          <p class="text-600">כל הנכסים עברו אימות ובדיקה</p>
+        </div>
+        <div class="col-12 md:col-4 text-center p-4">
+          <i class="pi pi-bolt feature-icon"></i>
+          <h3>תהליך מהיר</h3>
+          <p class="text-600">מחיפוש ועד חתימה בקלות ובמהירות</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="featured-section">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <h2 class="section-title">נכסים מומלצים</h2>
+        <p class="section-subtitle">הנכסים הטובים ביותר שלנו במיקומים מובחרים</p>
+      </div>
+      
+      <div class="carousel-container" *ngIf="featuredProducts && featuredProducts.length > 0">
+        <button class="carousel-nav carousel-nav-right" (click)="previousProduct()">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+        
+        <div class="carousel-wrapper">
+          <div class="carousel-side carousel-side-right" 
+               *ngIf="getPreviousProduct()">
+            <app-product-card [product]="getPreviousProduct()" (click)="previousProduct()"></app-product-card>
+          </div>
+          
+          <div class="carousel-center" *ngIf="featuredProducts[currentIndex]">
+            <app-product-card [product]="featuredProducts[currentIndex]"></app-product-card>
+          </div>
+          
+          <div class="carousel-side carousel-side-left" 
+               *ngIf="getNextProduct()">
+            <app-product-card [product]="getNextProduct()" (click)="nextProduct()"></app-product-card>
+          </div>
+        </div>
+        
+        <button class="carousel-nav carousel-nav-left" (click)="nextProduct()">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+        
+        <div class="carousel-indicators">
+          <span *ngFor="let product of featuredProducts; let i = index" 
+                class="indicator" 
+                [class.active]="i === currentIndex"
+                (click)="goToSlide(i)"></span>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <button pButton label="צפה בכל הנכסים" icon="pi pi-arrow-left" 
+                class="p-button-lg p-button-outlined" (click)="goToProducts()"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container text-center">
+      <h2 class="cta-title">מוכר או משכיר נכס?</h2>
+      <p class="cta-subtitle">פרסם את הנכס שלך בקלות והגע לאלפי קונים פוטנציאליים</p>
+      <button pButton label="פרסם נכס עכשיו" icon="pi pi-plus" 
+              class="p-button-lg cta-button" (click)="addProperty()"></button>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta-section">
+    <div class="container text-center">
+      <h2 class="cta-title">מוכן למצוא את הנכס המושלם?</h2>
+      <p class="cta-subtitle">הצטרף לאלפי לקוחות מרוצים שמצאו את ביתם איתנו</p>
+      <button pButton label="התחל עכשיו" icon="pi pi-arrow-left" 
+              class="p-button-lg final-cta-button" (click)="goToProducts()"></button>
+    </div>
+  </section>
+</div>

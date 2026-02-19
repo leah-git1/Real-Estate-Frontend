@@ -1,26 +1,134 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { Router } from '@angular/router'; // <--- ייבוא הנתב
+import { Router } from '@angular/router';
 import { ProductSummaryDTOModel } from '../../models/product/product-model';
+import { UserService } from '../../services/user-service';
+import { CartService } from '../../services/cart-service';
+import { CartItem } from '../../models/cart/cart-item.model';
+import { DialogModule } from 'primeng/dialog';
+import { ProductService } from '../../services/product-service';
+import { DatePickerModule } from 'primeng/datepicker';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, ButtonModule],
+  imports: [CommonModule, ButtonModule, DialogModule, DatePickerModule, FormsModule],
   templateUrl: './product-card-component.html',
   styleUrl: './product-card-component.scss'
 })
-export class ProductCardComponent {
+export class ProductCardComponent implements OnInit, OnChanges {
   @Input() product!: ProductSummaryDTOModel;
+  imageUrl: string = '';
+  showDetailsDialog: boolean = false;
+  productDetails: any = null;
+  selectedDates: Date[] | undefined;
+  minDate: Date = new Date();
 
-  // הזרקת ה-Router בבנאי (Constructor)
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router, 
+    private userService: UserService,
+    private cartService: CartService,
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  // פונקציה להוספה לסל (כרגע רק מדפיסה לקונסול)
+  ngOnInit() {
+    this.updateImageUrl();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['product'] && this.product) {
+      this.updateImageUrl();
+      this.cdr.detectChanges();
+    }
+  }
+
+  updateImageUrl() {
+    if (this.product && this.product.imageUrl) {
+      this.imageUrl = this.getFullImageUrl(this.product.imageUrl);
+    }
+  }
+
+  get isMyProduct(): boolean {
+    const currentUser = this.userService.getCurrentUser();
+    return !!(currentUser && this.product.ownerId === currentUser.userId);
+  }
+
+  // פונקציה להוספה לסל
   addToCart(product: any) {
-    console.log('מוצר נוסף לסל:', product.title);
-    alert(`הנכס "${product.title}" נוסף לרשימה שלך`);
+    if (product.transactionType === 'מכירה') {
+      // מוצר למכירה - הוסף ישירות לסל
+      const cartItem: CartItem = {
+        productId: product.productId,
+        title: product.title,
+        price: product.price,
+        imageUrl: this.imageUrl,
+        city: product.city,
+        transactionType: product.transactionType,
+        quantity: 1
+      };
+      this.cartService.addToCart(cartItem);
+    } else {
+      // מוצר להשכרה/נופש - טען פרטים ופתח דיאלוג
+      this.loadProductDetails();
+    }
+  }
+
+  loadProductDetails() {
+    this.productService.getProductById(this.product.productId).subscribe({
+      next: (data) => {
+        this.productDetails = data;
+        this.showDetailsDialog = true;
+      },
+      error: (err) => console.error('Error loading product:', err)
+    });
+  }
+
+  addToCartWithDates() {
+    if (this.selectedDates && this.selectedDates[0] && this.selectedDates[1]) {
+      // בדיקת זמינות לפני הוספה לסל
+      this.productService.checkAvailability(
+        this.product.productId,
+        this.selectedDates[0],
+        this.selectedDates[1]
+      ).subscribe({
+        next: (isAvailable) => {
+          if (isAvailable) {
+            const cartItem: CartItem = {
+              productId: this.product.productId,
+              title: this.product.title,
+              price: this.product.price,
+              imageUrl: this.imageUrl,
+              city: this.product.city,
+              transactionType: this.product.transactionType,
+              startDate: this.selectedDates![0],
+              endDate: this.selectedDates![1],
+              quantity: 1
+            };
+            this.cartService.addToCart(cartItem);
+            this.onDialogHide();
+          } else {
+            alert('התאריכים שבחרת כבר תפוסים. אנא בחר תאריכים אחרים.');
+          }
+        },
+        error: (err) => {
+          console.error('Error checking availability:', err);
+          alert('שגיאה בבדיקת זמינות');
+        }
+      });
+    }
+  }
+
+  onDialogHide() {
+    this.showDetailsDialog = false;
+    this.selectedDates = undefined;
+    this.productDetails = null;
+  }
+
+  editProduct() {
+    this.router.navigate(['/edit-product', this.product.productId]);
   }
 
   // פונקציית המעבר לדף פרטים נוספים
@@ -31,7 +139,12 @@ export class ProductCardComponent {
 
   getFullImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) return imageUrl + '?t=' + Date.now();
-    return 'https://localhost:44305' + imageUrl + '?t=' + Date.now();
+    // אם זה כבר URL מלא
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    // אם זה נתיב יחסי, הוסף את כתובת השרת
+    const serverUrl = 'https://localhost:44305';
+    return serverUrl + '/' + imageUrl;
   }
 }

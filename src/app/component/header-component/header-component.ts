@@ -8,6 +8,7 @@ import { MenuModule } from 'primeng/menu';
 import { CategoryService } from '../../services/category-service';
 import { CategoryDTOModel } from '../../models/category/category-model';
 import { UserService } from '../../services/user-service';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-header-component',
@@ -25,6 +26,7 @@ export class HeaderComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private userService: UserService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -36,10 +38,16 @@ export class HeaderComponent implements OnInit {
       error: (err) => console.error('Error fetching categories:', err)
     });
     this.currentUser = this.userService.getCurrentUser();
+    
+    this.cartService.getCart().subscribe(items => {
+      this.cartItemCount = items.length;
+      this.cdr.detectChanges();
+    });
   }
 
   isAdmin(): boolean {
-    return this.currentUser?.isAdmin || false;
+    const user = this.userService.getCurrentUser();
+    return user?.isAdmin || false;
   }
 
   trackByCategory(index: number, category: CategoryDTOModel): number {

@@ -30,6 +30,7 @@ export class ProductSummaryDTOModel {
     categoryCategoryName: string = '';
     transactionType: string = '';
     categoryId?: number;
+    ownerId?: number;
     isAvailable?: boolean | number;
 }
 

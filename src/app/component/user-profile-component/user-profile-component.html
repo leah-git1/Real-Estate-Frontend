@@ -18,6 +18,9 @@
       <button class="tab-button" [class.active]="activeTab === 3" (click)="setActiveTab(3)">
         <i class="pi pi-shopping-cart"></i> הסל שלי
       </button>
+      <button *ngIf="isAdmin()" class="tab-button" [class.active]="activeTab === 5" (click)="setActiveTab(5)">
+        <i class="pi pi-shield"></i> ניהול מערכת
+      </button>
       <button class="tab-button" [class.active]="activeTab === 4" (click)="setActiveTab(4)">
         <i class="pi pi-sign-out"></i> התנתקות
       </button>
@@ -208,6 +211,35 @@
         <h3 class="mb-3">האם אתה בטוח שברצונך להתנתק?</h3>
         <p-button label="התנתק" icon="pi pi-sign-out" severity="danger" (onClick)="logout()"></p-button>
       </div>
+
+      <div *ngIf="activeTab === 5" class="card p-4 text-center">
+        <i class="pi pi-shield text-6xl text-primary mb-3"></i>
+        <h3 class="mb-3">ניהול מערכת</h3>
+        <p class="text-600 mb-3">עבור למסך ניהול המערכת המלא</p>
+        <p-button label="עבור לניהול מערכת" icon="pi pi-shield" (onClick)="goToAdmin()"></p-button>
+      </div>
     </div>
   </div>
 </div>
+
+<p-dialog [(visible)]="showDeleteDialog" [modal]="true" [style]="{width: '400px'}">
+  <ng-template pTemplate="header">
+    <h3 class="text-red-600">
+      <i class="pi pi-exclamation-triangle mr-2"></i>
+      אישור מחיקה
+    </h3>
+  </ng-template>
+  
+  <div class="text-center p-4">
+    <i class="pi pi-trash text-red-500" style="font-size: 3rem;"></i>
+    <p class="text-xl mt-3 mb-2">האם אתה בטוח?</p>
+    <p class="text-600">המוצר יוסר מהרשימה שלך</p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="cancelDelete()" class="p-button-text"></button>
+    <button pButton label="מחק" icon="pi pi-trash" 
+            (click)="confirmDelete()" class="p-button-danger"></button>
+  </ng-template>
+</p-dialog>

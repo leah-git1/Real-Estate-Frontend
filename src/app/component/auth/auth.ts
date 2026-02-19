@@ -48,7 +48,11 @@ export class AuthComponent {
           this.userService.saveUserToStorage(user);
           this.messageService.add({ severity: 'success', summary: 'התחברות', detail: `שלום ${user.fullName}!` });
           setTimeout(() => {
-            window.location.reload();
+            const returnUrl = localStorage.getItem('returnUrl') || '/';
+            localStorage.removeItem('returnUrl');
+            this.router.navigate([returnUrl]).then(() => {
+              window.location.reload();
+            });
           }, 1000);
         },
         error: (err) => {

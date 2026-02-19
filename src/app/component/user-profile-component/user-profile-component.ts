@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
@@ -13,7 +14,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule],
+  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule, DialogModule],
   templateUrl: './user-profile-component.html',
   styleUrl: './user-profile-component.scss'
 })
@@ -24,6 +25,8 @@ export class UserProfileComponent implements OnInit {
   myProducts: any[] = [];
   activeTab: number = 0;
   isLoadingProducts: boolean = false;
+  showDeleteDialog: boolean = false;
+  productToDelete: number | null = null;
 
   constructor(
     private userService: UserService,
@@ -155,19 +158,31 @@ export class UserProfileComponent implements OnInit {
   }
 
   deleteProduct(productId: number) {
-    if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
+    this.productToDelete = productId;
+    this.showDeleteDialog = true;
+  }
+
+  confirmDelete() {
+    if (this.productToDelete) {
       const updateData = { isAvailable: false };
-      this.productService.updateProduct(productId, updateData).subscribe({
+      this.productService.updateProduct(this.productToDelete, updateData).subscribe({
         next: () => {
-          alert('המוצר נמחק בהצלחה');
+          this.showDeleteDialog = false;
+          this.productToDelete = null;
           this.loadMyProducts();
         },
         error: (err) => {
           console.error('Error deleting product:', err);
-          alert('שגיאה במחיקת המוצר');
+          this.showDeleteDialog = false;
+          this.productToDelete = null;
         }
       });
     }
+  }
+
+  cancelDelete() {
+    this.showDeleteDialog = false;
+    this.productToDelete = null;
   }
 
   addNewProduct() {
@@ -181,6 +196,14 @@ export class UserProfileComponent implements OnInit {
 
   goToCart() {
     this.router.navigate(['/cart']);
+  }
+
+  goToAdmin() {
+    this.router.navigate(['/admin']);
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.isAdmin || false;
   }
 
   setActiveTab(index: number) {
