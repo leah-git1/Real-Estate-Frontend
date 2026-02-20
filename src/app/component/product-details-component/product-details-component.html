@@ -114,12 +114,19 @@
       </div>
 
       <div class="flex flex-column gap-2 mt-auto" *ngIf="!isEmbedded">
-        <button pButton label="הוספה לסל" icon="pi pi-shopping-cart" 
+        <button *ngIf="isOwner()" pButton label="עריכת מוצר" icon="pi pi-pencil" 
                 class="w-full p-2 font-bold"
-                [disabled]="!canAddToCart()" (click)="addToCart()"></button>
+                [routerLink]="['/edit-product', product.productId]"
+                [queryParams]="{returnTo: 'details'}"></button>
         
-        <button pButton label="פרטי מפרסם" icon="pi pi-phone" 
-                class="w-full p-2 p-button-outlined p-button-secondary font-bold"></button>
+        <ng-container *ngIf="!isOwner()">
+          <button pButton label="הוספה לסל" icon="pi pi-shopping-cart" 
+                  class="w-full p-2 font-bold"
+                  [disabled]="!canAddToCart()" (click)="addToCart()"></button>
+          
+          <button pButton label="פרטי מפרסם" icon="pi pi-phone" 
+                  class="w-full p-2 p-button-outlined p-button-secondary font-bold"></button>
+        </ng-container>
       </div>
     </div>
   </div>

@@ -5,6 +5,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
+import { TimelineModule } from 'primeng/timeline';
+import { TagModule } from 'primeng/tag';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
@@ -14,7 +16,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule, DialogModule],
+  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule, DialogModule, TimelineModule, TagModule],
   templateUrl: './user-profile-component.html',
   styleUrl: './user-profile-component.scss'
 })
@@ -27,6 +29,8 @@ export class UserProfileComponent implements OnInit {
   isLoadingProducts: boolean = false;
   showDeleteDialog: boolean = false;
   productToDelete: number | null = null;
+  selectedOrder: any = null;
+  showOrderDialog: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -48,20 +52,19 @@ export class UserProfileComponent implements OnInit {
       return;
     }
     
+    // טען את הטאב מה-URL לפני הכל
+    const tabParam = this.route.snapshot.queryParams['tab'];
+    if (tabParam) {
+      this.activeTab = +tabParam;
+      console.log('Initial active tab from URL:', this.activeTab);
+    }
+    
     this.loadUserData();
     this.loadOrders();
     
-    this.route.queryParams.subscribe(params => {
-      console.log('Query params:', params);
-      if (params['tab']) {
-        this.activeTab = +params['tab'];
-        console.log('Active tab set to:', this.activeTab);
-        if (this.activeTab === 2) {
-          console.log('Tab 2 selected, loading products');
-          this.loadMyProducts();
-        }
-      }
-    });
+    if (this.activeTab === 2) {
+      this.loadMyProducts();
+    }
   }
 
   loadUserData() {
@@ -73,9 +76,17 @@ export class UserProfileComponent implements OnInit {
   }
 
   loadOrders() {
+    console.log('Loading orders for user:', this.currentUser.userId);
     this.orderService.getOrdersByUserId(this.currentUser.userId).subscribe({
-      next: (data) => this.orders = data,
-      error: (err) => console.error('Error loading orders:', err)
+      next: (data) => {
+        console.log('Orders received:', data);
+        this.orders = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading orders:', err);
+        this.orders = [];
+      }
     });
   }
 
@@ -213,5 +224,44 @@ export class UserProfileComponent implements OnInit {
       console.log('Tab 2 clicked, loading products');
       this.loadMyProducts();
     }
+  }
+
+  getStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    switch(status?.toLowerCase()) {
+      case 'pending': return 'warn';
+      case 'confirmed': return 'info';
+      case 'processing': return 'info';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch(status?.toLowerCase()) {
+      case 'pending': return 'התקבל';
+      case 'confirmed': return 'אושר';
+      case 'processing': return 'בטיפול';
+      case 'delivered': return 'הסתיים';
+      case 'cancelled': return 'בוטל';
+      default: return status;
+    }
+  }
+
+  viewOrderDetails(order: any) {
+    this.selectedOrder = order;
+    this.showOrderDialog = true;
+  }
+
+  closeOrderDialog() {
+    this.showOrderDialog = false;
+    this.selectedOrder = null;
+  }
+
+  isStepCompleted(currentStatus: string, stepStatus: string): boolean {
+    const statusOrder = ['Pending', 'Confirmed', 'Processing', 'Delivered'];
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    const stepIndex = statusOrder.indexOf(stepStatus);
+    return currentIndex > stepIndex;
   }
 }

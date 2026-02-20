@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
+import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart-service';
@@ -10,21 +11,29 @@ import { UserService } from '../../services/user-service';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
 import { CartItem } from '../../models/cart/cart-item.model';
+import { calculateTotalPrice } from '../../config/commission.config';
 
 @Component({
   selector: 'app-cart-component',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, DatePickerModule, FormsModule],
+  imports: [CommonModule, ButtonModule, DialogModule, DatePickerModule, InputTextModule, FormsModule],
   templateUrl: './cart-component.html',
   styleUrl: './cart-component.scss',
 })
 export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
   showDateDialog: boolean = false;
-  showSuccessDialog: boolean = false;
   selectedItem: CartItem | null = null;
   selectedDates: Date[] | undefined;
   minDate: Date = new Date();
+  disabledDates: Date[] = [];
+  currentMonth: number = new Date().getMonth();
+  currentYear: number = new Date().getFullYear();
+  availabilityMessage: string = '';
+  isRangeAvailable: boolean = false;
+  discountCode: string = '';
+  discountAmount: number = 0;
+  discountMessage: string = '';
 
   constructor(
     private cartService: CartService,
@@ -50,31 +59,132 @@ export class CartComponent implements OnInit {
       this.selectedDates = [new Date(item.startDate), new Date(item.endDate)];
     }
     this.showDateDialog = true;
+    this.loadOccupiedDates();
   }
 
-  saveDates() {
-    if (this.selectedItem && this.selectedDates && this.selectedDates[0] && this.selectedDates[1]) {
-      // בדיקת זמינות לפני שמירה
-      this.productService.checkAvailability(
-        this.selectedItem.productId,
-        this.selectedDates[0],
-        this.selectedDates[1]
-      ).subscribe({
+  loadOccupiedDates(month?: number, year?: number) {
+    if (!this.selectedItem) return;
+    
+    const targetMonth = month || this.currentMonth + 1;
+    const targetYear = year || this.currentYear;
+    
+    this.orderService.getOccupiedDates(this.selectedItem.productId, targetMonth, targetYear)
+      .subscribe({
+        next: (data) => {
+          this.disabledDates = data.occupiedDates.map(dateStr => new Date(dateStr));
+        },
+        error: (err) => console.error('Error fetching occupied dates:', err)
+      });
+  }
+
+  onMonthChange(event: any) {
+    this.currentMonth = event.month;
+    this.currentYear = event.year;
+    this.loadOccupiedDates(event.month + 1, event.year);
+  }
+
+  onDateChange(dates: Date[] | undefined) {
+    if (dates && dates.length === 2 && dates[0] && dates[1]) {
+      // בדיקה להשכרה - רק חודשים שלמים
+      if (this.selectedItem && this.selectedItem.transactionType === 'השכרה') {
+        if (!this.isFullMonths(dates[0], dates[1])) {
+          this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
+          this.isRangeAvailable = false;
+          setTimeout(() => {
+            this.selectedDates = undefined;
+          }, 2000);
+          return;
+        }
+      }
+      this.checkRangeAvailability(dates[0], dates[1]);
+    } else {
+      this.availabilityMessage = '';
+      this.isRangeAvailable = false;
+    }
+  }
+
+  isFullMonths(start: Date, end: Date): boolean {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    console.log('Checking full months:', startDate.getDate(), 'vs', endDate.getDate());
+    
+    // בדיקה שהיום בחודש זהה
+    if (startDate.getDate() !== endDate.getDate()) {
+      console.log('Days do not match - NOT full months');
+      return false;
+    }
+    
+    // חישוב הפרש בחודשים
+    const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                       (endDate.getMonth() - startDate.getMonth());
+    
+    console.log('Months diff:', monthsDiff);
+    const result = monthsDiff >= 1;
+    console.log('Is full months:', result);
+    return result;
+  }
+
+  checkRangeAvailability(startDate: Date, endDate: Date) {
+    if (!this.selectedItem) return;
+    
+    // בדיקה להשכרה - חודשים שלמים
+    if (this.selectedItem.transactionType === 'השכרה') {
+      if (!this.isFullMonths(startDate, endDate)) {
+        this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
+        this.isRangeAvailable = false;
+        setTimeout(() => {
+          this.selectedDates = undefined;
+        }, 2000);
+        return;
+      }
+    }
+    
+    this.productService.checkAvailability(this.selectedItem.productId, startDate, endDate)
+      .subscribe({
         next: (isAvailable) => {
+          this.isRangeAvailable = isAvailable;
           if (isAvailable) {
-            this.selectedItem!.startDate = this.selectedDates![0];
-            this.selectedItem!.endDate = this.selectedDates![1];
-            this.cartService.updateCart();
-            this.closeDateDialog();
+            this.availabilityMessage = '✓ התאריכים זמינים להזמנה!';
           } else {
-            alert('התאריכים שבחרת כבר תפוסים. אנא בחר תאריכים אחרים.');
+            this.availabilityMessage = '✗ התאריכים לא זמינים - יש חפיפה עם תאריכים תפוסים';
+            setTimeout(() => {
+              this.selectedDates = undefined;
+            }, 100);
           }
         },
         error: (err) => {
-          console.error('Error checking availability:', err);
-          alert('שגיאה בבדיקת זמינות');
+          console.error('שגיאה בבדיקת זמינות:', err);
+          this.availabilityMessage = 'שגיאה בבדיקת זמינות';
+          this.isRangeAvailable = false;
+          this.selectedDates = undefined;
         }
       });
+  }
+
+  saveDates() {
+    if (this.selectedItem && this.selectedDates && this.selectedDates[0] && this.selectedDates[1] && this.isRangeAvailable) {
+      this.selectedItem.startDate = this.selectedDates[0];
+      this.selectedItem.endDate = this.selectedDates[1];
+      
+      // עדכון מחיר לפי תאריכים חדשים
+      const basePrice = this.selectedItem.basePrice || 0;
+      let finalPrice = basePrice;
+      
+      if (this.selectedItem.transactionType === 'נופש') {
+        const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
+        finalPrice = basePrice * nights;
+        // הוספת עמלה 3%
+        finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
+      } else if (this.selectedItem.transactionType === 'השכרה') {
+        const months = this.calculateMonths(this.selectedDates[0], this.selectedDates[1]);
+        // להשכרה: מספר חודשים + 1 חודש עמלה
+        finalPrice = basePrice * (months + 1);
+      }
+      
+      this.selectedItem.price = finalPrice;
+      this.cartService.updateCart();
+      this.closeDateDialog();
     }
   }
 
@@ -82,10 +192,86 @@ export class CartComponent implements OnInit {
     this.showDateDialog = false;
     this.selectedItem = null;
     this.selectedDates = undefined;
+    this.disabledDates = [];
+    this.availabilityMessage = '';
+    this.isRangeAvailable = false;
   }
 
   getTotalPrice(): number {
-    return this.cartItems.reduce((sum, item) => sum + item.price, 0);
+    return this.cartItems.reduce((sum, item) => {
+      if (item.transactionType === 'מכירה') {
+        return sum; // לא מוסיפים מחיר למכירה - רק סיור
+      }
+      return sum + item.price;
+    }, 0);
+  }
+
+  getSubtotal(): number {
+    return this.getTotalPrice();
+  }
+
+  getFinalPrice(): number {
+    return this.getSubtotal() - this.discountAmount;
+  }
+
+  applyDiscount() {
+    if (!this.discountCode.trim()) {
+      this.discountMessage = 'אנא הכנס קוד הנחה';
+      return;
+    }
+    
+    const validCodes: {[key: string]: number} = {
+      'SAVE10': 10,
+      'SAVE20': 20,
+      'DISCOUNT50': 50
+    };
+    
+    const discount = validCodes[this.discountCode.toUpperCase()];
+    if (discount) {
+      this.discountAmount = (this.getSubtotal() * discount) / 100;
+      this.discountMessage = `✓ קוד הנחה הוחל בהצלחה! ${discount}% הנחה`;
+    } else {
+      this.discountAmount = 0;
+      this.discountMessage = '✗ קוד לא קיים או לא תקין';
+    }
+  }
+
+  removeDiscount() {
+    this.discountCode = '';
+    this.discountAmount = 0;
+    this.discountMessage = '';
+  }
+
+  calculateNights(startDate: Date, endDate: Date): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  calculateMonths(startDate: Date, endDate: Date): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let months = (end.getFullYear() - start.getFullYear()) * 12;
+    months += end.getMonth() - start.getMonth();
+    return months;
+  }
+
+  getItemBasePrice(item: CartItem): number {
+    if (item.transactionType === 'מכירה') {
+      return 0; // סיור בלבד
+    }
+    return item.basePrice || item.price; // מחזיר את המחיר הבסיסי
+  }
+
+  getItemPeriod(item: CartItem): string {
+    if (item.transactionType === 'נופש' && item.startDate && item.endDate) {
+      return `${this.calculateNights(item.startDate, item.endDate)} לילות`;
+    }
+    if (item.transactionType === 'השכרה' && item.startDate && item.endDate) {
+      return `${this.calculateMonths(item.startDate, item.endDate)} חודשים`;
+    }
+    return '';
   }
 
   checkout() {
@@ -94,25 +280,10 @@ export class CartComponent implements OnInit {
     
     if (!this.userService.isLoggedIn()) {
       console.log('User not logged in, redirecting to auth');
-      localStorage.setItem('returnUrl', '/cart');
+      localStorage.setItem('returnUrl', '/checkout');
       this.router.navigate(['/auth']);
-    } else {
-      console.log('User logged in, creating order');
-      this.createOrder();
-    }
-  }
-
-  createOrder() {
-    console.log('Creating order...');
-    const currentUser = this.userService.getCurrentUser();
-    console.log('Current user:', currentUser);
-    
-    if (!currentUser) {
-      alert('שגיאה: משתמש לא מחובר');
       return;
     }
-    
-    console.log('Cart items:', this.cartItems);
     
     // בדיקה שלמוצרי השכרה/נופש יש תאריכים
     const invalidItems = this.cartItems.filter(item => 
@@ -124,58 +295,10 @@ export class CartComponent implements OnInit {
       return;
     }
     
-    const orderItems = this.cartItems.map((item, index) => {
-      console.log('Processing item:', item);
-      // למוצרי מכירה - תאריך עתידי מאוד רחוק
-      if (item.transactionType === 'מכירה') {
-        const futureDate = new Date('2099-12-31');
-        futureDate.setHours(index, index, index, index);
-        console.log('Sale item - using future date:', futureDate);
-        return {
-          productId: item.productId,
-          priceAtPurchase: item.price,
-          startDate: futureDate.toISOString(),
-          endDate: futureDate.toISOString()
-        };
-      }
-      // למוצרי השכרה/נופש - התאריכים שנבחרו
-      console.log('Rental/Vacation item - using selected dates:', item.startDate, item.endDate);
-      return {
-        productId: item.productId,
-        priceAtPurchase: item.price,
-        startDate: new Date(item.startDate!).toISOString(),
-        endDate: new Date(item.endDate!).toISOString()
-      };
-    });
-
-    console.log('Order items:', orderItems);
-
-    const orderData = {
-      userId: currentUser.userId,
-      orderItems: orderItems,
-      totalAmount: this.getTotalPrice()
-    };
-
-    console.log('Order data:', orderData);
-
-    this.orderService.createOrder(orderData).subscribe({
-      next: (response) => {
-        console.log('Order created successfully:', response);
-        this.cartService.clearCart();
-        this.showSuccessDialog = true;
-      },
-      error: (err) => {
-        console.error('Error creating order:', err);
-        const errorMsg = err.error?.message || err.error || err.message || 'שגיאה ביצירת ההזמנה';
-        alert('שגיאה: ' + errorMsg);
-      }
-    });
+    console.log('Navigating to checkout');
+    this.router.navigate(['/checkout']);
   }
 
-  goToOrders() {
-    this.showSuccessDialog = false;
-    this.router.navigate(['/profile'], { queryParams: { tab: 1 } });
-  }
 
   continueShopping() {
     this.router.navigate(['/products']);

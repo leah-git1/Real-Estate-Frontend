@@ -56,18 +56,8 @@ export class CartSidebarComponent implements OnInit {
     this.cartService.hideCart();
     
     if (!this.userService.isLoggedIn()) {
-      localStorage.setItem('returnUrl', '/cart');
+      localStorage.setItem('returnUrl', '/checkout');
       this.router.navigate(['/auth']);
-    } else {
-      this.createOrder();
-    }
-  }
-
-  createOrder() {
-    const currentUser = this.userService.getCurrentUser();
-    
-    if (!currentUser) {
-      alert('שגיאה: משתמש לא מחובר');
       return;
     }
     
@@ -81,43 +71,7 @@ export class CartSidebarComponent implements OnInit {
       return;
     }
     
-    const orderItems = this.cartItems.map((item, index) => {
-      if (item.transactionType === 'מכירה') {
-        const futureDate = new Date('2099-12-31');
-        futureDate.setHours(index, index, index, index);
-        return {
-          productId: item.productId,
-          priceAtPurchase: item.price,
-          startDate: futureDate.toISOString(),
-          endDate: futureDate.toISOString()
-        };
-      }
-      return {
-        productId: item.productId,
-        priceAtPurchase: item.price,
-        startDate: new Date(item.startDate!).toISOString(),
-        endDate: new Date(item.endDate!).toISOString()
-      };
-    });
-
-    const orderData = {
-      userId: currentUser.userId,
-      orderItems: orderItems,
-      totalAmount: this.getTotalPrice()
-    };
-
-    this.orderService.createOrder(orderData).subscribe({
-      next: (response) => {
-        this.cartService.clearCart();
-        alert('ההזמנה בוצעה בהצלחה!');
-        this.router.navigate(['/profile'], { queryParams: { tab: 1 } });
-      },
-      error: (err) => {
-        console.error('Error creating order:', err);
-        const errorMsg = err.error?.message || err.error || err.message || 'שגיאה ביצירת ההזמנה';
-        alert('שגיאה: ' + errorMsg);
-      }
-    });
+    this.router.navigate(['/checkout']);
   }
 
   getTotalPrice(): number {

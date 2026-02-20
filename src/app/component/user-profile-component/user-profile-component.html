@@ -110,20 +110,120 @@
       </div>
 
       <div *ngIf="activeTab === 1" class="card p-4">
-        <h3 class="mb-4">ההזמנות שלי</h3>
+        <h3 class="mb-4"><i class="pi pi-shopping-bag mr-2"></i>ההזמנות שלי ({{ orders.length }})</h3>
+        
         <div *ngIf="orders.length === 0" class="text-center p-5">
           <i class="pi pi-inbox text-6xl text-400 mb-3"></i>
-          <p class="text-600">אין לך הזמנות עדיין</p>
+          <p class="text-600 mb-3">אין לך הזמנות עדיין</p>
+          <p-button label="התחל לקנות" icon="pi pi-shopping-cart" 
+                    routerLink="/products"></p-button>
         </div>
-        <div *ngFor="let order of orders" class="border-1 border-200 border-round p-3 mb-3">
-          <div class="flex justify-content-between">
-            <div>
-              <p class="font-bold">הזמנה #{{ order.orderId }}</p>
-              <p class="text-600">תאריך: {{ order.orderDate | date:'dd/MM/yyyy' }}</p>
-              <p class="text-600">סטטוס: {{ order.status }}</p>
+        
+        <div *ngFor="let order of orders" class="order-card mb-3">
+          <div class="border-1 border-200 border-round overflow-hidden hover:shadow-3 transition-all transition-duration-300">
+            <div class="p-4 bg-primary-50 border-bottom-1 border-200">
+              <div class="flex justify-content-between align-items-center">
+                <div>
+                  <h4 class="m-0 mb-2">
+                    <i class="pi pi-hashtag"></i>
+                    הזמנה {{ order.orderId }}
+                  </h4>
+                  <p class="text-600 text-sm m-0">
+                    <i class="pi pi-calendar mr-1"></i>
+                    {{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}
+                  </p>
+                </div>
+                <div class="text-left">
+                  <p-tag [value]="getStatusLabel(order.status)" 
+                         [severity]="getStatusSeverity(order.status)"
+                         styleClass="text-lg"></p-tag>
+                </div>
+              </div>
             </div>
-            <div class="text-left">
-              <p class="text-2xl font-bold text-primary">₪{{ order.totalPrice | number }}</p>
+            
+            <div class="p-4">
+              <div class="order-stepper mb-4">
+                <div class="stepper-container">
+                  <div class="stepper-step" [class.completed]="isStepCompleted(order.status, 'Pending')" [class.active]="order.status === 'Pending'">
+                    <div class="step-circle">
+                      <i class="pi" [ngClass]="isStepCompleted(order.status, 'Pending') ? 'pi-check' : 'pi-inbox'"></i>
+                    </div>
+                    <div class="step-label">התקבל</div>
+                  </div>
+                  <div class="stepper-line" [class.completed]="isStepCompleted(order.status, 'Confirmed')"></div>
+                  <div class="stepper-step" [class.completed]="isStepCompleted(order.status, 'Confirmed')" [class.active]="order.status === 'Confirmed'">
+                    <div class="step-circle">
+                      <i class="pi" [ngClass]="isStepCompleted(order.status, 'Confirmed') ? 'pi-check' : 'pi-check-circle'"></i>
+                    </div>
+                    <div class="step-label">אושר</div>
+                  </div>
+                  <div class="stepper-line" [class.completed]="isStepCompleted(order.status, 'Processing')"></div>
+                  <div class="stepper-step" [class.completed]="isStepCompleted(order.status, 'Processing')" [class.active]="order.status === 'Processing'">
+                    <div class="step-circle">
+                      <i class="pi" [ngClass]="isStepCompleted(order.status, 'Processing') ? 'pi-check' : 'pi-sync'"></i>
+                    </div>
+                    <div class="step-label">בטיפול</div>
+                  </div>
+                  <div class="stepper-line" [class.completed]="order.status === 'Delivered'"></div>
+                  <div class="stepper-step" [class.completed]="order.status === 'Delivered'" [class.active]="order.status === 'Delivered'">
+                    <div class="step-circle">
+                      <i class="pi" [ngClass]="order.status === 'Delivered' ? 'pi-check' : 'pi-flag'"></i>
+                    </div>
+                    <div class="step-label">הסתיים</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <p class="text-600 text-sm mb-2">
+                  <i class="pi pi-box mr-1"></i>
+                  פריטים בהזמנה: {{ order.orderItems?.length || 0 }}
+                </p>
+                
+                <div class="grid" *ngIf="order.orderItems && order.orderItems.length > 0">
+                  <div class="col-12" *ngFor="let item of order.orderItems.slice(0, 2)">
+                    <div class="flex align-items-center gap-3 p-2 bg-gray-50 border-round">
+                      <img *ngIf="item.product?.imageUrl" 
+                           [src]="item.product.imageUrl" 
+                           [alt]="item.product?.title"
+                           style="width: 60px; height: 60px; object-fit: cover;"
+                           class="border-round" />
+                      <div class="flex-grow-1">
+                        <p class="font-semibold m-0 mb-1">{{ item.product?.title || 'מוצר' }}</p>
+                        <p class="text-sm text-600 m-0">
+                          <i class="pi pi-map-marker mr-1"></i>{{ item.product?.city || 'N/A' }}
+                        </p>
+                        <p class="text-sm text-600 m-0" *ngIf="item.startDate">
+                          <i class="pi pi-calendar mr-1"></i>
+                          {{ item.startDate | date:'dd/MM/yy' }}<span *ngIf="item.endDate"> - {{ item.endDate | date:'dd/MM/yy' }}</span>
+                        </p>
+                      </div>
+                      <div class="text-left">
+                        <p class="font-bold text-primary m-0">₪{{ item.priceAtPurchase | number }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-12" *ngIf="order.orderItems.length > 2">
+                    <p class="text-center text-600 text-sm m-0">
+                      +{{ order.orderItems.length - 2 }} פריטים נוספים
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border-top-1 border-200 pt-3 mt-3">
+                <div class="flex justify-content-between align-items-center">
+                  <span class="text-xl font-bold">סה"כ:</span>
+                  <span class="text-2xl font-bold text-primary">₪{{ order.totalAmount | number }}</span>
+                </div>
+              </div>
+              
+              <div class="mt-3">
+                <p-button label="צפה בפרטים" icon="pi pi-eye" 
+                          (onClick)="viewOrderDetails(order)"
+                          styleClass="w-full"></p-button>
+              </div>
             </div>
           </div>
         </div>
@@ -241,5 +341,86 @@
             (click)="cancelDelete()" class="p-button-text"></button>
     <button pButton label="מחק" icon="pi pi-trash" 
             (click)="confirmDelete()" class="p-button-danger"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showOrderDialog" [modal]="true" [style]="{width: '800px'}" *ngIf="selectedOrder">
+  <ng-template pTemplate="header">
+    <h3>
+      <i class="pi pi-shopping-bag mr-2"></i>
+      פרטי הזמנה #{{ selectedOrder.orderId }}
+    </h3>
+  </ng-template>
+  
+  <div class="p-4">
+    <div class="grid mb-4">
+      <div class="col-6">
+        <p class="text-600 text-sm mb-1">תאריך הזמנה</p>
+        <p class="font-bold">
+          <i class="pi pi-calendar mr-1"></i>
+          {{ selectedOrder.orderDate | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <div class="col-6 text-left">
+        <p class="text-600 text-sm mb-1">סטטוס</p>
+        <p-tag [value]="getStatusLabel(selectedOrder.status)" 
+               [severity]="getStatusSeverity(selectedOrder.status)"
+               styleClass="text-lg"></p-tag>
+      </div>
+    </div>
+    
+    <div class="border-1 border-200 border-round p-3 mb-4">
+      <h4 class="mb-3">פריטים בהזמנה</h4>
+      
+      <div *ngFor="let item of selectedOrder.orderItems" class="mb-3 pb-3 border-bottom-1 border-200">
+        <div class="flex gap-3">
+          <img *ngIf="item.product?.imageUrl" 
+               [src]="item.product.imageUrl" 
+               [alt]="item.product?.title"
+               style="width: 100px; height: 100px; object-fit: cover;"
+               class="border-round" />
+          
+          <div class="flex-grow-1">
+            <h5 class="m-0 mb-2">{{ item.product?.title }}</h5>
+            <p class="text-600 text-sm m-0 mb-1">
+              <i class="pi pi-map-marker mr-1"></i>{{ item.product?.city }}
+            </p>
+            <p class="text-600 text-sm m-0 mb-1" *ngIf="item.product?.rooms">
+              <i class="pi pi-home mr-1"></i>{{ item.product.rooms }} חדרים
+            </p>
+            <p class="text-600 text-sm m-0 mb-1" *ngIf="item.startDate && item.endDate">
+              <i class="pi pi-calendar mr-1"></i>
+              {{ item.startDate | date:'dd/MM/yyyy' }} - {{ item.endDate | date:'dd/MM/yyyy' }}
+            </p>
+            <p class="text-600 text-sm m-0" *ngIf="item.product?.transactionType">
+              <span class="p-tag p-tag-sm" [ngClass]="{
+                'p-tag-info': item.product.transactionType === 'Sale',
+                'p-tag-success': item.product.transactionType === 'Rent',
+                'p-tag-warning': item.product.transactionType === 'Vacation'
+              }">
+                {{ item.product.transactionType === 'Sale' ? 'מכירה' : 
+                   item.product.transactionType === 'Rent' ? 'השכרה' : 'נופש' }}
+              </span>
+            </p>
+          </div>
+          
+          <div class="text-left">
+            <p class="text-xl font-bold text-primary m-0">₪{{ item.priceAtPurchase | number }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="border-top-2 border-primary pt-3">
+      <div class="flex justify-content-between align-items-center">
+        <span class="text-2xl font-bold">סה"כ כולל:</span>
+        <span class="text-3xl font-bold text-primary">₪{{ selectedOrder.totalAmount | number }}</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="סגור" icon="pi pi-times" 
+            (click)="closeOrderDialog()" class="p-button-text"></button>
   </ng-template>
 </p-dialog>

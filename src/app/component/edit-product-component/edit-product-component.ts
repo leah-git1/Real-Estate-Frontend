@@ -35,6 +35,7 @@ export class EditProductComponent implements OnInit {
   mainImagePreview: string | null = null;
   additionalImagesFiles: File[] = [];
   additionalImagesPreviews: string[] = [];
+  returnTo: string = 'profile';
 
   constructor(
     private productService: ProductService,
@@ -45,6 +46,9 @@ export class EditProductComponent implements OnInit {
 
   ngOnInit() {
     this.productId = +this.route.snapshot.paramMap.get('id')!;
+    this.route.queryParams.subscribe(params => {
+      this.returnTo = params['returnTo'] || 'profile';
+    });
     this.loadProduct();
     this.loadCategories();
   }
@@ -119,7 +123,7 @@ export class EditProductComponent implements OnInit {
         this.uploadAdditionalImages();
       } else {
         alert('המוצר עודכן בהצלחה!');
-        this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+        this.navigateBack();
       }
       return;
     }
@@ -133,7 +137,7 @@ export class EditProductComponent implements OnInit {
         this.uploadAdditionalImages();
       } else {
         alert('המוצר עודכן בהצלחה!');
-        this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+        this.navigateBack();
       }
     }).catch(err => {
       console.error('Error deleting images:', err);
@@ -172,7 +176,7 @@ export class EditProductComponent implements OnInit {
       return Promise.all(addImagePromises);
     }).then(() => {
       alert('המוצר עודכן בהצלחה!');
-      this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+      this.navigateBack();
     }).catch(err => {
       console.error('Error uploading additional images:', err);
       alert('שגיאה בהעלאת תמונות נוספות');
@@ -219,7 +223,17 @@ onMainImageSelect(event: any) {
   }
 
   cancel() {
-    this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+    this.navigateBack();
+  }
+
+  navigateBack() {
+    if (this.returnTo === 'details') {
+      this.router.navigate(['/product-details', this.productId]);
+    } else if (this.returnTo === 'products') {
+      this.router.navigate(['/products']);
+    } else {
+      this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
+    }
   }
 
   getFullImageUrl(imageUrl: string | {imageId: number, url: string}): string {

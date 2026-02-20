@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
+import { UserService } from '../../services/user-service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { GalleriaModule } from 'primeng/galleria';
@@ -41,6 +42,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     private productService: ProductService,
     private orderService: OrderService,
     private cartService: CartService,
+    private userService: UserService,
     private cdr: ChangeDetectorRef,
     private injector: Injector
   ) {}
@@ -142,11 +144,13 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
 
   onDateChange(dates: Date[] | undefined) {
     console.log('onDateChange נקרא עם:', dates);
+    console.log('Product transactionType:', this.product?.transactionType);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
-      // בדיקה להשכרה - רק חודשים שלמים
-      if (this.product.transactionType === 'Rent') {
+      if (this.product && (this.product.transactionType === 'Rent' || this.product.transactionType === 'השכרה')) {
+        console.log('Checking full months...');
         if (!this.isFullMonths(dates[0], dates[1])) {
-          this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. לדוגמה: 12.02 - 12.03';
+          console.log('NOT full months!');
+          this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
           this.isRangeAvailable = false;
           setTimeout(() => {
             this.rangeDates = undefined;
@@ -168,10 +172,16 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     const startDate = new Date(start);
     const endDate = new Date(end);
     
+    // בדיקה שהיום בחודש זהה
+    if (startDate.getDate() !== endDate.getDate()) {
+      return false;
+    }
+    
+    // חישוב הפרש בחודשים
     const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
                        (endDate.getMonth() - startDate.getMonth());
     
-    return monthsDiff >= 1 && startDate.getDate() === endDate.getDate();
+    return monthsDiff >= 1;
   }
 
   calculateMonths(start: Date, end: Date): number {
@@ -180,11 +190,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     
     let months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
     months += endDate.getMonth() - startDate.getMonth();
-    
-    // אם היום בחודש הסיום זהה ליום בחודש ההתחלה, זה חודש שלם
-    if (startDate.getDate() === endDate.getDate()) {
-      months++;
-    }
     
     return months;
   }
@@ -199,6 +204,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
 
   checkRangeAvailability(startDate: Date, endDate: Date) {
     console.log('קורא ל-API לבדיקת זמינות:', startDate, endDate);
+    
     this.productService.checkAvailability(this.product.productId, startDate, endDate)
       .subscribe({
         next: (isAvailable) => {
@@ -210,7 +216,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
           } else {
             this.availabilityMessage = '✗ התאריכים לא זמינים - יש חפיפה עם תאריכים תפוסים';
             console.log('הטווח לא זמין, מאפס בחירה');
-            // מאפס את הבחירה אם הטווח לא זמין
             setTimeout(() => {
               this.rangeDates = undefined;
               this.cdr.detectChanges();
@@ -273,23 +278,20 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     // חישוב מחיר לפי סוג עסקה
     if (this.rangeDates && this.rangeDates[0] && this.rangeDates[1]) {
       if (this.product.transactionType === 'Vacation') {
-        // נופש - מחיר לפי מספר לילות
         const nights = this.calculateNights(this.rangeDates[0], this.rangeDates[1]);
         finalPrice = this.product.price * nights;
+        finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
       } else if (this.product.transactionType === 'Rent') {
-        // השכרה - מחיר לפי מספר חודשים
         const months = this.calculateMonths(this.rangeDates[0], this.rangeDates[1]);
-        finalPrice = this.product.price * months;
+        finalPrice = this.product.price * (months + 1);
       }
     }
-    
-    // הוספת עמלה
-    const totalWithCommission = calculateTotalPrice(finalPrice, this.product.transactionType);
     
     const cartItem = {
       productId: this.product.productId,
       title: this.product.title,
-      price: totalWithCommission,
+      price: finalPrice,
+      basePrice: this.product.price,
       imageUrl: this.product.imageUrl,
       city: this.product.city,
       transactionType: this.product.transactionType === 'Sale' ? 'מכירה' : 
@@ -318,5 +320,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
       case 'VACATION': return '3%';
       default: return '2%';
     }
+  }
+
+  isOwner(): boolean {
+    const currentUser = this.userService.getCurrentUser();
+    if (!currentUser || !this.product) return false;
+    return this.product.ownerId === currentUser.userId;
   }
 }

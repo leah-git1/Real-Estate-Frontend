@@ -1,19 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
 .luxury-header {
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
   z-index: 1000;
   font-family: 'Montserrat', sans-serif;
+  border-bottom: 1px solid rgba(26, 35, 126, 0.08);
 }
 
 .header-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 5rem;
+  padding: 1rem 5rem;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -22,61 +23,70 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .logo-icon {
-  font-size: 2rem;
-  color: #1a237e;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #1a237e, #3949ab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .logo-text {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a237e;
+  background: linear-gradient(135deg, #1a237e, #3949ab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-decoration: none;
   letter-spacing: -0.5px;
-  transition: color 0.3s ease;
-  
-  &:hover {
-    color: #3949ab;
-  }
+  transition: all 0.3s ease;
 }
 
 .nav-center {
   display: flex;
-  gap: 3.5rem;
+  gap: 3rem;
   flex: 1;
   justify-content: center;
   
   > a {
     color: #263238;
     text-decoration: none;
-    font-weight: 500;
-    font-size: 1.05rem;
+    font-weight: 600;
+    font-size: 1rem;
     transition: all 0.3s ease;
     position: relative;
-    padding: 0.5rem 0;
+    padding: 0.75rem 1rem;
     letter-spacing: 0.3px;
+    border-radius: 8px;
     
     &::after {
       content: '';
       position: absolute;
-      bottom: -2px;
+      bottom: 5px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
-      height: 3px;
+      height: 2px;
       background: linear-gradient(90deg, #1a237e, #3949ab);
       transition: width 0.3s ease;
       border-radius: 2px;
     }
     
     &:hover::after, &.active::after {
-      width: 100%;
+      width: 60%;
     }
     
     &:hover, &.active {
       color: #1a237e;
+      background: rgba(26, 35, 126, 0.05);
     }
   }
 }
@@ -197,23 +207,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: #f5f5f5;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f5f5f5, #e9ecef);
   color: #263238;
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   
   i {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
   
   &:hover {
-    background: #1a237e;
+    background: linear-gradient(135deg, #1a237e, #3949ab);
     color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(26, 35, 126, 0.3);
   }
 }
 

@@ -34,10 +34,12 @@ export class ProductListComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
+      this.currentFilters = {};
       if (params['categoryIds']) {
         const categoryId = +params['categoryIds'];
         this.currentFilters.categoryIds = [categoryId];
       }
+      this.currentPage = 1;
       this.loadProducts();
     });
   }

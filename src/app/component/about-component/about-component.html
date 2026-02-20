@@ -182,8 +182,10 @@
       <h2 class="cta-title">יש לכם שאלות?</h2>
       <p class="cta-subtitle">אנחנו כאן כדי לעזור! צרו קשר ונשמח לענות על כל שאלה</p>
       <div class="cta-buttons">
+        <button pButton label="צור קשר" icon="pi pi-envelope" 
+                class="p-button-lg cta-button" routerLink="/contact"></button>
         <button pButton label="צפה בנכסים" icon="pi pi-search" 
-                class="p-button-lg cta-button" (click)="goToProducts()"></button>
+                class="p-button-lg p-button-outlined cta-button-outline" (click)="goToProducts()"></button>
         <button pButton label="פרסם נכס" icon="pi pi-plus" 
                 class="p-button-lg p-button-outlined cta-button-outline" (click)="goToAddProduct()"></button>
       </div>

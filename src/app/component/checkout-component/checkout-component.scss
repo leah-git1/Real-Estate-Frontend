@@ -1,0 +1,23 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.field-radiobutton {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: var(--surface-100) !important;
+  }
+}
+
+.sticky {
+  position: sticky;
+}
+
+::ng-deep {
+  .p-dialog-header {
+    padding-bottom: 0 !important;
+  }
+}

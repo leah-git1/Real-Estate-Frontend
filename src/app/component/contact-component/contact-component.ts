@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ContactService } from '../../services/contact-service';
 
 @Component({
   selector: 'app-contact',
@@ -31,20 +32,31 @@ export class ContactComponent {
     message: ''
   };
 
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private contactService: ContactService
+  ) {}
 
   onSubmit() {
     if (this.isFormValid()) {
-      // כאן תוכלי להוסיף שליחה לשרת בעתיד
-      console.log('Contact form submitted:', this.contactForm);
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'הפנייה נשלחה בהצלחה',
-        detail: 'ניצור איתך קשר בהקדם האפשרי'
+      this.contactService.sendMessage(this.contactForm).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'הפנייה נשלחה בהצלחה',
+            detail: 'ניצור איתך קשר בהקדם האפשרי'
+          });
+          this.resetForm();
+        },
+        error: (err) => {
+          console.error('Error sending message:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'שגיאה',
+            detail: 'שגיאה בשליחת הפנייה'
+          });
+        }
       });
-      
-      this.resetForm();
     } else {
       this.messageService.add({
         severity: 'error',

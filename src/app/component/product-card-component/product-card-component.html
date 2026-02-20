@@ -50,7 +50,7 @@
 </div>
 
 <p-dialog [(visible)]="showDetailsDialog" [modal]="true" [style]="{width: '800px'}" 
-          [maximizable]="true" (onHide)="onDialogHide()">
+          [maximizable]="true" (onHide)="onDialogHide()" *ngIf="showDetailsDialog">
   <ng-template pTemplate="header">
     <h3>{{ productDetails?.title }}</h3>
   </ng-template>
@@ -95,15 +95,29 @@
 
     <div class="border-top-1 border-200 pt-3">
       <h4 class="mb-3">בחר תאריכים</h4>
-      <p-datepicker [(ngModel)]="selectedDates" selectionMode="range" [inline]="true" 
-                    [minDate]="minDate" dateFormat="dd/mm/yy" class="w-full"></p-datepicker>
+      <p-datepicker [(ngModel)]="selectedDates" 
+                    selectionMode="range" 
+                    [inline]="true" 
+                    [minDate]="minDate" 
+                    [disabledDates]="disabledDates"
+                    dateFormat="dd/mm/yy" 
+                    class="w-full"
+                    (onMonthChange)="onMonthChange($event)"
+                    (ngModelChange)="onDateChange($event)"></p-datepicker>
       
-      <div *ngIf="selectedDates && selectedDates[0] && selectedDates[1]" 
-           class="mt-3 p-3 bg-green-50 border-round">
-        <p class="text-green-700 font-semibold m-0">
-          <i class="pi pi-check-circle mr-2"></i>
-          תאריכים נבחרו: {{ selectedDates[0] | date:'dd/MM/yyyy' }} - {{ selectedDates[1] | date:'dd/MM/yyyy' }}
-        </p>
+      <div *ngIf="disabledDates.length > 0" class="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm">
+        <span class="text-red-600 font-semibold">⚠️ תאריכים תפוסים: </span>
+        <span class="text-red-700">
+          <span *ngFor="let date of disabledDates; let i = index">
+            {{ date.getDate() }}/{{ date.getMonth() + 1 }}<span *ngIf="i < disabledDates.length - 1">, </span>
+          </span>
+        </span>
+      </div>
+      
+      <div *ngIf="availabilityMessage" 
+           [ngClass]="{'text-red-500': !isRangeAvailable, 'text-green-500': isRangeAvailable}"
+           class="mt-2 text-sm font-semibold">
+        {{ availabilityMessage }}
       </div>
     </div>
   </div>
@@ -113,7 +127,7 @@
             class="p-button-text"></button>
     <button pButton label="הוסף לסל" icon="pi pi-shopping-cart" 
             (click)="addToCartWithDates()" 
-            [disabled]="!selectedDates || !selectedDates[0] || !selectedDates[1]" 
+            [disabled]="!selectedDates || !selectedDates[0] || !selectedDates[1] || !isRangeAvailable" 
             class="p-button-success"></button>
   </ng-template>
 </p-dialog>

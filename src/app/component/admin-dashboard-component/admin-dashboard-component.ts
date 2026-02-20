@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AdminService } from '../../services/admin-service';
 import { AdminStatisticsModel } from '../../models/admin/admin-model';
@@ -14,12 +16,13 @@ import { UserProfileDTOModel } from '../../models/user/user-model';
 import { ProductModel } from '../../models/product/product-model';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
+import { ContactService } from '../../services/contact-service';
 import { ProductDetailsComponent } from '../product-details-component/product-details-component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, ProductDetailsComponent],
+  imports: [CommonModule, FormsModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, SelectModule, ProductDetailsComponent],
   providers: [ConfirmationService, MessageService],
   templateUrl: './admin-dashboard-component.html',
   styleUrl: './admin-dashboard-component.scss'
@@ -37,11 +40,30 @@ export class AdminDashboardComponent implements OnInit {
   selectedUser: any = null;
   selectedProductId: number | null = null;
   selectedOrder: any = null;
+  
+  contactMessages: any[] = [];
+  displayMessageDialog = false;
+  selectedMessage: any = null;
+  
+  messageStatusOptions = [
+    { label: 'חדש', value: 'New' },
+    { label: 'בטיפול', value: 'InProgress' },
+    { label: 'טופל', value: 'Resolved' }
+  ];
+  
+  statusOptions = [
+    { label: 'התקבל', value: 'Pending' },
+    { label: 'אושר', value: 'Confirmed' },
+    { label: 'בטיפול', value: 'Processing' },
+    { label: 'הסתיים', value: 'Delivered' },
+    { label: 'בוטל', value: 'Cancelled' }
+  ];
 
   constructor(
     private adminService: AdminService,
     private userService: UserService,
     private orderService: OrderService,
+    private contactService: ContactService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -88,6 +110,14 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading orders:', err)
+    });
+    
+    this.contactService.getAllMessages().subscribe({
+      next: (data) => {
+        this.contactMessages = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading messages:', err)
     });
   }
 
@@ -150,7 +180,7 @@ export class AdminDashboardComponent implements OnInit {
       acceptLabel: 'כן',
       rejectLabel: 'לא',
       accept: () => {
-        this.adminService.deleteOrder(orderId).subscribe({
+        this.orderService.deleteOrder(orderId).subscribe({
           next: () => {
             this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'ההזמנה נמחקה בהצלחה' });
             this.loadData();
@@ -162,6 +192,67 @@ export class AdminDashboardComponent implements OnInit {
         });
       }
     });
+  }
+  
+  updateOrderStatus(order: any, newStatus: string): void {
+    this.orderService.updateOrderStatus(order.orderId, { status: newStatus }).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס ההזמנה עודכן' });
+        this.loadData();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });
+        console.error('Error updating order status:', err);
+      }
+    });
+  }
+  
+  getStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    switch(status?.toLowerCase()) {
+      case 'pending': return 'warn';
+      case 'confirmed': return 'info';
+      case 'processing': return 'info';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      default: return 'secondary';
+    }
+  }
+  
+  calculateCommission(order: any): number {
+    if (!order.orderItems || order.orderItems.length === 0) return 0;
+    
+    let commission = 0;
+    order.orderItems.forEach((item: any) => {
+      const transactionType = item.product?.transactionType;
+      const price = item.priceAtPurchase || 0;
+      
+      if (transactionType === 'Vacation') {
+        commission += price * 0.03;
+      } else if (transactionType === 'Rent') {
+        const months = this.calculateMonths(item.startDate, item.endDate);
+        if (months > 0) {
+          commission += price / (months + 1);
+        }
+      }
+    });
+    return commission;
+  }
+  
+  calculateMonths(startDate: string, endDate: string): number {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+  }
+  
+  getTotalCommissions(): number {
+    const total = this.orders.reduce((sum, order) => {
+      const commission = this.calculateCommission(order);
+      console.log(`Order ${order.orderId} commission:`, commission);
+      return sum + commission;
+    }, 0);
+    console.log('Total commissions:', total);
+    return total;
   }
 
   viewUserDetails(userId: number): void {
@@ -206,5 +297,54 @@ export class AdminDashboardComponent implements OnInit {
         console.error('Error loading order details:', err);
       }
     });
+  }
+  
+  viewMessageDetails(message: any): void {
+    this.selectedMessage = message;
+    this.displayMessageDialog = true;
+  }
+  
+  updateMessageStatus(message: any, newStatus: string): void {
+    this.contactService.updateMessageStatus(message.id, newStatus).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס הפנייה עודכן' });
+        this.loadData();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });
+        console.error('Error updating message status:', err);
+      }
+    });
+  }
+  
+  deleteMessage(messageId: number): void {
+    this.confirmationService.confirm({
+      message: 'האם אתה בטוח שברצונך למחוק פנייה זו?',
+      header: 'אישור מחיקה',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'כן',
+      rejectLabel: 'לא',
+      accept: () => {
+        this.contactService.deleteMessage(messageId).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הפנייה נמחקה בהצלחה' });
+            this.loadData();
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה במחיקת הפנייה' });
+            console.error('Error deleting message:', err);
+          }
+        });
+      }
+    });
+  }
+  
+  getMessageStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    switch(status?.toLowerCase()) {
+      case 'new': return 'info';
+      case 'inprogress': return 'warn';
+      case 'resolved': return 'success';
+      default: return 'secondary';
+    }
   }
 }
