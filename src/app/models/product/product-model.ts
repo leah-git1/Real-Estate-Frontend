@@ -15,6 +15,7 @@ export class ProductModel {
   rooms?: number;
   beds?: number;
   TransactionType: string = ''; // "מכירה", "השכרה", "נופש"
+  rating?: number; // דירוג 1-5 כוכבים
   // רשימת תמונות נוספות מה-Entity
   productImages: ProductImageModel[] = [];
 }

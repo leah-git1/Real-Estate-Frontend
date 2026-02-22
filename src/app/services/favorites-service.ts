@@ -55,6 +55,15 @@ export class FavoritesService {
     this.favoritesSubject.next([]);
   }
 
+  updateRating(productId: number, rating: number): void {
+    const favorites = this.loadFavorites();
+    const product = favorites.find(p => p.productId === productId);
+    if (product) {
+      product.rating = rating;
+      this.saveFavorites(favorites);
+    }
+  }
+
   getFavoritesVisible() {
     return this.favoritesVisibleSubject.asObservable();
   }

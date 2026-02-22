@@ -205,3 +205,28 @@
             [disabled]="!contactForm.name || !contactForm.phone || !contactForm.email"></button>
   </ng-template>
 </p-dialog>
+
+<p-dialog [(visible)]="showRatingDialog" [modal]="true" [style]="{width: '400px'}" header="דרג את הנכס">
+  <div class="text-center p-4">
+    <h3 class="mb-3">כמה אהבת את הנכס?</h3>
+    <div class="flex justify-content-center gap-2 mb-4">
+      <i *ngFor="let star of [1,2,3,4,5]" 
+         class="pi pi-star-fill cursor-pointer"
+         [style.color]="star <= (hoverRating || selectedRating) ? '#fbbf24' : '#d1d5db'"
+         [style.font-size]="'3rem'"
+         (click)="setRating(star)"
+         (mouseenter)="setHoverRating(star)"
+         (mouseleave)="setHoverRating(0)"></i>
+    </div>
+    <p class="text-600" *ngIf="selectedRating > 0">בחרת: {{ selectedRating }} כוכבים</p>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="showRatingDialog=false" class="p-button-text"></button>
+    <button pButton label="הוסף למועדפים" icon="pi pi-heart" 
+            (click)="submitRating()" 
+            [disabled]="selectedRating === 0"
+            class="p-button-success"></button>
+  </ng-template>
+</p-dialog>

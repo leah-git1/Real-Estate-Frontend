@@ -25,6 +25,9 @@ export class ProductCardComponent implements OnInit, OnChanges {
   @Input() product!: ProductSummaryDTOModel;
   imageUrl: string = '';
   showDetailsDialog: boolean = false;
+  showRatingDialog: boolean = false;
+  selectedRating: number = 0;
+  hoverRating: number = 0;
   productDetails: any = null;
   selectedDates: Date[] | undefined;
   minDate: Date = new Date();
@@ -319,24 +322,45 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   addToFavorites(product: any) {
+    this.selectedRating = 0;
+    this.hoverRating = 0;
+    this.showRatingDialog = true;
+  }
+
+  submitRating() {
+    if (this.selectedRating === 0) {
+      return;
+    }
+    
     const wasAdded = this.favoritesService.addToFavorites({
-      productId: product.productId,
-      title: product.title,
-      price: product.price,
+      productId: this.product.productId,
+      title: this.product.title,
+      price: this.product.price,
       imageUrl: this.imageUrl,
-      city: product.city,
-      TransactionType: product.transactionType,
+      city: this.product.city,
+      TransactionType: this.product.transactionType,
       description: '',
-      categoryId: product.categoryId,
-      ownerId: product.ownerId,
+      categoryId: this.product.categoryId,
+      ownerId: this.product.ownerId,
       isAvailable: true,
-      productImages: []
+      productImages: [],
+      rating: this.selectedRating
     });
+    
+    this.showRatingDialog = false;
     
     if (wasAdded) {
       this.favoritesService.showFavorites();
     } else {
       alert('המוצר כבר נמצא במועדפים!');
     }
+  }
+
+  setRating(rating: number) {
+    this.selectedRating = rating;
+  }
+
+  setHoverRating(rating: number) {
+    this.hoverRating = rating;
   }
 }

@@ -40,6 +40,10 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
   returnUrl: string = '/products';
   returnTab: number = 0;
   
+  showRatingDialog: boolean = false;
+  selectedRating: number = 0;
+  hoverRating: number = 0;
+  
   showContactDialog: boolean = false;
   ownerDetails: any = null;
   contactForm = {
@@ -284,14 +288,37 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
       this.favoritesService.removeFromFavorites(this.product.productId);
       alert('המוצר הוסר מהמועדפים');
     } else {
-      const wasAdded = this.favoritesService.addToFavorites(this.product);
-      if (wasAdded) {
-        this.favoritesService.showFavorites();
-      } else {
-        alert('המוצר כבר נמצא במועדפים!');
-      }
+      this.selectedRating = 0;
+      this.hoverRating = 0;
+      this.showRatingDialog = true;
     }
     this.cdr.detectChanges();
+  }
+
+  submitRating() {
+    if (this.selectedRating === 0 || !this.product) {
+      return;
+    }
+    
+    const productWithRating = { ...this.product, rating: this.selectedRating };
+    const wasAdded = this.favoritesService.addToFavorites(productWithRating);
+    
+    this.showRatingDialog = false;
+    
+    if (wasAdded) {
+      this.favoritesService.showFavorites();
+    } else {
+      alert('המוצר כבר נמצא במועדפים!');
+    }
+    this.cdr.detectChanges();
+  }
+
+  setRating(rating: number) {
+    this.selectedRating = rating;
+  }
+
+  setHoverRating(rating: number) {
+    this.hoverRating = rating;
   }
 
   canAddToCart(): boolean {

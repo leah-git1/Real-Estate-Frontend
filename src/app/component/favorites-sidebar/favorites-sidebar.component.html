@@ -31,6 +31,16 @@
               'p-tag-warning': item.TransactionType === 'Vacation'
             }">{{ getTransactionTypeLabel(item.TransactionType) }}</span>
           </p>
+          <div class="mb-1" *ngIf="item.rating">
+            <span *ngFor="let star of [1,2,3,4,5]" 
+                  [style.color]="star <= item.rating ? '#fbbf24' : '#d1d5db'"
+                  style="font-size: 0.9rem;">★</span>
+            <button pButton icon="pi pi-pencil" 
+                    class="p-button-text p-button-sm"
+                    style="padding: 0.25rem; height: auto;"
+                    (click)="editRating(item)"
+                    pTooltip="עדכן דירוג"></button>
+          </div>
           <p class="text-primary font-bold m-0 mb-2">₪{{ item.price | number }}</p>
           
           <div class="flex gap-1">
@@ -56,3 +66,28 @@
     </div>
   </div>
 </p-drawer>
+
+<p-dialog [(visible)]="showEditRatingDialog" [modal]="true" [style]="{width: '400px'}" header="עדכן דירוג">
+  <div class="text-center p-4">
+    <h3 class="mb-3">עדכן את הדירוג של {{ editingProduct?.title }}</h3>
+    <div class="flex justify-content-center gap-2 mb-4">
+      <i *ngFor="let star of [1,2,3,4,5]" 
+         class="pi pi-star-fill cursor-pointer"
+         [style.color]="star <= (hoverRating || selectedRating) ? '#fbbf24' : '#d1d5db'"
+         [style.font-size]="'3rem'"
+         (click)="setRating(star)"
+         (mouseenter)="setHoverRating(star)"
+         (mouseleave)="setHoverRating(0)"></i>
+    </div>
+    <p class="text-600" *ngIf="selectedRating > 0">דירוג חדש: {{ selectedRating }} כוכבים</p>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="showEditRatingDialog=false" class="p-button-text"></button>
+    <button pButton label="שמור" icon="pi pi-check" 
+            (click)="saveRating()" 
+            [disabled]="selectedRating === 0"
+            class="p-button-success"></button>
+  </ng-template>
+</p-dialog>
