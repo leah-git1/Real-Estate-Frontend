@@ -37,7 +37,13 @@
           <div class="flex gap-2 mt-auto">
             <button pButton label="צפה בפרטים" icon="pi pi-eye" 
                     [routerLink]="['/product-details', product.productId]" 
+                    [queryParams]="{returnTo: 'favorites'}"
                     class="flex-1"></button>
+            <button pButton icon="pi pi-phone" 
+                    severity="success"
+                    [text]="true"
+                    (click)="openContactDialog(product)"
+                    pTooltip="יצירת קשר"></button>
             <button pButton icon="pi pi-trash" 
                     severity="danger"
                     [text]="true"
@@ -74,3 +80,52 @@
             class="p-button-success"></button>
   </ng-template>
 </p-dialog>
+
+<p-dialog [(visible)]="showContactDialog" [modal]="true" [style]="{width: '550px'}" header="יצירת קשר">
+  <div class="p-3" *ngIf="contactProduct">
+    <div class="mb-3 p-3 bg-blue-50 border-round">
+      <div class="flex align-items-center gap-3 mb-2">
+        <i class="pi pi-user text-primary" style="font-size: 1.5rem;"></i>
+        <div>
+          <p class="font-bold text-lg m-0">בעל הנכס: {{ ownerDetails?.fullName || 'טוען...' }}</p>
+          <p class="text-sm text-600 m-0">נכס: {{ contactProduct.title }}</p>
+        </div>
+      </div>
+      <div class="border-top-1 border-blue-200 pt-2 mt-2">
+        <p class="text-sm m-0"><i class="pi pi-phone ml-2"></i><strong>ליצירת קשר:</strong> 1-800-{{ ownerDetails?.phone || 'טוען...' }}</p>
+      </div>
+    </div>
+    
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">שם מלא *</label>
+      <input pInputText [(ngModel)]="contactForm.name" class="w-full" required />
+    </div>
+    
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">טלפון *</label>
+      <input pInputText [(ngModel)]="contactForm.phone" class="w-full" required />
+    </div>
+    
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">אימייל *</label>
+      <input pInputText type="email" [(ngModel)]="contactForm.email" class="w-full" required />
+    </div>
+    
+    <div class="field mb-2">
+      <label class="block mb-2 font-semibold">הודעה</label>
+      <textarea [(ngModel)]="contactForm.message" rows="2" class="w-full p-2 border-1 border-300 border-round" 
+                placeholder="שתף פרטים נוספים..."></textarea>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="showContactDialog=false" class="p-button-text"></button>
+    <button pButton label="שלח" icon="pi pi-send" 
+            (click)="submitContact()" 
+            [disabled]="!contactForm.name || !contactForm.phone || !contactForm.email"
+            class="p-button-success"></button>
+  </ng-template>
+</p-dialog>
+
+<p-toast [dir]="'rtl'"></p-toast>

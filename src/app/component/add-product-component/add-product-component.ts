@@ -168,6 +168,7 @@ export class AddProductComponent implements OnInit {
     this.productService.createProduct(this.product).subscribe({
       next: (response) => {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'המוצר פורסם בהצלחה!' });
+        this.resetForm();
         setTimeout(() => {
           this.router.navigate(['/profile'], { queryParams: { tab: 2 } });
         }, 1500);
@@ -178,6 +179,14 @@ export class AddProductComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בפרסום המוצר' });
       }
     });
+  }
+
+  resetForm() {
+    this.product = new ProductCreateDTOModel();
+    this.mainImageFile = null;
+    this.mainImagePreview = null;
+    this.additionalImagesFiles = [];
+    this.additionalImagesPreviews = [];
   }
 
   getSellerCommission(): number {

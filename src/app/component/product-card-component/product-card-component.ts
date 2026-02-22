@@ -1,12 +1,14 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { Router } from '@angular/router';
 import { ProductSummaryDTOModel } from '../../models/product/product-model';
 import { UserService } from '../../services/user-service';
 import { CartService } from '../../services/cart-service';
 import { FavoritesService } from '../../services/favorites-service';
 import { OrderService } from '../../services/order-service';
+import { PropertyInquiryService } from '../../services/property-inquiry-service';
 import { CartItem } from '../../models/cart/cart-item.model';
 import { DialogModule } from 'primeng/dialog';
 import { ProductService } from '../../services/product-service';
@@ -14,11 +16,12 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, DatePickerModule, FormsModule],
+  imports: [CommonModule, ButtonModule, TooltipModule, DialogModule, DatePickerModule, FormsModule, InputTextModule],
   templateUrl: './product-card-component.html',
   styleUrl: './product-card-component.scss'
 })
@@ -27,6 +30,14 @@ export class ProductCardComponent implements OnInit, OnChanges {
   imageUrl: string = '';
   showDetailsDialog: boolean = false;
   showRatingDialog: boolean = false;
+  showContactDialog: boolean = false;
+  ownerDetails: any = null;
+  contactForm = {
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  };
   selectedRating: number = 0;
   hoverRating: number = 0;
   productDetails: any = null;
@@ -45,6 +56,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
     private favoritesService: FavoritesService,
     private productService: ProductService,
     private orderService: OrderService,
+    private propertyInquiryService: PropertyInquiryService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService
   ) {}
@@ -71,23 +83,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
     return !!(currentUser && this.product.ownerId === currentUser.userId);
   }
 
-  // פונקציה להוספה לסל
   addToCart(product: any) {
-    if (product.TransactionType === 'מכירה') {
-      // מוצר למכירה - הוסף ישירות לסל
-      const cartItem: CartItem = {
-        productId: product.productId,
-        title: product.title,
-        price: calculateTotalPrice(product.price, 'Sale'),
-        imageUrl: this.imageUrl,
-        city: product.city,
-        transactionType: product.TransactionType,
-        quantity: 1
-      };
-      this.cartService.addToCart(cartItem);
-    } else {
-      // מוצר להשכרה/נופש - טען פרטים ופתח דיאלוג
+    if (this.isVacationType()) {
       this.loadProductDetails();
+    } else {
+      this.openContactDialog();
     }
   }
 
@@ -262,8 +262,16 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   // פונקציית המעבר לדף פרטים נוספים
   viewDetails(productId: number) {
-    console.log('מעבר לדף פרטים עבור מוצר מספר:', productId);
-    this.router.navigate(['/product-details', productId]);
+    const currentUrl = this.router.url;
+    let returnTo = '/products';
+    
+    if (currentUrl.includes('/favorites')) {
+      returnTo = '/favorites';
+    } else if (currentUrl.includes('/profile')) {
+      returnTo = '/profile';
+    }
+    
+    this.router.navigate(['/product-details', productId], { queryParams: { returnTo } });
   }
 
   getFullImageUrl(imageUrl: string): string {
@@ -305,10 +313,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   getTransactionTypeLabel(type: string): string {
-    switch(type) {
-      case 'Sale': return 'מכירה';
-      case 'Rent': return 'השכרה';
-      case 'Vacation': return 'נופש';
+    if (!type) return '';
+    switch(type.toLowerCase()) {
+      case 'sale': return 'מכירה';
+      case 'rent': return 'השכרה';
+      case 'vacation': return 'נופש';
       default: return type;
     }
   }
@@ -318,7 +327,10 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   isVacationType(): boolean {
-    return this.product?.TransactionType === 'Vacation' || this.product?.TransactionType === 'נופש';
+    const product: any = this.product;
+    const type = product?.TransactionType?.toLowerCase() || product?.transactionType?.toLowerCase();
+    const result = type === 'vacation' || type === 'נופש';
+    return result;
   }
 
   addToFavorites(product: any) {
@@ -366,5 +378,65 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   setHoverRating(rating: number) {
     this.hoverRating = rating;
+  }
+
+  openContactDialog() {
+    const currentUser = this.userService.getCurrentUser();
+    if (currentUser) {
+      this.contactForm.name = currentUser.fullName || '';
+      this.contactForm.phone = currentUser.phone || '';
+      this.contactForm.email = currentUser.email || '';
+    }
+    
+    if (this.product?.ownerId) {
+      this.userService.getUserById(this.product.ownerId).subscribe({
+        next: (owner) => {
+          this.ownerDetails = owner;
+          this.showContactDialog = true;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading owner details:', err);
+          this.showContactDialog = true;
+        }
+      });
+    } else {
+      this.showContactDialog = true;
+    }
+  }
+
+  submitContactForm() {
+    const currentUser = this.userService.getCurrentUser();
+    if (!currentUser) {
+      alert('יש להתחבר כדי ליצור קשר');
+      return;
+    }
+
+    if (!this.product.ownerId) {
+      alert('שגיאה: לא נמצא בעל הנכס');
+      return;
+    }
+
+    const inquiry = {
+      productId: this.product.productId,
+      userId: currentUser.userId,
+      ownerId: this.product.ownerId,
+      name: this.contactForm.name,
+      phone: this.contactForm.phone,
+      email: this.contactForm.email,
+      message: this.contactForm.message
+    };
+
+    this.propertyInquiryService.createInquiry(inquiry).subscribe({
+      next: () => {
+        alert('הפנייה נשלחה בהצלחה!');
+        this.showContactDialog = false;
+        this.contactForm = { name: '', phone: '', email: '', message: '' };
+      },
+      error: (err) => {
+        console.error('Error sending inquiry:', err);
+        alert('שגיאה בשליחת הפנייה');
+      }
+    });
   }
 }

@@ -7,6 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { MessageService } from 'primeng/api';
 import { ProductService } from '../../services/product-service';
 import { CategoryService } from '../../services/category-service';
 import { ProductUpdateDTOModel } from '../../models/product/product-model';
@@ -41,7 +42,8 @@ export class EditProductComponent implements OnInit {
     private productService: ProductService,
     private categoryService: CategoryService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
@@ -112,7 +114,11 @@ export class EditProductComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error updating product:', err);
-        alert('שגיאה בעדכון המוצר');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'שגיאה בעדכון המוצר'
+        });
       }
     });
   }
@@ -122,8 +128,12 @@ export class EditProductComponent implements OnInit {
       if (this.additionalImagesFiles.length > 0) {
         this.uploadAdditionalImages();
       } else {
-        alert('המוצר עודכן בהצלחה!');
-        this.navigateBack();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'הצלחה',
+          detail: 'המוצר עודכן בהצלחה!'
+        });
+        setTimeout(() => this.navigateBack(), 1500);
       }
       return;
     }
@@ -136,12 +146,20 @@ export class EditProductComponent implements OnInit {
       if (this.additionalImagesFiles.length > 0) {
         this.uploadAdditionalImages();
       } else {
-        alert('המוצר עודכן בהצלחה!');
-        this.navigateBack();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'הצלחה',
+          detail: 'המוצר עודכן בהצלחה!'
+        });
+        setTimeout(() => this.navigateBack(), 1500);
       }
     }).catch(err => {
       console.error('Error deleting images:', err);
-      alert('שגיאה במחיקת תמונות');
+      this.messageService.add({
+        severity: 'error',
+        summary: 'שגיאה',
+        detail: 'שגיאה במחיקת תמונות'
+      });
     });
   }
 
@@ -155,7 +173,11 @@ export class EditProductComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error uploading main image:', err);
-        alert('שגיאה בהעלאת התמונה');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'שגיאה בהעלאת התמונה'
+        });
       }
     });
   }
@@ -175,11 +197,19 @@ export class EditProductComponent implements OnInit {
       });
       return Promise.all(addImagePromises);
     }).then(() => {
-      alert('המוצר עודכן בהצלחה!');
-      this.navigateBack();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'הצלחה',
+        detail: 'המוצר עודכן בהצלחה!'
+      });
+      setTimeout(() => this.navigateBack(), 1500);
     }).catch(err => {
       console.error('Error uploading additional images:', err);
-      alert('שגיאה בהעלאת תמונות נוספות');
+      this.messageService.add({
+        severity: 'error',
+        summary: 'שגיאה',
+        detail: 'שגיאה בהעלאת תמונות נוספות'
+      });
     });
   }
 

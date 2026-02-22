@@ -3,407 +3,329 @@
     <h1><i class="pi pi-shield"></i> לוח בקרה - מנהל</h1>
   </div>
 
-  <div class="statistics-grid">
-    <p-card class="stat-card users-card">
-      <div class="stat-content">
-        <i class="pi pi-users stat-icon"></i>
-        <div class="stat-details">
-          <h3>{{ statistics.totalUsers }}</h3>
-          <p>משתמשים</p>
+  <div class="tabs-container">
+    <div class="tabs-header">
+      <button class="tab-button" [class.active]="activeTab === 0" (click)="setActiveTab(0)">
+        <i class="pi pi-chart-line"></i> סטטיסטיקות
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 1" (click)="setActiveTab(1)">
+        <i class="pi pi-users"></i> משתמשים
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 2" (click)="setActiveTab(2)">
+        <i class="pi pi-box"></i> נכסים
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 3" (click)="setActiveTab(3)">
+        <i class="pi pi-shopping-cart"></i> הזמנות
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 4" (click)="setActiveTab(4)">
+        <i class="pi pi-envelope"></i> פניות
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Tab 0: Statistics -->
+      <div *ngIf="activeTab === 0" class="statistics-tab">
+        <div class="statistics-grid">
+          <p-card class="stat-card users-card">
+            <div class="stat-content">
+              <i class="pi pi-users stat-icon"></i>
+              <div class="stat-details">
+                <h3>{{ statistics.totalUsers }}</h3>
+                <p>משתמשים</p>
+              </div>
+            </div>
+          </p-card>
+
+          <p-card class="stat-card products-card">
+            <div class="stat-content">
+              <i class="pi pi-box stat-icon"></i>
+              <div class="stat-details">
+                <h3>{{ statistics.totalProducts }}</h3>
+                <p>נכסים</p>
+              </div>
+            </div>
+          </p-card>
+
+          <p-card class="stat-card orders-card">
+            <div class="stat-content">
+              <i class="pi pi-shopping-cart stat-icon"></i>
+              <div class="stat-details">
+                <h3>{{ statistics.totalOrders }}</h3>
+                <p>הזמנות</p>
+              </div>
+            </div>
+          </p-card>
+          
+          <p-card class="stat-card revenue-card">
+            <div class="stat-content">
+              <i class="pi pi-dollar stat-icon"></i>
+              <div class="stat-details">
+                <h3>₪{{ getTotalCommissions() | number }}</h3>
+                <p>עמלות</p>
+              </div>
+            </div>
+          </p-card>
+        </div>
+
+        <div class="charts-grid">
+          <p-card class="chart-card">
+            <h3>התפלגות הזמנות לפי סטטוס</h3>
+            <p-chart type="doughnut" [data]="ordersChartData" [options]="chartOptions" [style]="{'height': '300px'}"></p-chart>
+          </p-card>
+
+          <p-card class="chart-card">
+            <h3>הכנסות לפי חודש</h3>
+            <p-chart type="line" [data]="revenueChartData" [options]="chartOptions" [style]="{'height': '300px'}"></p-chart>
+          </p-card>
+
+          <p-card class="chart-card">
+            <h3>התפלגות משתמשים</h3>
+            <p-chart type="pie" [data]="usersChartData" [options]="chartOptions" [style]="{'height': '300px'}"></p-chart>
+          </p-card>
         </div>
       </div>
-    </p-card>
 
-    <p-card class="stat-card products-card">
-      <div class="stat-content">
-        <i class="pi pi-box stat-icon"></i>
-        <div class="stat-details">
-          <h3>{{ statistics.totalProducts }}</h3>
-          <p>נכסים</p>
-        </div>
+      <!-- Tab 1: Users -->
+      <div *ngIf="activeTab === 1">
+        <p-card class="table-card">
+          <ng-template pTemplate="header">
+            <h2><i class="pi pi-users"></i> ניהול משתמשים ({{ users.length }})</h2>
+          </ng-template>
+          <p-table [value]="users" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>שם מלא</th>
+                <th>טלפון</th>
+                <th>כתובת</th>
+                <th>סטטוס</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+              <tr (click)="viewUserDetails(user.userId)" style="cursor: pointer;">
+                <td>{{ user.userId }}</td>
+                <td>{{ user.fullName }}</td>
+                <td>{{ user.phone }}</td>
+                <td>{{ user.address }}</td>
+                <td>
+                  <p-tag [value]="user.isAdmin ? 'מנהל' : 'משתמש'" [severity]="user.isAdmin ? 'success' : 'info'"></p-tag>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <p-button *ngIf="!user.isAdmin" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteUser(user.userId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
       </div>
-    </p-card>
 
-    <p-card class="stat-card orders-card">
-      <div class="stat-content">
-        <i class="pi pi-shopping-cart stat-icon"></i>
-        <div class="stat-details">
-          <h3>{{ statistics.totalOrders }}</h3>
-          <p>הזמנות</p>
-        </div>
+      <!-- Tab 2: Products -->
+      <div *ngIf="activeTab === 2">
+        <p-card class="table-card">
+          <ng-template pTemplate="header">
+            <h2><i class="pi pi-box"></i> ניהול נכסים ({{ products.length }})</h2>
+          </ng-template>
+          <p-table [value]="products" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>כותרת</th>
+                <th>מחיר</th>
+                <th>עיר</th>
+                <th>זמין</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-product>
+              <tr (click)="viewProductDetails(product.productId)" style="cursor: pointer;">
+                <td>{{ product.productId }}</td>
+                <td>{{ product.title }}</td>
+                <td>₪{{ product.price | number }}</td>
+                <td>{{ product.city }}</td>
+                <td>
+                  <p-tag [value]="product.isAvailable ? 'זמין' : 'לא זמין'" [severity]="product.isAvailable ? 'success' : 'danger'"></p-tag>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteProduct(product.productId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
       </div>
-    </p-card>
-  </div>
 
-  <p-card class="table-card">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-users"></i> ניהול משתמשים</h2>
-    </ng-template>
-    <p-table [value]="users" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>שם מלא</th>
-          <th>טלפון</th>
-          <th>כתובת</th>
-          <th>סטטוס</th>
-          <th>פעולות</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-user>
-        <tr (click)="viewUserDetails(user.userId)" style="cursor: pointer;">
-          <td>{{ user.userId }}</td>
-          <td>{{ user.fullName }}</td>
-          <td>{{ user.phone }}</td>
-          <td>{{ user.address }}</td>
-          <td>
-            <p-tag [value]="user.isAdmin ? 'מנהל' : 'משתמש'" [severity]="user.isAdmin ? 'success' : 'info'"></p-tag>
-          </td>
-          <td (click)="$event.stopPropagation()">
-            <p-button *ngIf="!user.isAdmin" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteUser(user.userId)"></p-button>
-            <span *ngIf="user.isAdmin" style="color: #999; font-size: 0.9rem;">לא ניתן למחוק</span>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
+      <!-- Tab 3: Orders -->
+      <div *ngIf="activeTab === 3">
+        <p-card class="table-card">
+          <ng-template pTemplate="header">
+            <h2><i class="pi pi-shopping-cart"></i> ניהול הזמנות ({{ orders.length }})</h2>
+          </ng-template>
+          <p-table [value]="orders" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>משתמש</th>
+                <th>תאריך</th>
+                <th>סכום</th>
+                <th>סטטוס</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-order>
+              <tr>
+                <td>{{ order.orderId }}</td>
+                <td>{{ order.userName }}</td>
+                <td>{{ order.orderDate | date:'dd/MM/yyyy' }}</td>
+                <td>₪{{ order.totalAmount | number }}</td>
+                <td>
+                  <p-select [options]="statusOptions" [(ngModel)]="order.status" 
+                            (onChange)="updateOrderStatus(order, $event.value)" [style]="{'width': '150px'}">
+                    <ng-template pTemplate="selectedItem">
+                      <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)"></p-tag>
+                    </ng-template>
+                  </p-select>
+                </td>
+                <td>
+                  <p-button icon="pi pi-eye" [text]="true" (onClick)="viewOrderDetails(order.orderId)"></p-button>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteOrder(order.orderId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </div>
 
-  <p-card class="table-card">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-box"></i> ניהול נכסים</h2>
-    </ng-template>
-    <p-table [value]="products" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>כותרת</th>
-          <th>מחיר</th>
-          <th>עיר</th>
-          <th>זמין</th>
-          <th>פעולות</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-product>
-        <tr (click)="viewProductDetails(product.productId)" style="cursor: pointer;">
-          <td>{{ product.productId }}</td>
-          <td>{{ product.title }}</td>
-          <td>{{ product.price | currency:'ILS':'symbol':'1.0-0' }}</td>
-          <td>{{ product.city }}</td>
-          <td>
-            <p-tag [value]="product.isAvailable ? 'זמין' : 'לא זמין'" [severity]="product.isAvailable ? 'success' : 'danger'"></p-tag>
-          </td>
-          <td (click)="$event.stopPropagation()">
-            <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteProduct(product.productId)"></p-button>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
+      <!-- Tab 4: Inquiries -->
+      <div *ngIf="activeTab === 4">
+        <p-card class="table-card mb-4">
+          <ng-template pTemplate="header">
+            <h2><i class="pi pi-envelope"></i> פניות נכסים ({{ propertyInquiries.length }})</h2>
+          </ng-template>
+          <p-table [value]="propertyInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>נכס</th>
+                <th>מאת</th>
+                <th>טלפון</th>
+                <th>תאריך</th>
+                <th>סטטוס</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-inquiry>
+              <tr>
+                <td>{{ inquiry.inquiryId }}</td>
+                <td>{{ inquiry.productTitle }}</td>
+                <td>{{ inquiry.userName }}</td>
+                <td>{{ inquiry.phone }}</td>
+                <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                            (onChange)="updateInquiryStatus(inquiry, $event.value)" [style]="{'width': '120px'}">
+                    <ng-template pTemplate="selectedItem">
+                      <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
+                    </ng-template>
+                  </p-select>
+                </td>
+                <td>
+                  <p-button icon="pi pi-eye" [text]="true" (onClick)="viewInquiryDetails(inquiry)"></p-button>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteInquiry(inquiry.inquiryId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
 
-  <p-card class="table-card">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-shopping-cart"></i> ניהול הזמנות</h2>
-    </ng-template>
-    <p-table [value]="orders" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>משתמש</th>
-          <th>תאריך</th>
-          <th>סכום</th>
-          <th>סטטוס</th>
-          <th>פרטים</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-order>
-        <tr>
-          <td>{{ order.orderId }}</td>
-          <td>
-            <div>
-              <div class="font-semibold">{{ order.userName }}</div>
-              <div class="text-sm text-600">ID: {{ order.userId }}</div>
-            </div>
-          </td>
-          <td>{{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td class="font-bold">₪{{ order.totalAmount | number }}</td>
-          <td>
-            <p-select [options]="statusOptions" [(ngModel)]="order.status" 
-                        (onChange)="updateOrderStatus(order, $event.value)"
-                        [appendTo]="'body'"
-                        [style]="{'width': '150px'}">
-              <ng-template pTemplate="selectedItem">
-                <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)"></p-tag>
-              </ng-template>
-              <ng-template let-option pTemplate="item">
-                <p-tag [value]="option.label" [severity]="getStatusSeverity(option.value)"></p-tag>
-              </ng-template>
-            </p-select>
-          </td>
-          <td>
-            <div class="order-actions">
-              <p-button icon="pi pi-eye" [text]="true" (onClick)="viewOrderDetails(order.orderId)" pTooltip="צפה"></p-button>
-              <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteOrder(order.orderId)" pTooltip="מחק"></p-button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-
-  <p-card class="table-card">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-envelope"></i> פניות נכסים</h2>
-    </ng-template>
-    <p-table [value]="propertyInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>נכס</th>
-          <th>מאת</th>
-          <th>אל</th>
-          <th>טלפון</th>
-          <th>תאריך</th>
-          <th>סטטוס</th>
-          <th>פעולות</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-inquiry>
-        <tr>
-          <td>{{ inquiry.inquiryId }}</td>
-          <td>{{ inquiry.productTitle }}</td>
-          <td>{{ inquiry.userName }}</td>
-          <td>{{ inquiry.ownerName }}</td>
-          <td>{{ inquiry.phone }}</td>
-          <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
-          <td>
-            <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
-                        (onChange)="updateInquiryStatus(inquiry, $event.value)"
-                        [appendTo]="'body'"
-                        [style]="{'width': '120px'}">
-              <ng-template pTemplate="selectedItem">
-                <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
-              </ng-template>
-              <ng-template let-option pTemplate="item">
-                <p-tag [value]="option.label" [severity]="getMessageStatusSeverity(option.value)"></p-tag>
-              </ng-template>
-            </p-select>
-          </td>
-          <td>
-            <div class="order-actions">
-              <p-button icon="pi pi-eye" [text]="true" (onClick)="viewInquiryDetails(inquiry)" pTooltip="צפה"></p-button>
-              <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteInquiry(inquiry.inquiryId)" pTooltip="מחק"></p-button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-
-  <p-card class="table-card">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-comment"></i> פניות למנהל</h2>
-    </ng-template>
-    <p-table [value]="adminInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>שם</th>
-          <th>אימייל</th>
-          <th>טלפון</th>
-          <th>נושא</th>
-          <th>תאריך</th>
-          <th>סטטוס</th>
-          <th>פעולות</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-inquiry>
-        <tr>
-          <td>{{ inquiry.inquiryId }}</td>
-          <td>{{ inquiry.name }}</td>
-          <td>{{ inquiry.email }}</td>
-          <td>{{ inquiry.phone }}</td>
-          <td>{{ inquiry.subject }}</td>
-          <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
-          <td>
-            <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
-                        (onChange)="updateAdminInquiryStatus(inquiry, $event.value)"
-                        [appendTo]="'body'"
-                        [style]="{'width': '120px'}">
-              <ng-template pTemplate="selectedItem">
-                <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
-              </ng-template>
-              <ng-template let-option pTemplate="item">
-                <p-tag [value]="option.label" [severity]="getMessageStatusSeverity(option.value)"></p-tag>
-              </ng-template>
-            </p-select>
-          </td>
-          <td>
-            <div class="order-actions">
-              <p-button icon="pi pi-eye" [text]="true" (onClick)="viewAdminInquiryDetails(inquiry)" pTooltip="צפה"></p-button>
-              <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteAdminInquiry(inquiry.inquiryId)" pTooltip="מחק"></p-button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-
-<!-- Dialogs remain the same -->
-<p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{width: '50vw'}" header="פרטי משתמש">
-  <div *ngIf="selectedUser" class="details-dialog">
-    <div class="detail-row">
-      <strong>מזהה:</strong>
-      <span>{{ selectedUser.userId }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>שם מלא:</strong>
-      <span>{{ selectedUser.fullName }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>אימייל:</strong>
-      <span>{{ selectedUser.email }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>טלפון:</strong>
-      <span>{{ selectedUser.phone }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>כתובת:</strong>
-      <span>{{ selectedUser.address }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סטטוס:</strong>
-      <p-tag [value]="selectedUser.isAdmin ? 'מנהל' : 'משתמש'" [severity]="selectedUser.isAdmin ? 'success' : 'info'"></p-tag>
-    </div>
-  </div>
-</p-dialog>
-
-<p-dialog [(visible)]="displayProductDialog" [modal]="true" [style]="{width: '95vw', maxWidth: '1400px'}" header="פרטי מוצר" [maximizable]="true">
-  <app-product-details *ngIf="selectedProductId" [productId]="selectedProductId" [isEmbedded]="true"></app-product-details>
-  <div *ngIf="!selectedProductId" class="p-4 text-center">
-    <i class="pi pi-exclamation-triangle" style="font-size: 3rem; color: #f59e0b;"></i>
-    <p class="mt-3">מזהה מוצר לא תקין</p>
-  </div>
-</p-dialog>
-
-<p-dialog [(visible)]="displayOrderDialog" [modal]="true" [style]="{width: '60vw'}" header="פרטי הזמנה">
-  <div *ngIf="selectedOrder" class="details-dialog">
-    <div class="detail-row">
-      <strong>מזהה הזמנה:</strong>
-      <span>{{ selectedOrder.orderId }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>תאריך הזמנה:</strong>
-      <span>{{ selectedOrder.orderDate | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סכום כולל:</strong>
-      <span>{{ selectedOrder.totalAmount | currency:'ILS':'symbol':'1.0-0' }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סטטוס:</strong>
-      <p-tag [value]="selectedOrder.status" [severity]="selectedOrder.status === 'delivered' ? 'success' : 'warn'"></p-tag>
-    </div>
-    <div class="detail-row" *ngIf="selectedOrder.orderItems && selectedOrder.orderItems.length > 0">
-      <strong>פריטים בהזמנה:</strong>
-      <div class="order-items">
-        <div *ngFor="let item of selectedOrder.orderItems" class="order-item">
-          <p><strong>מזהה מוצר:</strong> {{ item.productId }}</p>
-          <p><strong>מחיר:</strong> {{ item.priceAtPurchase | currency:'ILS':'symbol':'1.0-0' }}</p>
-          <p><strong>תאריך התחלה:</strong> {{ item.startDate | date:'dd/MM/yyyy' }}</p>
-          <p><strong>תאריך סיום:</strong> {{ item.endDate | date:'dd/MM/yyyy' }}</p>
-        </div>
+        <p-card class="table-card">
+          <ng-template pTemplate="header">
+            <h2><i class="pi pi-comment"></i> פניות למנהל ({{ adminInquiries.length }})</h2>
+          </ng-template>
+          <p-table [value]="adminInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>שם</th>
+                <th>אימייל</th>
+                <th>נושא</th>
+                <th>תאריך</th>
+                <th>סטטוס</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-inquiry>
+              <tr>
+                <td>{{ inquiry.inquiryId }}</td>
+                <td>{{ inquiry.name }}</td>
+                <td>{{ inquiry.email }}</td>
+                <td>{{ inquiry.subject }}</td>
+                <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                            (onChange)="updateAdminInquiryStatus(inquiry, $event.value)" [style]="{'width': '120px'}">
+                    <ng-template pTemplate="selectedItem">
+                      <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
+                    </ng-template>
+                  </p-select>
+                </td>
+                <td>
+                  <p-button icon="pi pi-eye" [text]="true" (onClick)="viewAdminInquiryDetails(inquiry)"></p-button>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteAdminInquiry(inquiry.inquiryId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
       </div>
     </div>
   </div>
-</p-dialog>
-
-<p-dialog [(visible)]="displayInquiryDialog" [modal]="true" [style]="{width: '600px'}" header="פרטי פנייה">
-  <div *ngIf="selectedInquiry" class="details-dialog">
-    <div class="detail-row">
-      <strong>מזהה:</strong>
-      <span>{{ selectedInquiry.inquiryId }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>נכס:</strong>
-      <span>{{ selectedInquiry.productTitle }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>מאת:</strong>
-      <span>{{ selectedInquiry.userName }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>אל:</strong>
-      <span>{{ selectedInquiry.ownerName }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>שם:</strong>
-      <span>{{ selectedInquiry.name }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>טלפון:</strong>
-      <span>{{ selectedInquiry.phone }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>אימייל:</strong>
-      <span>{{ selectedInquiry.email }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>תאריך:</strong>
-      <span>{{ selectedInquiry.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סטטוס:</strong>
-      <p-tag [value]="selectedInquiry.status" [severity]="getMessageStatusSeverity(selectedInquiry.status)"></p-tag>
-    </div>
-    <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
-      <strong class="mb-2">הודעה:</strong>
-      <div class="message-content">
-        {{ selectedInquiry.message || 'אין הודעה' }}
-      </div>
-    </div>
-  </div>
-</p-dialog>
-
-<p-dialog [(visible)]="displayAdminInquiryDialog" [modal]="true" [style]="{width: '600px'}" header="פרטי פנייה למנהל">
-  <div *ngIf="selectedAdminInquiry" class="details-dialog">
-    <div class="detail-row">
-      <strong>מזהה:</strong>
-      <span>{{ selectedAdminInquiry.inquiryId }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>שם:</strong>
-      <span>{{ selectedAdminInquiry.name }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>אימייל:</strong>
-      <span>{{ selectedAdminInquiry.email }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>טלפון:</strong>
-      <span>{{ selectedAdminInquiry.phone }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>נושא:</strong>
-      <span>{{ selectedAdminInquiry.subject }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>תאריך:</strong>
-      <span>{{ selectedAdminInquiry.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סטטוס:</strong>
-      <p-tag [value]="selectedAdminInquiry.status" [severity]="getMessageStatusSeverity(selectedAdminInquiry.status)"></p-tag>
-    </div>
-    <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
-      <strong class="mb-2">הודעה:</strong>
-      <div class="message-content">
-        {{ selectedAdminInquiry.message || 'אין הודעה' }}
-      </div>
-    </div>
-  </div>
-</p-dialog>
-
-<p-confirmDialog></p-confirmDialog>
-<p-toast></p-toast>
 </div>
+
+<!-- Dialogs -->
+<p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{'width': '500px'}" header="פרטי משתמש">
+  <div *ngIf="selectedUser" class="p-4">
+    <div class="mb-3"><strong>מזהה:</strong> {{ selectedUser.userId }}</div>
+    <div class="mb-3"><strong>שם מלא:</strong> {{ selectedUser.fullName }}</div>
+    <div class="mb-3"><strong>אימייל:</strong> {{ selectedUser.email }}</div>
+    <div class="mb-3"><strong>טלפון:</strong> {{ selectedUser.phone }}</div>
+    <div class="mb-3"><strong>כתובת:</strong> {{ selectedUser.address }}</div>
+    <div><strong>סטטוס:</strong> <p-tag [value]="selectedUser.isAdmin ? 'מנהל' : 'משתמש'" [severity]="selectedUser.isAdmin ? 'success' : 'info'"></p-tag></div>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="displayProductDialog" [modal]="true" [style]="{'width': '95vw', 'maxWidth': '1400px'}" header="פרטי מוצר" [maximizable]="true">
+  <app-product-details *ngIf="selectedProductId" [productId]="selectedProductId" [isEmbedded]="true"></app-product-details>
+</p-dialog>
+
+<p-dialog [(visible)]="displayOrderDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי הזמנה">
+  <div *ngIf="selectedOrder" class="p-4">
+    <div class="mb-3"><strong>מזהה:</strong> {{ selectedOrder.orderId }}</div>
+    <div class="mb-3"><strong>תאריך:</strong> {{ selectedOrder.orderDate | date:'dd/MM/yyyy HH:mm' }}</div>
+    <div class="mb-3"><strong>סכום:</strong> ₪{{ selectedOrder.totalAmount | number }}</div>
+    <div><strong>סטטוס:</strong> <p-tag [value]="selectedOrder.status" [severity]="getStatusSeverity(selectedOrder.status)"></p-tag></div>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="displayInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה">
+  <div *ngIf="selectedInquiry" class="p-4">
+    <div class="mb-3"><strong>נכס:</strong> {{ selectedInquiry.productTitle }}</div>
+    <div class="mb-3"><strong>מאת:</strong> {{ selectedInquiry.userName }}</div>
+    <div class="mb-3"><strong>טלפון:</strong> {{ selectedInquiry.phone }}</div>
+    <div class="mb-3"><strong>אימייל:</strong> {{ selectedInquiry.email }}</div>
+    <div class="mb-3"><strong>הודעה:</strong> {{ selectedInquiry.message || 'אין הודעה' }}</div>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="displayAdminInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה למנהל">
+  <div *ngIf="selectedAdminInquiry" class="p-4">
+    <div class="mb-3"><strong>שם:</strong> {{ selectedAdminInquiry.name }}</div>
+    <div class="mb-3"><strong>אימייל:</strong> {{ selectedAdminInquiry.email }}</div>
+    <div class="mb-3"><strong>טלפון:</strong> {{ selectedAdminInquiry.phone }}</div>
+    <div class="mb-3"><strong>נושא:</strong> {{ selectedAdminInquiry.subject }}</div>
+    <div class="mb-3"><strong>הודעה:</strong> {{ selectedAdminInquiry.message }}</div>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [dir]="'rtl'"></p-confirmDialog>
+<p-toast [dir]="'rtl'"></p-toast>

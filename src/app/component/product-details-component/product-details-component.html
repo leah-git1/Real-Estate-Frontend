@@ -1,5 +1,6 @@
 <div class="container p-5" *ngIf="product; else loading">
-  <button *ngIf="!isEmbedded" pButton icon="pi pi-arrow-right" [label]="returnUrl === '/profile' ? 'חזרה למוצרים שלי' : 'חזרה לקטלוג'" 
+  <button *ngIf="!isEmbedded" pButton icon="pi pi-arrow-right" 
+          [label]="returnUrl === '/profile' ? 'חזרה למוצרים שלי' : returnUrl === '/favorites' ? 'חזרה למועדפים' : 'חזרה לקטלוג'" 
           (click)="goBack()" class="p-button-text mb-4"></button>
 
   <div class="grid shadow-4 border-round bg-white overflow-hidden" [style.min-height]="isEmbedded ? 'auto' : '550px'">
@@ -159,10 +160,10 @@
   </div>
 </ng-template>
 
-<p-dialog [(visible)]="showContactDialog" [modal]="true" [style]="{width: '500px'}" header="יצירת קשר עם המפרסם">
-  <div class="p-4">
-    <div class="mb-4 p-3 bg-blue-50 border-round">
-      <div class="flex align-items-center gap-2 mb-2">
+<p-dialog [(visible)]="showContactDialog" [modal]="true" [style]="{width: '550px'}" header="יצירת קשר עם המפרסם">
+  <div class="p-3">
+    <div class="mb-3 p-3 bg-blue-50 border-round">
+      <div class="flex align-items-center gap-3 mb-2">
         <i class="pi pi-user text-primary" style="font-size: 1.5rem;"></i>
         <div>
           <p class="font-bold text-lg m-0">בעל הנכס: {{ ownerDetails?.fullName || 'טוען...' }}</p>
@@ -170,8 +171,7 @@
         </div>
       </div>
       <div class="border-top-1 border-blue-200 pt-2 mt-2">
-        <p class="text-sm m-0"><i class="pi pi-phone mr-2"></i><strong>ליצירת קשר:</strong> 1-800-{{ ownerDetails?.phone || 'טוען...' }}</p>
-        <p class="text-xs text-500 m-0 mt-1">הטלפון של בעל הנכס</p>
+        <p class="text-sm m-0"><i class="pi pi-phone ml-2"></i><strong>ליצירת קשר:</strong> 1-800-{{ ownerDetails?.phone || 'טוען...' }}</p>
       </div>
     </div>
 
@@ -190,9 +190,9 @@
       <input pInputText type="email" [(ngModel)]="contactForm.email" class="w-full" required />
     </div>
 
-    <div class="field mb-3">
+    <div class="field mb-2">
       <label class="block mb-2 font-semibold">הודעה</label>
-      <textarea [(ngModel)]="contactForm.message" rows="4" class="w-full p-2 border-1 border-300 border-round" 
+      <textarea [(ngModel)]="contactForm.message" rows="2" class="w-full p-2 border-1 border-300 border-round" 
                 placeholder="שתף פרטים נוספים..."></textarea>
     </div>
   </div>

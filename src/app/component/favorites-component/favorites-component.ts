@@ -5,13 +5,20 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
 import { FavoritesService } from '../../services/favorites-service';
+import { PropertyInquiryService } from '../../services/property-inquiry-service';
+import { UserService } from '../../services/user-service';
 import { ProductModel } from '../../models/product/product-model';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule, CardModule, DialogModule, TooltipModule],
+  imports: [CommonModule, RouterModule, ButtonModule, CardModule, DialogModule, TooltipModule, FormsModule, InputTextModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './favorites-component.html',
   styleUrl: './favorites-component.scss'
 })
@@ -21,8 +28,23 @@ export class FavoritesComponent implements OnInit {
   editingProduct: ProductModel | null = null;
   selectedRating: number = 0;
   hoverRating: number = 0;
+  
+  showContactDialog: boolean = false;
+  contactProduct: ProductModel | null = null;
+  ownerDetails: any = null;
+  contactForm = {
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  };
 
-  constructor(private favoritesService: FavoritesService) {}
+  constructor(
+    private favoritesService: FavoritesService,
+    private propertyInquiryService: PropertyInquiryService,
+    private messageService: MessageService,
+    private userService: UserService
+  ) {}
 
   ngOnInit(): void {
     this.loadFavorites();
@@ -66,5 +88,48 @@ export class FavoritesComponent implements OnInit {
       this.editingProduct = null;
       this.loadFavorites();
     }
+  }
+  
+  openContactDialog(product: ProductModel) {
+    this.contactProduct = product;
+    this.ownerDetails = null;
+    this.contactForm = { name: '', phone: '', email: '', message: '' };
+    
+    if (product.ownerId) {
+      this.userService.getUserById(product.ownerId).subscribe({
+        next: (owner) => {
+          this.ownerDetails = owner;
+        },
+        error: (err) => console.error('Error loading owner details:', err)
+      });
+    }
+    
+    this.showContactDialog = true;
+  }
+  
+  submitContact() {
+    if (!this.contactProduct) return;
+    
+    const currentUser = this.userService.getCurrentUser();
+    const inquiry = {
+      productId: this.contactProduct.productId,
+      userId: currentUser?.userId || 0,
+      ownerId: this.contactProduct.ownerId || 0,
+      name: this.contactForm.name,
+      phone: this.contactForm.phone,
+      email: this.contactForm.email,
+      message: this.contactForm.message
+    };
+    
+    this.propertyInquiryService.createInquiry(inquiry).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הפנייה נשלחה בהצלחה' });
+        this.showContactDialog = false;
+        this.contactForm = { name: '', phone: '', email: '', message: '' };
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בשליחת הפנייה' });
+      }
+    });
   }
 }

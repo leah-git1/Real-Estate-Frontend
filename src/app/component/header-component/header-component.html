@@ -95,7 +95,7 @@
             <i class="pi pi-send"></i>
             <span>הפניות שלי</span>
           </a>
-          <a routerLink="/profile" [queryParams]="{tab: 6}" (click)="showUserMenu=false" class="menu-item">
+          <a *ngIf="!isAdmin()" routerLink="/profile" [queryParams]="{tab: 6}" (click)="showUserMenu=false" class="menu-item">
             <i class="pi pi-inbox"></i>
             <span>פניות אלי</span>
           </a>

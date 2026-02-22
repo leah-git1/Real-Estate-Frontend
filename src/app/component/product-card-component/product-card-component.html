@@ -1,60 +1,115 @@
-<div class="product-card shadow-2 p-3 border-round mb-4 bg-white">
-  <div class="text-center mb-3 relative">
-    <img [src]="imageUrl" [alt]="product.title" 
-         style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" 
-         class="border-round"
-         (click)="viewDetails(product.productId)">
-    <span *ngIf="product.TransactionType" class="absolute top-0 right-0 m-2 px-3 py-1 border-round text-white font-semibold text-sm"
-          [ngClass]="{
-            'bg-blue-500': product.TransactionType === 'Sale' || product.TransactionType === 'מכירה',
-            'bg-green-500': product.TransactionType === 'Rent' || product.TransactionType === 'השכרה',
-            'bg-orange-500': product.TransactionType === 'Vacation' || product.TransactionType === 'נופש'
-          }">
-      {{ getTransactionTypeLabel(product.TransactionType) }}
-    </span>
-    <span *ngIf="isMyProduct" class="absolute top-0 left-0 m-2 px-3 py-1 border-round bg-purple-600 text-white font-semibold text-sm">
-      <i class="pi pi-user mr-1"></i>המוצר שלי
-    </span>
+<div class="product-card">
+  <div class="card-image" (click)="viewDetails(product.productId)">
+    <img [src]="imageUrl" [alt]="product.title">
+    <div class="badges">
+      <span class="badge badge-type" [ngClass]="{
+        'badge-sale': product.TransactionType === 'Sale',
+        'badge-rent': product.TransactionType === 'Rent',
+        'badge-vacation': product.TransactionType === 'Vacation'
+      }">
+        {{ getTransactionTypeLabel(product.TransactionType) }}
+      </span>
+      <span *ngIf="isMyProduct" class="badge badge-mine">
+        <i class="pi pi-user"></i> שלי
+      </span>
+    </div>
   </div>
 
-  <div class="font-bold text-xl mb-2">{{ product.title }}</div>
-  <div class="mb-2">
-    <div class="text-primary font-bold text-lg">₪{{ product.price | number }}</div>
-    <div *ngIf="isVacationType()" class="text-sm font-semibold text-orange-600">+ עמלת שירות {{ getCommissionRate() }}</div>
-  </div>
+  <div class="card-content">
+    <div class="location">
+      <i class="pi pi-map-marker"></i>
+      <span>{{ product.city }}</span>
+    </div>
 
-  <div class="flex gap-2">
-    
-    <button *ngIf="!isMyProduct && isVacationType()" pButton pRipple 
-            icon="pi pi-shopping-cart" 
-            label="הוסף לסל" 
-            class="p-button-success flex-grow-1"
-            (click)="addToCart(product)">
-    </button>
-    
-    <button *ngIf="!isMyProduct && !isVacationType()" pButton pRipple 
-            icon="pi pi-heart" 
-            label="הוסף למועדפים" 
-            class="p-button-help flex-grow-1"
-            (click)="addToFavorites(product)">
-    </button>
-    
-    <button *ngIf="isMyProduct" pButton pRipple 
-            icon="pi pi-pencil" 
-            label="ערוך מוצר" 
-            class="p-button-warning flex-grow-1"
-            (click)="editProduct()">
-    </button>
-    
-    <button pButton pRipple 
-            icon="pi pi-info-circle" 
-            class="p-button-outlined p-button-secondary"
-            title="לחץ לצפייה בפרטים נוספים"
-            (click)="viewDetails(product.productId)">
-    </button>
+    <h3 class="title">{{ product.title }}</h3>
 
+    <div class="price-section">
+      <div class="price">₪{{ product.price | number }}</div>
+      <div *ngIf="isVacationType()" class="commission">+ עמלה 3%</div>
+    </div>
+
+    <div class="actions">
+      <ng-container *ngIf="!isMyProduct && isVacationType()">
+        <button class="btn btn-primary" (click)="addToCart(product)">
+          <i class="pi pi-shopping-cart"></i>
+          הוסף לסל
+        </button>
+        <button class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
+          <i class="pi pi-heart"></i>
+        </button>
+        <button class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
+          <i class="pi pi-info-circle"></i>
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="!isMyProduct && !isVacationType()">
+        <button class="btn btn-primary" (click)="openContactDialog()">
+          <i class="pi pi-phone"></i>
+          יצירת קשר
+        </button>
+        <button class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
+          <i class="pi pi-heart"></i>
+        </button>
+        <button class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
+          <i class="pi pi-info-circle"></i>
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="isMyProduct">
+        <button class="btn btn-warning" (click)="editProduct()">
+          <i class="pi pi-pencil"></i>
+          עריכה
+        </button>
+      </ng-container>
+    </div>
   </div>
 </div>
+
+<p-dialog [(visible)]="showContactDialog" [modal]="true" [style]="{width: '550px'}" header="יצירת קשר עם המפרסם">
+  <div class="p-3">
+    <div class="mb-3 p-3 bg-blue-50 border-round">
+      <div class="flex align-items-center gap-3 mb-2">
+        <i class="pi pi-user text-primary" style="font-size: 1.5rem;"></i>
+        <div>
+          <p class="font-bold text-lg m-0">בעל הנכס: {{ ownerDetails?.fullName || 'טוען...' }}</p>
+          <p class="text-sm text-600 m-0">נכס: {{ product?.title }}</p>
+        </div>
+      </div>
+      <div class="border-top-1 border-blue-200 pt-2 mt-2">
+        <p class="text-sm m-0"><i class="pi pi-phone ml-2"></i><strong>ליצירת קשר:</strong> 1-800-{{ ownerDetails?.phone || 'טוען...' }}</p>
+      </div>
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">שם מלא *</label>
+      <input pInputText [(ngModel)]="contactForm.name" class="w-full" required />
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">טלפון *</label>
+      <input pInputText [(ngModel)]="contactForm.phone" class="w-full" required />
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">אימייל *</label>
+      <input pInputText type="email" [(ngModel)]="contactForm.email" class="w-full" required />
+    </div>
+
+    <div class="field mb-2">
+      <label class="block mb-2 font-semibold">הודעה</label>
+      <textarea [(ngModel)]="contactForm.message" rows="2" class="w-full p-2 border-1 border-300 border-round" 
+                placeholder="שתף פרטים נוספים..."></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="showContactDialog=false" class="p-button-text"></button>
+    <button pButton label="שליחה" icon="pi pi-send" 
+            (click)="submitContactForm()" 
+            [disabled]="!contactForm.name || !contactForm.phone || !contactForm.email"></button>
+  </ng-template>
+</p-dialog>
 
 <p-dialog [(visible)]="showDetailsDialog" [modal]="true" [style]="{width: '800px'}" 
           [maximizable]="true" (onHide)="onDialogHide()" *ngIf="showDetailsDialog">

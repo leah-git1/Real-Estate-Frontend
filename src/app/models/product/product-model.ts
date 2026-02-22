@@ -29,7 +29,9 @@ export class ProductSummaryDTOModel {
     beds?: number;
     rooms?: number;
     categoryCategoryName: string = '';
+    categoryName: string = '';
     TransactionType: string = ''; // שינוי ל-T גדולה
+    transactionType?: string; // גם עם t קטנה
     categoryId?: number;
     ownerId?: number;
     isAvailable?: boolean | number;

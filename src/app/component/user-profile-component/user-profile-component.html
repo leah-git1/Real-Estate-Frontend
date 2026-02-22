@@ -21,7 +21,7 @@
       <button class="tab-button" [class.active]="activeTab === 5" (click)="setActiveTab(5)">
         <i class="pi pi-send"></i> הפניות שלי
       </button>
-      <button class="tab-button" [class.active]="activeTab === 6" (click)="setActiveTab(6)">
+      <button *ngIf="!isAdmin()" class="tab-button" [class.active]="activeTab === 6" (click)="setActiveTab(6)">
         <i class="pi pi-inbox"></i> פניות אלי
       </button>
       <button *ngIf="isAdmin()" class="tab-button" [class.active]="activeTab === 7" (click)="setActiveTab(7)">

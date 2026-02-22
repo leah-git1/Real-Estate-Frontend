@@ -129,6 +129,15 @@ export class UserProfileComponent implements OnInit {
   updateProfile() {
     console.log('Updating user:', this.currentUser.userId, this.userForm);
     
+    // ולידציה לטלפון
+    if (this.userForm.phone) {
+      const phoneRegex = /^0[2-9]\d{7,8}$/;
+      if (!phoneRegex.test(this.userForm.phone)) {
+        alert('מספר טלפון לא תקין. הזן מספר ישראלי תקין (לדוגמה: 0501234567)');
+        return;
+      }
+    }
+    
     const updateData: UserUpdateDTOModel = {
       fullName: this.userForm.fullName,
       phone: this.userForm.phone,

@@ -9,6 +9,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
+import { ChartModule } from 'primeng/chart';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AdminService } from '../../services/admin-service';
 import { AdminStatisticsModel } from '../../models/admin/admin-model';
@@ -24,17 +25,23 @@ import { ProductDetailsComponent } from '../product-details-component/product-de
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, SelectModule, ProductDetailsComponent],
+  imports: [CommonModule, FormsModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, SelectModule, ChartModule, ProductDetailsComponent],
   providers: [ConfirmationService, MessageService],
   templateUrl: './admin-dashboard-component.html',
   styleUrl: './admin-dashboard-component.scss'
 })
 export class AdminDashboardComponent implements OnInit {
+  activeTab: number = 0;
   statistics: AdminStatisticsModel = new AdminStatisticsModel();
   users: UserProfileDTOModel[] = [];
   products: ProductModel[] = [];
   orders: any[] = [];
   loading = true;
+  
+  ordersChartData: any;
+  revenueChartData: any;
+  usersChartData: any;
+  chartOptions: any;
 
   displayUserDialog = false;
   displayProductDialog = false;
@@ -89,7 +96,52 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.initCharts();
   }
+  
+  initCharts(): void {
+    this.chartOptions = {
+      plugins: {
+        legend: {
+          labels: {
+            usePointStyle: true,
+            font: { size: 14 }
+          }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false
+    };
+    
+    this.ordersChartData = {
+      labels: ['התקבל', 'אושר', 'בטיפול', 'הסתיים', 'בוטל'],
+      datasets: [{
+        data: [0, 0, 0, 0, 0],
+        backgroundColor: ['#FFA726', '#42A5F5', '#66BB6A', '#26A69A', '#EF5350']
+      }]
+    };
+    
+    this.revenueChartData = {
+      labels: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני'],
+      datasets: [{
+        label: 'הכנסות',
+        data: [12000, 19000, 15000, 25000, 22000, 30000],
+        borderColor: '#42A5F5',
+        backgroundColor: 'rgba(66, 165, 245, 0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    };
+    
+    this.usersChartData = {
+      labels: ['משתמשים', 'מנהלים'],
+      datasets: [{
+        data: [0, 0],
+        backgroundColor: ['#66BB6A', '#FFA726']
+      }]
+    };
+  }
+
 
   loadData(): void {
     this.loading = true;
@@ -104,6 +156,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllUsers().subscribe({
       next: (data) => {
         this.users = data;
+        this.updateCharts();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading users:', err)
@@ -125,6 +178,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllOrders().subscribe({
       next: (data) => {
         this.orders = data;
+        this.updateCharts();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading orders:', err)
@@ -153,6 +207,46 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (err) => console.error('Error loading admin inquiries:', err)
     });
+  }
+  
+  updateCharts(): void {
+    if (!this.orders || this.orders.length === 0 || !this.users || this.users.length === 0) {
+      return;
+    }
+    
+    const ordersByStatus = this.orders.reduce((acc: any, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      return acc;
+    }, {});
+    
+    this.ordersChartData = {
+      labels: ['התקבל', 'אושר', 'בטיפול', 'הסתיים', 'בוטל'],
+      datasets: [{
+        data: [
+          ordersByStatus['Pending'] || 0,
+          ordersByStatus['Confirmed'] || 0,
+          ordersByStatus['Processing'] || 0,
+          ordersByStatus['Delivered'] || 0,
+          ordersByStatus['Cancelled'] || 0
+        ],
+        backgroundColor: ['#FFA726', '#42A5F5', '#66BB6A', '#26A69A', '#EF5350']
+      }]
+    };
+    
+    const adminCount = this.users.filter(u => u.isAdmin).length;
+    const userCount = this.users.length - adminCount;
+    this.usersChartData = {
+      labels: ['משתמשים', 'מנהלים'],
+      datasets: [{
+        data: [userCount, adminCount],
+        backgroundColor: ['#66BB6A', '#FFA726']
+      }]
+    };
+  }
+
+  
+  setActiveTab(index: number): void {
+    this.activeTab = index;
   }
 
   deleteUser(userId: number): void {

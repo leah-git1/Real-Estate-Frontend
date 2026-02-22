@@ -77,6 +77,10 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
         if (params['returnTo'] === 'profile') {
           this.returnUrl = '/profile';
           this.returnTab = params['tab'] ? +params['tab'] : 0;
+        } else if (params['returnTo'] === 'favorites') {
+          this.returnUrl = '/favorites';
+        } else if (params['returnTo']) {
+          this.returnUrl = params['returnTo'];
         }
         if (params['openContact'] === 'true') {
           setTimeout(() => this.openContactDialog(), 500);
@@ -124,6 +128,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   goBack() {
     if (this.returnUrl === '/profile') {
       this.router.navigate([this.returnUrl], { queryParams: { tab: this.returnTab } });
+    } else if (this.returnUrl === '/favorites') {
+      this.router.navigate(['/favorites']);
     } else {
       this.router.navigate([this.returnUrl]);
     }
@@ -280,7 +286,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isRentType(): boolean {
-    return this.product?.TransactionType === 'Vacation';
+    console.log('Full product:', this.product);
+    const type = this.product?.TransactionType?.toLowerCase() || this.product?.transactionType?.toLowerCase();
+    const result = type === 'vacation' || type === 'נופש' || type === 'rent' || type === 'השכרה';
+    console.log('isRentType check:', { type, result });
+    return result;
   }
 
   isSaleOrLongTermRent(): boolean {
