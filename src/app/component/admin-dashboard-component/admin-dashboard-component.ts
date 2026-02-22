@@ -17,6 +17,8 @@ import { ProductModel } from '../../models/product/product-model';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
 import { ContactService } from '../../services/contact-service';
+import { PropertyInquiryService } from '../../services/property-inquiry-service';
+import { AdminInquiryService } from '../../services/admin-inquiry-service';
 import { ProductDetailsComponent } from '../product-details-component/product-details-component';
 
 @Component({
@@ -45,6 +47,20 @@ export class AdminDashboardComponent implements OnInit {
   displayMessageDialog = false;
   selectedMessage: any = null;
   
+  propertyInquiries: any[] = [];
+  displayInquiryDialog = false;
+  selectedInquiry: any = null;
+  
+  adminInquiries: any[] = [];
+  displayAdminInquiryDialog = false;
+  selectedAdminInquiry: any = null;
+  
+  inquiryStatusOptions = [
+    { label: 'חדש', value: 'New' },
+    { label: 'בטיפול', value: 'InProgress' },
+    { label: 'טופל', value: 'Resolved' }
+  ];
+  
   messageStatusOptions = [
     { label: 'חדש', value: 'New' },
     { label: 'בטיפול', value: 'InProgress' },
@@ -64,6 +80,8 @@ export class AdminDashboardComponent implements OnInit {
     private userService: UserService,
     private orderService: OrderService,
     private contactService: ContactService,
+    private propertyInquiryService: PropertyInquiryService,
+    private adminInquiryService: AdminInquiryService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -118,6 +136,22 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading messages:', err)
+    });
+    
+    this.propertyInquiryService.getAllInquiries().subscribe({
+      next: (data) => {
+        this.propertyInquiries = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading inquiries:', err)
+    });
+    
+    this.adminInquiryService.getAllInquiries().subscribe({
+      next: (data) => {
+        this.adminInquiries = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading admin inquiries:', err)
     });
   }
 
@@ -346,5 +380,85 @@ export class AdminDashboardComponent implements OnInit {
       case 'resolved': return 'success';
       default: return 'secondary';
     }
+  }
+  
+  viewInquiryDetails(inquiry: any): void {
+    this.selectedInquiry = inquiry;
+    this.displayInquiryDialog = true;
+  }
+  
+  updateInquiryStatus(inquiry: any, newStatus: string): void {
+    this.propertyInquiryService.updateInquiryStatus(inquiry.inquiryId, newStatus).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס הפנייה עודכן' });
+        this.loadData();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });
+        console.error('Error updating inquiry status:', err);
+      }
+    });
+  }
+  
+  deleteInquiry(inquiryId: number): void {
+    this.confirmationService.confirm({
+      message: 'האם אתה בטוח שברצונך למחוק פנייה זו?',
+      header: 'אישור מחיקה',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'כן',
+      rejectLabel: 'לא',
+      accept: () => {
+        this.propertyInquiryService.deleteInquiry(inquiryId).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הפנייה נמחקה בהצלחה' });
+            this.loadData();
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה במחיקת הפנייה' });
+            console.error('Error deleting inquiry:', err);
+          }
+        });
+      }
+    });
+  }
+  
+  viewAdminInquiryDetails(inquiry: any): void {
+    this.selectedAdminInquiry = inquiry;
+    this.displayAdminInquiryDialog = true;
+  }
+  
+  updateAdminInquiryStatus(inquiry: any, newStatus: string): void {
+    this.adminInquiryService.updateInquiryStatus(inquiry.inquiryId, newStatus).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס הפנייה עודכן' });
+        this.loadData();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });
+        console.error('Error updating admin inquiry status:', err);
+      }
+    });
+  }
+  
+  deleteAdminInquiry(inquiryId: number): void {
+    this.confirmationService.confirm({
+      message: 'האם אתה בטוח שברצונך למחוק פנייה זו?',
+      header: 'אישור מחיקה',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'כן',
+      rejectLabel: 'לא',
+      accept: () => {
+        this.adminInquiryService.deleteInquiry(inquiryId).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הפנייה נמחקה בהצלחה' });
+            this.loadData();
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה במחיקת הפנייה' });
+            console.error('Error deleting admin inquiry:', err);
+          }
+        });
+      }
+    });
   }
 }

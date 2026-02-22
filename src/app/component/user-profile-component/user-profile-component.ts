@@ -10,6 +10,7 @@ import { TagModule } from 'primeng/tag';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
+import { PropertyInquiryService } from '../../services/property-inquiry-service';
 import { UserUpdateDTOModel } from '../../models/user/user-model';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -31,11 +32,16 @@ export class UserProfileComponent implements OnInit {
   productToDelete: number | null = null;
   selectedOrder: any = null;
   showOrderDialog: boolean = false;
+  myInquiries: any[] = [];
+  inquiriesToMe: any[] = [];
+  selectedInquiry: any = null;
+  showInquiryDialog: boolean = false;
 
   constructor(
     private userService: UserService,
     private orderService: OrderService,
     private productService: ProductService,
+    private propertyInquiryService: PropertyInquiryService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
@@ -64,6 +70,10 @@ export class UserProfileComponent implements OnInit {
     
     if (this.activeTab === 2) {
       this.loadMyProducts();
+    } else if (this.activeTab === 5) {
+      this.loadMyInquiries();
+    } else if (this.activeTab === 6) {
+      this.loadInquiriesToMe();
     }
   }
 
@@ -223,6 +233,12 @@ export class UserProfileComponent implements OnInit {
     if (index === 2) {
       console.log('Tab 2 clicked, loading products');
       this.loadMyProducts();
+    } else if (index === 5) {
+      this.loadMyInquiries();
+    } else if (index === 6) {
+      this.loadInquiriesToMe();
+    } else if (index === 7) {
+      this.goToAdmin();
     }
   }
 
@@ -263,5 +279,57 @@ export class UserProfileComponent implements OnInit {
     const currentIndex = statusOrder.indexOf(currentStatus);
     const stepIndex = statusOrder.indexOf(stepStatus);
     return currentIndex > stepIndex;
+  }
+
+  loadMyInquiries() {
+    this.propertyInquiryService.getInquiriesByUserId(this.currentUser.userId).subscribe({
+      next: (data) => {
+        this.myInquiries = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading inquiries:', err)
+    });
+  }
+
+  loadInquiriesToMe() {
+    this.propertyInquiryService.getInquiriesByOwnerId(this.currentUser.userId).subscribe({
+      next: (data) => {
+        this.inquiriesToMe = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading inquiries to me:', err)
+    });
+  }
+
+  viewInquiryDetails(inquiry: any) {
+    this.selectedInquiry = inquiry;
+    this.showInquiryDialog = true;
+  }
+
+  closeInquiryDialog() {
+    this.showInquiryDialog = false;
+    this.selectedInquiry = null;
+  }
+
+  getInquiryStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    switch(status?.toLowerCase()) {
+      case 'new': return 'info';
+      case 'inprogress': return 'warn';
+      case 'resolved': return 'success';
+      default: return 'secondary';
+    }
+  }
+
+  getInquiryStatusLabel(status: string): string {
+    switch(status?.toLowerCase()) {
+      case 'new': return 'חדש';
+      case 'inprogress': return 'בטיפול';
+      case 'resolved': return 'טופל';
+      default: return status;
+    }
+  }
+
+  viewInquiryProduct(productId: number) {
+    this.router.navigate(['/product-details', productId]);
   }
 }

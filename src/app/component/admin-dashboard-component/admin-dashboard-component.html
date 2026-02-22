@@ -150,6 +150,104 @@
     </p-table>
   </p-card>
 
+  <p-card class="table-card" id="inquiries">
+    <ng-template pTemplate="header">
+      <h2><i class="pi pi-envelope"></i> פניות נכסים</h2>
+    </ng-template>
+    <p-table [value]="propertyInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>מזהה</th>
+          <th>נכס</th>
+          <th>מאת</th>
+          <th>אל</th>
+          <th>טלפון</th>
+          <th>תאריך</th>
+          <th>סטטוס</th>
+          <th>פעולות</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-inquiry>
+        <tr>
+          <td>{{ inquiry.inquiryId }}</td>
+          <td>{{ inquiry.productTitle }}</td>
+          <td>{{ inquiry.userName }}</td>
+          <td>{{ inquiry.ownerName }}</td>
+          <td>{{ inquiry.phone }}</td>
+          <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                        (onChange)="updateInquiryStatus(inquiry, $event.value)"
+                        [appendTo]="'body'"
+                        [style]="{'width': '120px'}">
+              <ng-template pTemplate="selectedItem">
+                <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
+              </ng-template>
+              <ng-template let-option pTemplate="item">
+                <p-tag [value]="option.label" [severity]="getMessageStatusSeverity(option.value)"></p-tag>
+              </ng-template>
+            </p-select>
+          </td>
+          <td>
+            <div class="order-actions">
+              <p-button icon="pi pi-eye" [text]="true" (onClick)="viewInquiryDetails(inquiry)" pTooltip="צפה"></p-button>
+              <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteInquiry(inquiry.inquiryId)" pTooltip="מחק"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-card class="table-card" id="admin-inquiries">
+    <ng-template pTemplate="header">
+      <h2><i class="pi pi-envelope"></i> פניות למנהל</h2>
+    </ng-template>
+    <p-table [value]="adminInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>מזהה</th>
+          <th>שם</th>
+          <th>אימייל</th>
+          <th>טלפון</th>
+          <th>נושא</th>
+          <th>תאריך</th>
+          <th>סטטוס</th>
+          <th>פעולות</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-inquiry>
+        <tr>
+          <td>{{ inquiry.inquiryId }}</td>
+          <td>{{ inquiry.name }}</td>
+          <td>{{ inquiry.email }}</td>
+          <td>{{ inquiry.phone }}</td>
+          <td>{{ inquiry.subject }}</td>
+          <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                        (onChange)="updateAdminInquiryStatus(inquiry, $event.value)"
+                        [appendTo]="'body'"
+                        [style]="{'width': '120px'}">
+              <ng-template pTemplate="selectedItem">
+                <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
+              </ng-template>
+              <ng-template let-option pTemplate="item">
+                <p-tag [value]="option.label" [severity]="getMessageStatusSeverity(option.value)"></p-tag>
+              </ng-template>
+            </p-select>
+          </td>
+          <td>
+            <div class="order-actions">
+              <p-button icon="pi pi-eye" [text]="true" (onClick)="viewAdminInquiryDetails(inquiry)" pTooltip="צפה"></p-button>
+              <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteAdminInquiry(inquiry.inquiryId)" pTooltip="מחק"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
   <p-card class="table-card" id="messages">
     <ng-template pTemplate="header">
       <h2><i class="pi pi-envelope"></i> פניות מדף צור קשר</h2>
@@ -300,6 +398,92 @@
       <strong class="mb-2">הודעה:</strong>
       <div class="message-content">
         {{ selectedMessage.message }}
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="displayInquiryDialog" [modal]="true" [style]="{width: '600px'}" header="פרטי פנייה">
+  <div *ngIf="selectedInquiry" class="details-dialog">
+    <div class="detail-row">
+      <strong>מזהה:</strong>
+      <span>{{ selectedInquiry.inquiryId }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>נכס:</strong>
+      <span>{{ selectedInquiry.productTitle }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>מאת:</strong>
+      <span>{{ selectedInquiry.userName }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>אל:</strong>
+      <span>{{ selectedInquiry.ownerName }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>שם:</strong>
+      <span>{{ selectedInquiry.name }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>טלפון:</strong>
+      <span>{{ selectedInquiry.phone }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>אימייל:</strong>
+      <span>{{ selectedInquiry.email }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>תאריך:</strong>
+      <span>{{ selectedInquiry.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>סטטוס:</strong>
+      <p-tag [value]="selectedInquiry.status" [severity]="getMessageStatusSeverity(selectedInquiry.status)"></p-tag>
+    </div>
+    <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
+      <strong class="mb-2">הודעה:</strong>
+      <div class="message-content">
+        {{ selectedInquiry.message || 'אין הודעה' }}
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="displayAdminInquiryDialog" [modal]="true" [style]="{width: '600px'}" header="פרטי פנייה למנהל">
+  <div *ngIf="selectedAdminInquiry" class="details-dialog">
+    <div class="detail-row">
+      <strong>מזהה:</strong>
+      <span>{{ selectedAdminInquiry.inquiryId }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>שם:</strong>
+      <span>{{ selectedAdminInquiry.name }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>אימייל:</strong>
+      <span>{{ selectedAdminInquiry.email }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>טלפון:</strong>
+      <span>{{ selectedAdminInquiry.phone }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>נושא:</strong>
+      <span>{{ selectedAdminInquiry.subject }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>תאריך:</strong>
+      <span>{{ selectedAdminInquiry.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>סטטוס:</strong>
+      <p-tag [value]="selectedAdminInquiry.status" [severity]="getMessageStatusSeverity(selectedAdminInquiry.status)"></p-tag>
+    </div>
+    <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
+      <strong class="mb-2">הודעה:</strong>
+      <div class="message-content">
+        {{ selectedAdminInquiry.message || 'אין הודעה' }}
       </div>
     </div>
   </div>

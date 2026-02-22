@@ -55,6 +55,14 @@
             <i class="pi pi-box"></i>
             <span>המוצרים שלי</span>
           </a>
+          <a routerLink="/profile" [queryParams]="{tab: 5}" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-send"></i>
+            <span>הפניות שלי</span>
+          </a>
+          <a routerLink="/profile" [queryParams]="{tab: 6}" (click)="showUserMenu=false" class="menu-item">
+            <i class="pi pi-inbox"></i>
+            <span>פניות אלי</span>
+          </a>
           <a *ngIf="isAdmin()" routerLink="/admin" (click)="showUserMenu=false" class="menu-item admin-item">
             <i class="pi pi-shield"></i>
             <span>ניהול מערכת</span>

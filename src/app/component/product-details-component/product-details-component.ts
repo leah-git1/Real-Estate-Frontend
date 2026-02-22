@@ -4,17 +4,20 @@ import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
 import { UserService } from '../../services/user-service';
+import { PropertyInquiryService } from '../../services/property-inquiry-service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { GalleriaModule } from 'primeng/galleria';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, DatePickerModule, FormsModule],
+  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, DatePickerModule, FormsModule, DialogModule, InputTextModule],
   templateUrl: './product-details-component.html',
   styleUrl: './product-details-component.scss'
 })
@@ -35,6 +38,15 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
   isRangeAvailable: boolean = false;
   returnUrl: string = '/products';
   returnTab: number = 0;
+  
+  showContactDialog: boolean = false;
+  ownerDetails: any = null;
+  contactForm = {
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -43,6 +55,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     private orderService: OrderService,
     private cartService: CartService,
     private userService: UserService,
+    private propertyInquiryService: PropertyInquiryService,
     private cdr: ChangeDetectorRef,
     private injector: Injector
   ) {}
@@ -326,5 +339,60 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     const currentUser = this.userService.getCurrentUser();
     if (!currentUser || !this.product) return false;
     return this.product.ownerId === currentUser.userId;
+  }
+
+  openContactDialog() {
+    const currentUser = this.userService.getCurrentUser();
+    if (currentUser) {
+      this.contactForm.name = currentUser.fullName || '';
+      this.contactForm.phone = currentUser.phone || '';
+      this.contactForm.email = currentUser.email || '';
+    }
+    
+    if (this.product?.ownerId) {
+      this.userService.getUserById(this.product.ownerId).subscribe({
+        next: (owner) => {
+          this.ownerDetails = owner;
+          this.showContactDialog = true;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading owner details:', err);
+          this.showContactDialog = true;
+        }
+      });
+    } else {
+      this.showContactDialog = true;
+    }
+  }
+
+  submitContactForm() {
+    const currentUser = this.userService.getCurrentUser();
+    if (!currentUser) {
+      alert('יש להתחבר כדי ליצור קשר');
+      return;
+    }
+
+    const inquiry = {
+      productId: this.product.productId,
+      userId: currentUser.userId,
+      ownerId: this.product.ownerId,
+      name: this.contactForm.name,
+      phone: this.contactForm.phone,
+      email: this.contactForm.email,
+      message: this.contactForm.message
+    };
+
+    this.propertyInquiryService.createInquiry(inquiry).subscribe({
+      next: () => {
+        alert('הפנייה נשלחה בהצלחה!');
+        this.showContactDialog = false;
+        this.contactForm = { name: '', phone: '', email: '', message: '' };
+      },
+      error: (err) => {
+        console.error('Error sending inquiry:', err);
+        alert('שגיאה בשליחת הפנייה');
+      }
+    });
   }
 }
