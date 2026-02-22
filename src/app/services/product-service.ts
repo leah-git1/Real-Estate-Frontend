@@ -85,4 +85,9 @@ getFullImageUrl(imageUrl: string): string {
     console.log('ProductService: Request URL:', url);
     return this.http.get<ProductSummaryDTOModel[]>(url);
   }
+
+  searchProducts(query: string): Observable<ProductSummaryDTOModel[]> {
+    const params = new HttpParams().set('query', query);
+    return this.http.get<ProductSummaryDTOModel[]>(`${this.apiUrl}/search`, { params });
+  }
 }

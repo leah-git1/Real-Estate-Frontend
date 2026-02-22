@@ -4,7 +4,7 @@
   </div>
 
   <div class="statistics-grid">
-    <p-card class="stat-card users-card" (click)="scrollToSection('users')">
+    <p-card class="stat-card users-card">
       <div class="stat-content">
         <i class="pi pi-users stat-icon"></i>
         <div class="stat-details">
@@ -14,17 +14,17 @@
       </div>
     </p-card>
 
-    <p-card class="stat-card products-card" (click)="scrollToSection('products')">
+    <p-card class="stat-card products-card">
       <div class="stat-content">
         <i class="pi pi-box stat-icon"></i>
         <div class="stat-details">
           <h3>{{ statistics.totalProducts }}</h3>
-          <p>מוצרים</p>
+          <p>נכסים</p>
         </div>
       </div>
     </p-card>
 
-    <p-card class="stat-card orders-card" (click)="scrollToSection('orders')">
+    <p-card class="stat-card orders-card">
       <div class="stat-content">
         <i class="pi pi-shopping-cart stat-icon"></i>
         <div class="stat-details">
@@ -35,7 +35,7 @@
     </p-card>
   </div>
 
-  <p-card class="table-card" id="users">
+  <p-card class="table-card">
     <ng-template pTemplate="header">
       <h2><i class="pi pi-users"></i> ניהול משתמשים</h2>
     </ng-template>
@@ -68,9 +68,9 @@
     </p-table>
   </p-card>
 
-  <p-card class="table-card" id="products">
+  <p-card class="table-card">
     <ng-template pTemplate="header">
-      <h2><i class="pi pi-box"></i> ניהול מוצרים</h2>
+      <h2><i class="pi pi-box"></i> ניהול נכסים</h2>
     </ng-template>
     <p-table [value]="products" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
       <ng-template pTemplate="header">
@@ -100,7 +100,7 @@
     </p-table>
   </p-card>
 
-  <p-card class="table-card" id="orders">
+  <p-card class="table-card">
     <ng-template pTemplate="header">
       <h2><i class="pi pi-shopping-cart"></i> ניהול הזמנות</h2>
     </ng-template>
@@ -150,7 +150,7 @@
     </p-table>
   </p-card>
 
-  <p-card class="table-card" id="inquiries">
+  <p-card class="table-card">
     <ng-template pTemplate="header">
       <h2><i class="pi pi-envelope"></i> פניות נכסים</h2>
     </ng-template>
@@ -199,9 +199,9 @@
     </p-table>
   </p-card>
 
-  <p-card class="table-card" id="admin-inquiries">
+  <p-card class="table-card">
     <ng-template pTemplate="header">
-      <h2><i class="pi pi-envelope"></i> פניות למנהל</h2>
+      <h2><i class="pi pi-comment"></i> פניות למנהל</h2>
     </ng-template>
     <p-table [value]="adminInquiries" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
       <ng-template pTemplate="header">
@@ -248,50 +248,7 @@
     </p-table>
   </p-card>
 
-  <p-card class="table-card" id="messages">
-    <ng-template pTemplate="header">
-      <h2><i class="pi pi-envelope"></i> פניות מדף צור קשר</h2>
-    </ng-template>
-    <p-table [value]="contactMessages" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>מזהה</th>
-          <th>שם</th>
-          <th>אימייל</th>
-          <th>נושא</th>
-          <th>תאריך</th>
-          <th>סטטוס</th>
-          <th>פעולות</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-message>
-        <tr>
-          <td>{{ message.id }}</td>
-          <td>{{ message.name }}</td>
-          <td>{{ message.email }}</td>
-          <td>{{ message.subject }}</td>
-          <td>{{ message.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>
-            <p-select [options]="messageStatusOptions" [(ngModel)]="message.status" 
-                        (onChange)="updateMessageStatus(message, $event.value)"
-                        [style]="{'width': '120px'}">
-              <ng-template pTemplate="selectedItem">
-                <p-tag [value]="message.status" [severity]="getMessageStatusSeverity(message.status)"></p-tag>
-              </ng-template>
-              <ng-template let-option pTemplate="item">
-                <p-tag [value]="option.label" [severity]="getMessageStatusSeverity(option.value)"></p-tag>
-              </ng-template>
-            </p-select>
-          </td>
-          <td>
-            <p-button icon="pi pi-eye" [text]="true" (onClick)="viewMessageDetails(message)" pTooltip="צפה"></p-button>
-            <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteMessage(message.id)" pTooltip="מחק"></p-button>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-<!-- User Details Dialog -->
+<!-- Dialogs remain the same -->
 <p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{width: '50vw'}" header="פרטי משתמש">
   <div *ngIf="selectedUser" class="details-dialog">
     <div class="detail-row">
@@ -321,7 +278,6 @@
   </div>
 </p-dialog>
 
-<!-- Product Details Dialog -->
 <p-dialog [(visible)]="displayProductDialog" [modal]="true" [style]="{width: '95vw', maxWidth: '1400px'}" header="פרטי מוצר" [maximizable]="true">
   <app-product-details *ngIf="selectedProductId" [productId]="selectedProductId" [isEmbedded]="true"></app-product-details>
   <div *ngIf="!selectedProductId" class="p-4 text-center">
@@ -330,7 +286,6 @@
   </div>
 </p-dialog>
 
-<!-- Order Details Dialog -->
 <p-dialog [(visible)]="displayOrderDialog" [modal]="true" [style]="{width: '60vw'}" header="פרטי הזמנה">
   <div *ngIf="selectedOrder" class="details-dialog">
     <div class="detail-row">
@@ -358,46 +313,6 @@
           <p><strong>תאריך התחלה:</strong> {{ item.startDate | date:'dd/MM/yyyy' }}</p>
           <p><strong>תאריך סיום:</strong> {{ item.endDate | date:'dd/MM/yyyy' }}</p>
         </div>
-      </div>
-    </div>
-  </div>
-</p-dialog>
-
-<!-- Message Details Dialog -->
-<p-dialog [(visible)]="displayMessageDialog" [modal]="true" [style]="{width: '600px'}" header="פרטי פנייה">
-  <div *ngIf="selectedMessage" class="details-dialog">
-    <div class="detail-row">
-      <strong>מזהה:</strong>
-      <span>{{ selectedMessage.id }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>שם:</strong>
-      <span>{{ selectedMessage.name }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>אימייל:</strong>
-      <span>{{ selectedMessage.email }}</span>
-    </div>
-    <div class="detail-row" *ngIf="selectedMessage.phone">
-      <strong>טלפון:</strong>
-      <span>{{ selectedMessage.phone }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>נושא:</strong>
-      <span>{{ selectedMessage.subject }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>תאריך:</strong>
-      <span>{{ selectedMessage.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-    <div class="detail-row">
-      <strong>סטטוס:</strong>
-      <p-tag [value]="selectedMessage.status" [severity]="getMessageStatusSeverity(selectedMessage.status)"></p-tag>
-    </div>
-    <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
-      <strong class="mb-2">הודעה:</strong>
-      <div class="message-content">
-        {{ selectedMessage.message }}
       </div>
     </div>
   </div>
@@ -491,3 +406,4 @@
 
 <p-confirmDialog></p-confirmDialog>
 <p-toast></p-toast>
+</div>

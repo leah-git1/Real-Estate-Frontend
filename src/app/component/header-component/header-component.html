@@ -25,6 +25,42 @@
       </div>
     </nav>
     
+    <div class="search-section">
+      <div class="search-container">
+        <i class="pi pi-search search-icon"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchInput()" 
+          (keyup.enter)="onSearchEnter()"
+          placeholder="חיפוש נכס..."
+          class="search-input"
+        />
+        <div *ngIf="searchResults.length > 0 && showSearchResults" class="search-dropdown">
+          <div *ngFor="let product of searchResults" class="search-result-item" (click)="navigateToProduct(product.productId)">
+            <img [src]="product.imageUrl || 'assets/placeholder.jpg'" [alt]="product.title" class="result-image">
+            <div class="result-info">
+              <div class="result-title">{{ product.title }}</div>
+              <div class="result-details">
+                <span class="result-city"><i class="pi pi-map-marker"></i> {{ product.city }}</span>
+                <span class="result-price">₪{{ product.price | number }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="search-footer" (click)="viewAllResults()">
+            <span>ראה עוד תוצאות</span>
+            <i class="pi pi-arrow-left"></i>
+          </div>
+        </div>
+        <div *ngIf="searchQuery && searchResults.length === 0 && !isSearching && showSearchResults" class="search-dropdown">
+          <div class="no-results">
+            <i class="pi pi-info-circle"></i>
+            <span>לא נמצאו תוצאות</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="actions-section">
       <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button" routerLink="/add-product"></p-button>
       <p-button *ngIf="isAdmin()" label="ניהול מערכת" icon="pi pi-shield" styleClass="cta-button" routerLink="/admin"></p-button>
