@@ -10,6 +10,7 @@ import { CategoryService } from '../../services/category-service';
 import { CategoryDTOModel } from '../../models/category/category-model';
 import { UserService } from '../../services/user-service';
 import { CartService } from '../../services/cart-service';
+import { FavoritesService } from '../../services/favorites-service';
 import { ProductService } from '../../services/product-service';
 import { debounceTime, Subject } from 'rxjs';
 
@@ -22,6 +23,7 @@ import { debounceTime, Subject } from 'rxjs';
 })
 export class HeaderComponent implements OnInit {
   cartItemCount = 0;
+  favoritesCount = 0;
   categories: CategoryDTOModel[] = [];
   currentUser: any = null;
   showUserMenu = false;
@@ -36,6 +38,7 @@ export class HeaderComponent implements OnInit {
     private categoryService: CategoryService,
     private userService: UserService,
     private cartService: CartService,
+    private favoritesService: FavoritesService,
     private productService: ProductService,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -53,6 +56,11 @@ export class HeaderComponent implements OnInit {
     
     this.cartService.getCart().subscribe(items => {
       this.cartItemCount = items.length;
+      this.cdr.detectChanges();
+    });
+    
+    this.favoritesService.favorites$.subscribe(favorites => {
+      this.favoritesCount = favorites.length;
       this.cdr.detectChanges();
     });
     
@@ -83,6 +91,7 @@ export class HeaderComponent implements OnInit {
   performSearch(query: string) {
     this.productService.searchProducts(query).subscribe({
       next: (results) => {
+        console.log('Search results:', results);
         this.searchResults = results.slice(0, 7);
         this.isSearching = false;
         this.cdr.detectChanges();
@@ -104,7 +113,7 @@ export class HeaderComponent implements OnInit {
   navigateToProduct(productId: number) {
     this.showSearchResults = false;
     this.searchQuery = '';
-    this.router.navigate(['/product', productId]);
+    this.router.navigate(['/product-details', productId]);
   }
   
   viewAllResults() {
@@ -127,5 +136,23 @@ export class HeaderComponent implements OnInit {
 
   toggleUserMenu() {
     this.showUserMenu = !this.showUserMenu;
+  }
+
+  addProduct() {
+    if (this.userService.isLoggedIn()) {
+      this.router.navigate(['/add-product']);
+    } else {
+      localStorage.setItem('returnUrl', '/add-product');
+      this.router.navigate(['/auth']);
+    }
+  }
+
+  getProductImageUrl(imageUrl: string): string {
+    if (!imageUrl) return 'assets/placeholder.jpg';
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    const serverUrl = 'https://localhost:44305';
+    return serverUrl + '/' + imageUrl;
   }
 }

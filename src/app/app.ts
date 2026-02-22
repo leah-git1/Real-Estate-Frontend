@@ -3,13 +3,14 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from './component/header-component/header-component';
 import { CartSidebarComponent } from './component/cart-sidebar/cart-sidebar.component';
+import { FavoritesSidebarComponent } from './component/favorites-sidebar/favorites-sidebar.component';
 import { FooterComponent } from './component/footer-component/footer-component';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastModule, HeaderComponent, CartSidebarComponent, FooterComponent],
+  imports: [RouterOutlet, ToastModule, HeaderComponent, CartSidebarComponent, FavoritesSidebarComponent, FooterComponent],
   templateUrl: './app.html'
 })
 export class AppComponent implements OnInit {

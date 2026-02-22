@@ -33,12 +33,15 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // טעינה ראשונית - תמיד טוענים מוצרים
     this.route.queryParams.subscribe(params => {
       this.currentFilters = {};
+      
       if (params['categoryIds']) {
         const categoryId = +params['categoryIds'];
         this.currentFilters.categoryIds = [categoryId];
       }
+      
       this.currentPage = 1;
       this.loadProducts();
     });

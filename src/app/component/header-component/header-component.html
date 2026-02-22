@@ -38,7 +38,7 @@
         />
         <div *ngIf="searchResults.length > 0 && showSearchResults" class="search-dropdown">
           <div *ngFor="let product of searchResults" class="search-result-item" (click)="navigateToProduct(product.productId)">
-            <img [src]="product.imageUrl || 'assets/placeholder.jpg'" [alt]="product.title" class="result-image">
+            <img [src]="getProductImageUrl(product.imageUrl)" [alt]="product.title" class="result-image">
             <div class="result-info">
               <div class="result-title">{{ product.title }}</div>
               <div class="result-details">
@@ -62,7 +62,7 @@
     </div>
     
     <div class="actions-section">
-      <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button" routerLink="/add-product"></p-button>
+      <p-button label="לפרסום באתר" icon="pi pi-plus" styleClass="cta-button" (onClick)="addProduct()"></p-button>
       <p-button *ngIf="isAdmin()" label="ניהול מערכת" icon="pi pi-shield" styleClass="cta-button" routerLink="/admin"></p-button>
       
       <div class="user-menu" *ngIf="isLoggedIn(); else loginLink" style="position: relative;">
@@ -127,6 +127,10 @@
       
       <a routerLink="/cart" class="icon-link cart-link" pBadge [value]="cartItemCount.toString()" severity="danger">
         <i class="pi pi-shopping-cart"></i>
+      </a>
+      
+      <a routerLink="/favorites" class="icon-link favorites-link" pBadge [value]="favoritesCount.toString()" severity="success">
+        <i class="pi pi-heart"></i>
       </a>
     </div>
   </div>

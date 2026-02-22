@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ProductSummaryDTOModel } from '../../models/product/product-model';
 import { UserService } from '../../services/user-service';
 import { CartService } from '../../services/cart-service';
+import { FavoritesService } from '../../services/favorites-service';
 import { OrderService } from '../../services/order-service';
 import { CartItem } from '../../models/cart/cart-item.model';
 import { DialogModule } from 'primeng/dialog';
@@ -37,6 +38,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
     private router: Router, 
     private userService: UserService,
     private cartService: CartService,
+    private favoritesService: FavoritesService,
     private productService: ProductService,
     private orderService: OrderService,
     private cdr: ChangeDetectorRef
@@ -44,6 +46,8 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.updateImageUrl();
+    console.log('Product data:', this.product);
+    console.log('TransactionType:', this.product?.transactionType);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -273,8 +277,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
   getCommissionRate(): string {
     const type = this.product?.transactionType;
     switch(type) {
+      case 'Sale': 
       case 'מכירה': return '1%';
+      case 'Rent':
       case 'השכרה': return 'חודש שלם';
+      case 'Vacation':
       case 'נופש': return '3%';
       default: return '2%';
     }
@@ -282,15 +289,54 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   getBuyerCommission(): number {
     if (!this.productDetails) return 0;
-    const type = this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
-                 this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    const type = this.productDetails.transactionType === 'Sale' || this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.transactionType === 'Rent' || this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
     return calculateBuyerCommission(this.productDetails.price, type);
   }
 
   getTotalPrice(): number {
     if (!this.productDetails) return 0;
-    const type = this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
-                 this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    const type = this.productDetails.transactionType === 'Sale' || this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.transactionType === 'Rent' || this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
     return calculateTotalPrice(this.productDetails.price, type);
+  }
+
+  getTransactionTypeLabel(type: string): string {
+    switch(type) {
+      case 'Sale': return 'מכירה';
+      case 'Rent': return 'השכרה';
+      case 'Vacation': return 'נופש';
+      default: return type;
+    }
+  }
+
+  isSaleType(): boolean {
+    return this.product?.transactionType === 'Sale' || this.product?.transactionType === 'מכירה';
+  }
+
+  isVacationType(): boolean {
+    return this.product?.transactionType === 'Vacation' || this.product?.transactionType === 'נופש';
+  }
+
+  addToFavorites(product: any) {
+    const wasAdded = this.favoritesService.addToFavorites({
+      productId: product.productId,
+      title: product.title,
+      price: product.price,
+      imageUrl: this.imageUrl,
+      city: product.city,
+      TransactionType: product.transactionType,
+      description: '',
+      categoryId: product.categoryId,
+      ownerId: product.ownerId,
+      isAvailable: true,
+      productImages: []
+    });
+    
+    if (wasAdded) {
+      this.favoritesService.showFavorites();
+    } else {
+      alert('המוצר כבר נמצא במועדפים!');
+    }
   }
 }

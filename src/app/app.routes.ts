@@ -12,6 +12,7 @@ import { CartComponent } from './component/cart-component/cart-component';
 import { CheckoutComponent } from './component/checkout-component/checkout-component';
 import { OrderSuccessComponent } from './component/order-success-component/order-success-component';
 import { ContactComponent } from './component/contact-component/contact-component';
+import { FavoritesComponent } from './component/favorites-component/favorites-component';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'products', component: ProductListComponent },
   { path: 'auth', component: AuthComponent },
   { path: 'cart', component: CartComponent },
+  { path: 'favorites', component: FavoritesComponent },
   { path: 'checkout', component: CheckoutComponent },
   { path: 'order-success', component: OrderSuccessComponent },
   { path: 'add-product', component: AddProductComponent },

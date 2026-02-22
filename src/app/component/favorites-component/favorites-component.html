@@ -1,0 +1,41 @@
+<div class="container p-5">
+  <h1 class="text-4xl font-bold mb-4"><i class="pi pi-heart-fill text-red-500 mr-2"></i>המועדפים שלי</h1>
+
+  <div *ngIf="favorites.length === 0" class="text-center p-8">
+    <i class="pi pi-heart" style="font-size: 4rem; color: #ccc;"></i>
+    <p class="text-xl mt-4 text-600">אין לך מועדפים עדיין</p>
+    <p class="text-500">שמור נכסים שמעניינים אותך כדי לראות אותם כאן</p>
+    <button pButton label="חזרה לקטלוג" icon="pi pi-arrow-right" 
+            [routerLink]="['/products']" class="mt-4"></button>
+  </div>
+
+  <div *ngIf="favorites.length > 0" class="grid">
+    <div *ngFor="let product of favorites" class="col-12 md:col-6 lg:col-4">
+      <p-card class="product-card h-full">
+        <ng-template pTemplate="header">
+          <img [src]="getImageUrl(product.imageUrl)" 
+               alt="{{product.title}}" 
+               class="w-full" 
+               style="height: 200px; object-fit: cover;">
+        </ng-template>
+        
+        <div class="flex flex-column h-full">
+          <h3 class="text-xl font-bold mb-2">{{product.title}}</h3>
+          <p class="text-600 mb-2"><i class="pi pi-map-marker mr-1"></i>{{product.city}}</p>
+          <p class="text-2xl font-bold text-primary mb-3">₪{{product.price | number}}</p>
+          
+          <div class="flex gap-2 mt-auto">
+            <button pButton label="צפה בפרטים" icon="pi pi-eye" 
+                    [routerLink]="['/product-details', product.productId]" 
+                    class="flex-1"></button>
+            <button pButton icon="pi pi-trash" 
+                    severity="danger"
+                    [text]="true"
+                    (click)="removeFromFavorites(product.productId)"
+                    pTooltip="הסר ממועדפים"></button>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
+import { FavoritesService } from '../../services/favorites-service';
 import { UserService } from '../../services/user-service';
 import { PropertyInquiryService } from '../../services/property-inquiry-service';
 import { CommonModule } from '@angular/common';
@@ -54,6 +55,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     private productService: ProductService,
     private orderService: OrderService,
     private cartService: CartService,
+    private favoritesService: FavoritesService,
     private userService: UserService,
     private propertyInquiryService: PropertyInquiryService,
     private cdr: ChangeDetectorRef,
@@ -66,6 +68,9 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
         if (params['returnTo'] === 'profile') {
           this.returnUrl = '/profile';
           this.returnTab = params['tab'] ? +params['tab'] : 0;
+        }
+        if (params['openContact'] === 'true') {
+          setTimeout(() => this.openContactDialog(), 500);
         }
       });
       
@@ -257,6 +262,35 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
 
   previousImage() {
     this.activeIndex = this.activeIndex === 0 ? this.images.length - 1 : this.activeIndex - 1;
+    this.cdr.detectChanges();
+  }
+
+  isRentType(): boolean {
+    return this.product?.transactionType === 'Vacation';
+  }
+
+  isSaleOrLongTermRent(): boolean {
+    return this.product?.transactionType === 'Sale' || this.product?.transactionType === 'Rent';
+  }
+
+  isFavorite(): boolean {
+    return this.product ? this.favoritesService.isFavorite(this.product.productId) : false;
+  }
+
+  toggleFavorite(): void {
+    if (!this.product) return;
+    
+    if (this.isFavorite()) {
+      this.favoritesService.removeFromFavorites(this.product.productId);
+      alert('המוצר הוסר מהמועדפים');
+    } else {
+      const wasAdded = this.favoritesService.addToFavorites(this.product);
+      if (wasAdded) {
+        this.favoritesService.showFavorites();
+      } else {
+        alert('המוצר כבר נמצא במועדפים!');
+      }
+    }
     this.cdr.detectChanges();
   }
 
