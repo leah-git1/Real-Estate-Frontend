@@ -31,7 +31,7 @@
             </div>
           </div>
 
-          <div class="bg-yellow-50 border-3 border-yellow-400 p-4 border-round mb-4" *ngIf="product.price > 0 && product.transactionType">
+          <div class="bg-yellow-50 border-3 border-yellow-400 p-4 border-round mb-4" *ngIf="product.price > 0 && product.TransactionType">
             <div class="flex align-items-center gap-2 mb-3">
               <i class="pi pi-exclamation-triangle text-yellow-700 text-2xl"></i>
               <span class="text-xl font-bold text-yellow-900">💰 חישוב מה שתקבל</span>
@@ -54,7 +54,7 @@
             </div>
           </div>
 
-          <div class="bg-orange-50 border-2 border-orange-300 p-3 border-round mb-4 text-center" *ngIf="product.price > 0 && !product.transactionType">
+          <div class="bg-orange-50 border-2 border-orange-300 p-3 border-round mb-4 text-center" *ngIf="product.price > 0 && !product.TransactionType">
             <i class="pi pi-arrow-up text-orange-600 text-2xl mb-2"></i>
             <p class="text-orange-800 font-semibold m-0">בחר סוג עסקה כדי לראות את חישוב הרווחים</p>
           </div>
@@ -87,7 +87,7 @@
 
           <div class="field mb-4">
             <label class="block font-bold mb-2">סוג עסקה *</label>
-            <select [(ngModel)]="product.transactionType" name="transactionType" required class="w-full p-3 border-1 border-300 border-round">
+            <select [(ngModel)]="product.TransactionType" name="TransactionType" required class="w-full p-3 border-1 border-300 border-round">
               <option value="" disabled selected>בחר סוג עסקה</option>
               <option *ngFor="let type of transactionTypes" [value]="type.value">{{ type.label }}</option>
             </select>

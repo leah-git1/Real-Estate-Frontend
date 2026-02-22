@@ -40,7 +40,7 @@
       <div class="mb-3">
         <div class="flex justify-content-between align-items-start mb-2">
           <h1 class="text-3xl font-bold text-900 m-0">{{ product.title }}</h1>
-          <span class="p-tag p-tag-warning text-sm px-2 py-1">{{ product.transactionType }}</span>
+          <span class="p-tag p-tag-warning text-sm px-2 py-1">{{ product.TransactionType }}</span>
         </div>
         <p class="text-600 text-lg m-0"><i class="pi pi-map-marker mr-2"></i>{{ product.city }}</p>
       </div>
@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <div class="grid text-center border-1 border-200 border-round mb-4 p-3" *ngIf="product.transactionType !== 'Sale'">
+      <div class="grid text-center border-1 border-200 border-round mb-4 p-3" *ngIf="product.TransactionType !== 'Sale'">
         <div class="col-6 border-left-1 border-200">
           <span class="block text-500 font-semibold mb-1">חדרים</span>
           <span class="text-2xl font-bold text-900">{{ product.rooms }}</span>
@@ -83,7 +83,7 @@
         <p class="text-700 line-height-3 m-0 text-sm">{{ product.description }}</p>
       </div>
 
-      <div class="mb-4" *ngIf="product.transactionType !== 'Sale'">
+      <div class="mb-4" *ngIf="product.TransactionType !== 'Sale'">
         <label class="block font-bold mb-2 text-sm">בחירת תאריכים:</label>
         <p-datepicker [(ngModel)]="rangeDates" 
                     selectionMode="range" 

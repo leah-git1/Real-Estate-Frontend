@@ -64,7 +64,7 @@ export class EditProductComponent implements OnInit {
           rooms: data.rooms,
           beds: data.beds,
           categoryId: data.categoryId,
-          transactionType: data.transactionType
+          TransactionType: data.TransactionType
         };
         this.currentMainImage = data.imageUrl;
         this.currentAdditionalImages = data.productImages?.map((img: any) => ({
@@ -100,7 +100,7 @@ export class EditProductComponent implements OnInit {
       price: this.product.price,
       city: this.product.city,
       categoryId: this.product.categoryId,
-      transactionType: this.product.transactionType
+      TransactionType: this.product.TransactionType
     };
     if (this.product.rooms !== undefined) updateData.rooms = this.product.rooms;
     if (this.product.beds !== undefined) updateData.beds = this.product.beds;

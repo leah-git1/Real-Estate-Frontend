@@ -4,13 +4,13 @@
          style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;" 
          class="border-round"
          (click)="viewDetails(product.productId)">
-    <span *ngIf="product.transactionType" class="absolute top-0 right-0 m-2 px-3 py-1 border-round text-white font-semibold text-sm"
+    <span *ngIf="product.TransactionType" class="absolute top-0 right-0 m-2 px-3 py-1 border-round text-white font-semibold text-sm"
           [ngClass]="{
-            'bg-blue-500': product.transactionType === 'Sale' || product.transactionType === 'מכירה',
-            'bg-green-500': product.transactionType === 'Rent' || product.transactionType === 'השכרה',
-            'bg-orange-500': product.transactionType === 'Vacation' || product.transactionType === 'נופש'
+            'bg-blue-500': product.TransactionType === 'Sale' || product.TransactionType === 'מכירה',
+            'bg-green-500': product.TransactionType === 'Rent' || product.TransactionType === 'השכרה',
+            'bg-orange-500': product.TransactionType === 'Vacation' || product.TransactionType === 'נופש'
           }">
-      {{ getTransactionTypeLabel(product.transactionType) }}
+      {{ getTransactionTypeLabel(product.TransactionType) }}
     </span>
     <span *ngIf="isMyProduct" class="absolute top-0 left-0 m-2 px-3 py-1 border-round bg-purple-600 text-white font-semibold text-sm">
       <i class="pi pi-user mr-1"></i>המוצר שלי

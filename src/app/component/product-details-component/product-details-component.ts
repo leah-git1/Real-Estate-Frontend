@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Input, OnChanges, SimpleChanges, Injector } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Input, OnChanges, SimpleChanges, Injector, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
@@ -14,6 +14,8 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
+import { MessageService } from 'primeng/api';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
@@ -22,7 +24,7 @@ import { calculateBuyerCommission, calculateTotalPrice } from '../../config/comm
   templateUrl: './product-details-component.html',
   styleUrl: './product-details-component.scss'
 })
-export class ProductDetailsComponent implements OnInit, OnChanges {
+export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() productId: number | null = null;
   @Input() isEmbedded: boolean = false;
   
@@ -52,6 +54,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     email: '',
     message: ''
   };
+  
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -63,12 +67,13 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     private userService: UserService,
     private propertyInquiryService: PropertyInquiryService,
     private cdr: ChangeDetectorRef,
-    private injector: Injector
+    private injector: Injector,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
     if (!this.isEmbedded) {
-      this.route.queryParams.subscribe(params => {
+      const sub = this.route.queryParams.subscribe(params => {
         if (params['returnTo'] === 'profile') {
           this.returnUrl = '/profile';
           this.returnTab = params['tab'] ? +params['tab'] : 0;
@@ -77,6 +82,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
           setTimeout(() => this.openContactDialog(), 500);
         }
       });
+      this.subscriptions.push(sub);
       
       const id = Number(this.route.snapshot.paramMap.get('id'));
       if (id) {
@@ -85,6 +91,10 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     } else if (this.productId) {
       this.loadProduct(this.productId);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -98,7 +108,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
       next: (data) => {
         this.product = data;
         this.setupGallery(data);
-        if (data.transactionType !== 'Sale' && !this.isEmbedded) {
+        if (data.TransactionType !== 'Sale' && !this.isEmbedded) {
           this.loadOccupiedDates();
         }
         this.cdr.detectChanges();
@@ -166,9 +176,9 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
 
   onDateChange(dates: Date[] | undefined) {
     console.log('onDateChange נקרא עם:', dates);
-    console.log('Product transactionType:', this.product?.transactionType);
+    console.log('Product TransactionType:', this.product?.TransactionType);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
-      if (this.product && (this.product.transactionType === 'Rent' || this.product.transactionType === 'השכרה')) {
+      if (this.product && (this.product.TransactionType === 'Rent' || this.product.TransactionType === 'השכרה')) {
         console.log('Checking full months...');
         if (!this.isFullMonths(dates[0], dates[1])) {
           console.log('NOT full months!');
@@ -270,11 +280,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
   }
 
   isRentType(): boolean {
-    return this.product?.transactionType === 'Vacation';
+    return this.product?.TransactionType === 'Vacation';
   }
 
   isSaleOrLongTermRent(): boolean {
-    return this.product?.transactionType === 'Sale' || this.product?.transactionType === 'Rent';
+    return this.product?.TransactionType === 'Sale' || this.product?.TransactionType === 'Rent';
   }
 
   isFavorite(): boolean {
@@ -286,7 +296,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     
     if (this.isFavorite()) {
       this.favoritesService.removeFromFavorites(this.product.productId);
-      alert('המוצר הוסר מהמועדפים');
+      this.messageService.add({
+        severity: 'success',
+        summary: 'הוסר',
+        detail: 'המוצר הוסר מהמועדפים'
+      });
     } else {
       this.selectedRating = 0;
       this.hoverRating = 0;
@@ -308,7 +322,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     if (wasAdded) {
       this.favoritesService.showFavorites();
     } else {
-      alert('המוצר כבר נמצא במועדפים!');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'כבר קיים',
+        detail: 'המוצר כבר נמצא במועדפים'
+      });
     }
     this.cdr.detectChanges();
   }
@@ -324,7 +342,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
   canAddToCart(): boolean {
     console.log('בודק אם ניתן להוסיף לסל:', {
       product: !!this.product,
-      transactionType: this.product?.transactionType,
+      TransactionType: this.product?.TransactionType,
       rangeDates: this.rangeDates,
       isRangeAvailable: this.isRangeAvailable
     });
@@ -334,7 +352,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
       return false;
     }
     
-    if (this.product.transactionType === 'Sale') {
+    if (this.product.TransactionType === 'Sale') {
       console.log('מוצר למכירה - מותר');
       return true;
     }
@@ -351,11 +369,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
     
     // חישוב מחיר לפי סוג עסקה
     if (this.rangeDates && this.rangeDates[0] && this.rangeDates[1]) {
-      if (this.product.transactionType === 'Vacation') {
+      if (this.product.TransactionType === 'Vacation') {
         const nights = this.calculateNights(this.rangeDates[0], this.rangeDates[1]);
         finalPrice = this.product.price * nights;
         finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
-      } else if (this.product.transactionType === 'Rent') {
+      } else if (this.product.TransactionType === 'Rent') {
         const months = this.calculateMonths(this.rangeDates[0], this.rangeDates[1]);
         finalPrice = this.product.price * (months + 1);
       }
@@ -368,8 +386,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
       basePrice: this.product.price,
       imageUrl: this.product.imageUrl,
       city: this.product.city,
-      transactionType: this.product.transactionType === 'Sale' ? 'מכירה' : 
-                       this.product.transactionType === 'Rent' ? 'השכרה' : 'נופש',
+      transactionType: this.product.TransactionType === 'Sale' ? 'מכירה' : 
+                       this.product.TransactionType === 'Rent' ? 'השכרה' : 'נופש',
       startDate: this.rangeDates?.[0],
       endDate: this.rangeDates?.[1],
       quantity: 1
@@ -379,15 +397,15 @@ export class ProductDetailsComponent implements OnInit, OnChanges {
   }
 
   getBuyerCommission(): number {
-    return calculateBuyerCommission(this.product?.price || 0, this.product?.transactionType || 'Sale');
+    return calculateBuyerCommission(this.product?.price || 0, this.product?.TransactionType || 'Sale');
   }
 
   getTotalPrice(): number {
-    return calculateTotalPrice(this.product?.price || 0, this.product?.transactionType || 'Sale');
+    return calculateTotalPrice(this.product?.price || 0, this.product?.TransactionType || 'Sale');
   }
 
   getCommissionRate(): string {
-    const type = this.product?.transactionType?.toUpperCase();
+    const type = this.product?.TransactionType?.toUpperCase();
     switch(type) {
       case 'SALE': return '1%';
       case 'RENT': return 'חודש שלם';

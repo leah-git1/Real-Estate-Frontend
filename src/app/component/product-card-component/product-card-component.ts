@@ -13,6 +13,7 @@ import { ProductService } from '../../services/product-service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-product-card',
@@ -44,13 +45,12 @@ export class ProductCardComponent implements OnInit, OnChanges {
     private favoritesService: FavoritesService,
     private productService: ProductService,
     private orderService: OrderService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
     this.updateImageUrl();
-    console.log('Product data:', this.product);
-    console.log('TransactionType:', this.product?.transactionType);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -73,7 +73,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   // פונקציה להוספה לסל
   addToCart(product: any) {
-    if (product.transactionType === 'מכירה') {
+    if (product.TransactionType === 'מכירה') {
       // מוצר למכירה - הוסף ישירות לסל
       const cartItem: CartItem = {
         productId: product.productId,
@@ -81,7 +81,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
         price: calculateTotalPrice(product.price, 'Sale'),
         imageUrl: this.imageUrl,
         city: product.city,
-        transactionType: product.transactionType,
+        transactionType: product.TransactionType,
         quantity: 1
       };
       this.cartService.addToCart(cartItem);
@@ -124,9 +124,9 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   onDateChange(dates: Date[] | undefined) {
     console.log('onDateChange called with:', dates);
-    console.log('Product transactionType:', this.product.transactionType);
+    console.log('Product TransactionType:', this.product.TransactionType);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
-      if (this.product.transactionType === 'השכרה' || this.product.transactionType === 'Rent') {
+      if (this.product.TransactionType === 'השכרה' || this.product.TransactionType === 'Rent') {
         console.log('Checking full months...');
         if (!this.isFullMonths(dates[0], dates[1])) {
           console.log('NOT full months!');
@@ -147,7 +147,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   checkRangeAvailability(startDate: Date, endDate: Date) {
-    if (this.product.transactionType === 'השכרה' || this.product.transactionType === 'Rent') {
+    if (this.product.TransactionType === 'השכרה' || this.product.TransactionType === 'Rent') {
       if (!this.isFullMonths(startDate, endDate)) {
         this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
         this.isRangeAvailable = false;
@@ -187,11 +187,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
     if (this.selectedDates && this.selectedDates[0] && this.selectedDates[1] && this.isRangeAvailable) {
       let finalPrice = this.product.price;
       
-      if (this.product.transactionType === 'נופש') {
+      if (this.product.TransactionType === 'נופש') {
         const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
         finalPrice = this.product.price * nights;
         finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
-      } else if (this.product.transactionType === 'השכרה') {
+      } else if (this.product.TransactionType === 'השכרה') {
         const months = this.calculateMonths(this.selectedDates[0], this.selectedDates[1]);
         finalPrice = this.product.price * (months + 1);
       }
@@ -203,7 +203,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
         basePrice: this.product.price,
         imageUrl: this.imageUrl,
         city: this.product.city,
-        transactionType: this.product.transactionType,
+        transactionType: this.product.TransactionType,
         startDate: this.selectedDates[0],
         endDate: this.selectedDates[1],
         quantity: 1
@@ -278,7 +278,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   getCommissionRate(): string {
-    const type = this.product?.transactionType;
+    const type = this.product?.TransactionType;
     switch(type) {
       case 'Sale': 
       case 'מכירה': return '1%';
@@ -292,15 +292,15 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   getBuyerCommission(): number {
     if (!this.productDetails) return 0;
-    const type = this.productDetails.transactionType === 'Sale' || this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
-                 this.productDetails.transactionType === 'Rent' || this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    const type = this.productDetails.TransactionType === 'Sale' || this.productDetails.TransactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.TransactionType === 'Rent' || this.productDetails.TransactionType === 'השכרה' ? 'Rent' : 'Vacation';
     return calculateBuyerCommission(this.productDetails.price, type);
   }
 
   getTotalPrice(): number {
     if (!this.productDetails) return 0;
-    const type = this.productDetails.transactionType === 'Sale' || this.productDetails.transactionType === 'מכירה' ? 'Sale' : 
-                 this.productDetails.transactionType === 'Rent' || this.productDetails.transactionType === 'השכרה' ? 'Rent' : 'Vacation';
+    const type = this.productDetails.TransactionType === 'Sale' || this.productDetails.TransactionType === 'מכירה' ? 'Sale' : 
+                 this.productDetails.TransactionType === 'Rent' || this.productDetails.TransactionType === 'השכרה' ? 'Rent' : 'Vacation';
     return calculateTotalPrice(this.productDetails.price, type);
   }
 
@@ -314,11 +314,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   isSaleType(): boolean {
-    return this.product?.transactionType === 'Sale' || this.product?.transactionType === 'מכירה';
+    return this.product?.TransactionType === 'Sale' || this.product?.TransactionType === 'מכירה';
   }
 
   isVacationType(): boolean {
-    return this.product?.transactionType === 'Vacation' || this.product?.transactionType === 'נופש';
+    return this.product?.TransactionType === 'Vacation' || this.product?.TransactionType === 'נופש';
   }
 
   addToFavorites(product: any) {
@@ -338,7 +338,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
       price: this.product.price,
       imageUrl: this.imageUrl,
       city: this.product.city,
-      TransactionType: this.product.transactionType,
+      TransactionType: this.product.TransactionType,
       description: '',
       categoryId: this.product.categoryId,
       ownerId: this.product.ownerId,
@@ -352,7 +352,11 @@ export class ProductCardComponent implements OnInit, OnChanges {
     if (wasAdded) {
       this.favoritesService.showFavorites();
     } else {
-      alert('המוצר כבר נמצא במועדפים!');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'כבר קיים',
+        detail: 'המוצר כבר נמצא במועדפים'
+      });
     }
   }
 

@@ -29,7 +29,7 @@ export class ProductSummaryDTOModel {
     beds?: number;
     rooms?: number;
     categoryCategoryName: string = '';
-    transactionType: string = '';
+    TransactionType: string = ''; // שינוי ל-T גדולה
     categoryId?: number;
     ownerId?: number;
     isAvailable?: boolean | number;
@@ -47,7 +47,7 @@ export class ProductDetailsDTOModel {
     rooms?: number;
     categoryId?: number;
     ownerId?: number;
-    transactionType: string = '';
+    TransactionType: string = '';
 }
 
 export class ProductCreateDTOModel {
@@ -61,7 +61,7 @@ export class ProductCreateDTOModel {
     city: string = '';
     beds: number = 0;
     rooms: number = 0;
-    transactionType: string = '';
+    TransactionType: string = '';
 }
 
 export class ProductUpdateDTOModel {
@@ -74,6 +74,6 @@ export class ProductUpdateDTOModel {
     city?: string;
     beds?: number;
     rooms?: number;
-    transactionType?: string;
+    TransactionType?: string;
     isAvailable?: boolean;
 }

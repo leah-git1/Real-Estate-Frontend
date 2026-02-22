@@ -13,6 +13,8 @@ import { CartService } from '../../services/cart-service';
 import { FavoritesService } from '../../services/favorites-service';
 import { ProductService } from '../../services/product-service';
 import { debounceTime, Subject } from 'rxjs';
+import { OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header-component',
@@ -21,7 +23,7 @@ import { debounceTime, Subject } from 'rxjs';
   templateUrl: './header-component.html',
   styleUrl: './header-component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   cartItemCount = 0;
   favoritesCount = 0;
   categories: CategoryDTOModel[] = [];
@@ -33,6 +35,7 @@ export class HeaderComponent implements OnInit {
   showSearchResults = false;
   isSearching = false;
   private searchSubject = new Subject<string>();
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private categoryService: CategoryService,
@@ -45,28 +48,37 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.categoryService.getCategories().subscribe({
+    const sub1 = this.categoryService.getCategories().subscribe({
       next: (data) => {
         this.categories = data;
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching categories:', err)
     });
+    this.subscriptions.push(sub1);
+    
     this.currentUser = this.userService.getCurrentUser();
     
-    this.cartService.getCart().subscribe(items => {
+    const sub2 = this.cartService.getCart().subscribe(items => {
       this.cartItemCount = items.length;
       this.cdr.detectChanges();
     });
+    this.subscriptions.push(sub2);
     
-    this.favoritesService.favorites$.subscribe(favorites => {
+    const sub3 = this.favoritesService.favorites$.subscribe(favorites => {
       this.favoritesCount = favorites.length;
       this.cdr.detectChanges();
     });
+    this.subscriptions.push(sub3);
     
-    this.searchSubject.pipe(debounceTime(300)).subscribe(query => {
+    const sub4 = this.searchSubject.pipe(debounceTime(300)).subscribe(query => {
       this.performSearch(query);
     });
+    this.subscriptions.push(sub4);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
   
   @HostListener('document:click', ['$event'])
@@ -91,7 +103,6 @@ export class HeaderComponent implements OnInit {
   performSearch(query: string) {
     this.productService.searchProducts(query).subscribe({
       next: (results) => {
-        console.log('Search results:', results);
         this.searchResults = results.slice(0, 7);
         this.isSearching = false;
         this.cdr.detectChanges();

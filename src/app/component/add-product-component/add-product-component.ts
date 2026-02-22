@@ -181,19 +181,19 @@ export class AddProductComponent implements OnInit {
   }
 
   getSellerCommission(): number {
-    return calculateSellerCommission(this.product.price || 0, this.product.transactionType || 'Sale');
+    return calculateSellerCommission(this.product.price || 0, this.product.TransactionType || 'Sale');
   }
 
   getSellerReceives(): number {
-    return calculateSellerReceives(this.product.price || 0, this.product.transactionType || 'Sale');
+    return calculateSellerReceives(this.product.price || 0, this.product.TransactionType || 'Sale');
   }
 
   getCommissionInfo(): string {
-    return getCommissionText(this.product.transactionType || 'Sale');
+    return getCommissionText(this.product.TransactionType || 'Sale');
   }
 
   getSellerRate(): string {
-    const type = this.product.transactionType?.toUpperCase();
+    const type = this.product.TransactionType?.toUpperCase();
     switch(type) {
       case 'SALE': return '1%';
       case 'RENT': return '0%';
@@ -203,7 +203,7 @@ export class AddProductComponent implements OnInit {
   }
 
   getBuyerRate(): string {
-    const type = this.product.transactionType?.toUpperCase();
+    const type = this.product.TransactionType?.toUpperCase();
     switch(type) {
       case 'SALE': return '1%';
       case 'RENT': return 'חודש שלם';
@@ -213,6 +213,6 @@ export class AddProductComponent implements OnInit {
   }
 
   getBuyerCommission(): number {
-    return calculateBuyerCommission(this.product.price || 0, this.product.transactionType || 'Sale');
+    return calculateBuyerCommission(this.product.price || 0, this.product.TransactionType || 'Sale');
   }
 }

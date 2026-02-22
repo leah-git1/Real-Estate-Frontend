@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../services/product-service'; 
 import { ProductSummaryDTOModel } from '../../models/product/product-model'; 
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { ProductFilterComponent } from '../product-filter-component/product-filter-component';
 import { ProductCardComponent } from '../product-card-component/product-card-component';
 import { PaginatorModule } from 'primeng/paginator';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-product-list',
@@ -20,12 +21,13 @@ import { PaginatorModule } from 'primeng/paginator';
   styleUrl: './product-list-component.scss',
 })
 
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
   products: ProductSummaryDTOModel[] = [];
   totalRecords: number = 0;
   rows: number = 9;
   currentPage: number = 1;
   currentFilters: any = {};
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private productService: ProductService,
@@ -33,8 +35,7 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // טעינה ראשונית - תמיד טוענים מוצרים
-    this.route.queryParams.subscribe(params => {
+    const sub = this.route.queryParams.subscribe(params => {
       this.currentFilters = {};
       
       if (params['categoryIds']) {
@@ -45,28 +46,24 @@ export class ProductListComponent implements OnInit {
       this.currentPage = 1;
       this.loadProducts();
     });
+    this.subscriptions.push(sub);
   }
 
-  // פונקציה המופעלת כשהבן (Filter) שולח נתוני סינון חדשים
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
   handleFilter(filters: any) {
-    console.log('סינון חדש התקבל מהפילטר:', filters);
     this.currentFilters = filters;
-    this.currentPage = 1; // תמיד חוזרים לדף הראשון בחיפוש חדש
+    this.currentPage = 1;
     this.loadProducts();
   }
 
   loadProducts(event?: any) {
-    // עדכון פרמטרי הדפדוף במידה והגיעו מה-Paginator
     if (event) {
       this.currentPage = (event.first / event.rows) + 1;
       this.rows = event.rows;
     }
-
-    console.log('שולח בקשה ל-API עם הפרמטרים הבאים:', {
-      filters: this.currentFilters,
-      page: this.currentPage,
-      pageSize: this.rows
-    });
 
     this.productService.getProducts(
       this.currentFilters.categoryIds || [],
@@ -79,21 +76,16 @@ export class ProductListComponent implements OnInit {
       this.rows
     ).subscribe({
       next: (response) => {
-        console.log('תגובה מה-API בתוך ה-Component:', response);
-        
         if (response && response.data) {
           this.products = response.data;
           this.totalRecords = response.totalItems;
-          console.log('מערך המוצרים עודכן בהצלחה. כמות:', this.products.length);
-          console.log('דוגמה למוצר:', this.products[0]);
         } else {
-          console.warn('ה-API החזיר תשובה תקינה אך ללא נתונים במערך ה-data');
           this.products = [];
           this.totalRecords = 0;
         }
       },
       error: (err) => {
-        console.error('שגיאה חמורה בשליפת נתונים מהשרת:', err);
+        console.error('שגיאה בשליפת מוצרים:', err);
       }
     });
   }
