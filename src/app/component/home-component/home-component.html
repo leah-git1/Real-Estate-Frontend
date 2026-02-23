@@ -1,6 +1,6 @@
 <div class="home-page">
   <!-- Hero Section -->
-  <section class="hero-section">
+  <section class="hero-section" @fadeInUp>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <h1 class="hero-title">מצא את בית החלומות שלך</h1>
@@ -11,9 +11,9 @@
   </section>
 
   <!-- Features Section -->
-  <section class="features-section">
+  <section class="features-section" @fadeInUp>
     <div class="container">
-      <div class="grid">
+      <div class="grid" [@staggerFadeIn]="featuredProducts.length">
         <div class="col-12 md:col-4 text-center p-4">
           <i class="pi pi-home feature-icon"></i>
           <h3>מגוון רחב</h3>
@@ -34,7 +34,7 @@
   </section>
 
   <!-- Featured Products -->
-  <section class="featured-section">
+  <section class="featured-section" @fadeInUp>
     <div class="container">
       <div class="section-header text-center mb-5">
         <h2 class="section-title">נכסים מומלצים</h2>
@@ -82,7 +82,7 @@
   </section>
 
   <!-- CTA Section -->
-  <section class="cta-section">
+  <section class="cta-section" @fadeInUp>
     <div class="container text-center">
       <h2 class="cta-title">מוכר או משכיר נכס?</h2>
       <p class="cta-subtitle">פרסם את הנכס שלך בקלות והגע לאלפי קונים פוטנציאליים</p>
@@ -92,7 +92,7 @@
   </section>
 
   <!-- Final CTA -->
-  <section class="final-cta-section">
+  <section class="final-cta-section" @fadeInUp>
     <div class="container text-center">
       <h2 class="cta-title">מוכן למצוא את הנכס המושלם?</h2>
       <p class="cta-subtitle">הצטרף לאלפי לקוחות מרוצים שמצאו את ביתם איתנו</p>

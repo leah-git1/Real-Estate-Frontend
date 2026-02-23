@@ -6,19 +6,28 @@
   <div class="tabs-container">
     <div class="tabs-header">
       <button class="tab-button" [class.active]="activeTab === 0" (click)="setActiveTab(0)">
-        <i class="pi pi-chart-line"></i> סטטיסטיקות
+        <i class="pi pi-chart-line"></i>
+        <span>סטטיסטיקות</span>
       </button>
       <button class="tab-button" [class.active]="activeTab === 1" (click)="setActiveTab(1)">
-        <i class="pi pi-users"></i> משתמשים
+        <i class="pi pi-users"></i>
+        <span>משתמשים</span>
       </button>
       <button class="tab-button" [class.active]="activeTab === 2" (click)="setActiveTab(2)">
-        <i class="pi pi-box"></i> נכסים
+        <i class="pi pi-box"></i>
+        <span>נכסים</span>
       </button>
       <button class="tab-button" [class.active]="activeTab === 3" (click)="setActiveTab(3)">
-        <i class="pi pi-shopping-cart"></i> הזמנות
+        <i class="pi pi-shopping-cart"></i>
+        <span>הזמנות</span>
       </button>
       <button class="tab-button" [class.active]="activeTab === 4" (click)="setActiveTab(4)">
-        <i class="pi pi-envelope"></i> פניות
+        <i class="pi pi-envelope"></i>
+        <span>פניות</span>
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 5" (click)="setActiveTab(5)">
+        <i class="pi pi-tags"></i>
+        <span>קטגוריות</span>
       </button>
     </div>
 
@@ -58,10 +67,10 @@
           
           <p-card class="stat-card revenue-card">
             <div class="stat-content">
-              <i class="pi pi-dollar stat-icon"></i>
+              <i class="pi pi-envelope stat-icon"></i>
               <div class="stat-details">
-                <h3>₪{{ getTotalCommissions() | number }}</h3>
-                <p>עמלות</p>
+                <h3>{{ getTotalInquiries() }}</h3>
+                <p>פניות</p>
               </div>
             </div>
           </p-card>
@@ -278,9 +287,60 @@
           </p-table>
         </p-card>
       </div>
+
+      <!-- Tab 5: Categories -->
+      <div *ngIf="activeTab === 5">
+        <p-card class="table-card">
+          <ng-template pTemplate="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h2><i class="pi pi-tags"></i> ניהול קטגוריות ({{ categories.length }})</h2>
+              <p-button label="הוסף קטגוריה" icon="pi pi-plus" (onClick)="openCategoryDialog()"></p-button>
+            </div>
+          </ng-template>
+          <p-table [value]="categories" [loading]="loading" styleClass="p-datatable-striped" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>מזהה</th>
+                <th>שם קטגוריה</th>
+                <th>תיאור</th>
+                <th>פעולות</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-category>
+              <tr>
+                <td>{{ category.categoryId }}</td>
+                <td>{{ category.categoryName }}</td>
+                <td>{{ category.description || 'אין תיאור' }}</td>
+                <td>
+                  <p-button icon="pi pi-pencil" [text]="true" (onClick)="openCategoryDialog(category)"></p-button>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteCategory(category.categoryId)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Category Dialog -->
+<p-dialog [(visible)]="displayCategoryDialog" [modal]="true" [style]="{'width': '500px'}" [header]="selectedCategory ? 'עריכת קטגוריה' : 'הוספת קטגוריה'">
+  <div class="p-4">
+    <div class="mb-3">
+      <label for="categoryName" class="block mb-2">שם קטגוריה *</label>
+      <input pInputText id="categoryName" [(ngModel)]="categoryForm.categoryName" class="w-full" />
+    </div>
+    <div class="mb-3">
+      <label for="categoryDescription" class="block mb-2">תיאור</label>
+      <textarea pInputTextarea id="categoryDescription" [(ngModel)]="categoryForm.description" rows="3" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="ביטול" severity="secondary" (onClick)="displayCategoryDialog = false"></p-button>
+    <p-button label="שמור" (onClick)="saveCategory()"></p-button>
+  </ng-template>
+</p-dialog>
 
 <!-- Dialogs -->
 <p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{'width': '500px'}" header="פרטי משתמש">

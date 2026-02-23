@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,7 +15,8 @@ interface Message {
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule],
   templateUrl: './chatbot-component.html',
-  styleUrl: './chatbot-component.scss'
+  styleUrl: './chatbot-component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class ChatbotComponent {
   isOpen = false;

@@ -155,7 +155,7 @@
       </div>
     </div>
 
-    <div class="border-top-1 border-200 pt-3">
+    <div class="border-top-1 border-200 pt-3" *ngIf="productDetails?.TransactionType === 'Vacation'">
       <h4 class="mb-3">בחר תאריכים</h4>
       <p-datepicker [(ngModel)]="selectedDates" 
                     selectionMode="range" 

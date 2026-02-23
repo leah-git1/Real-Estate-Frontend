@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -21,7 +21,7 @@ import { Router, ActivatedRoute } from '@angular/router';
   templateUrl: './user-profile-component.html',
   styleUrl: './user-profile-component.scss'
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent implements OnInit, AfterViewInit {
   currentUser: any = null;
   userForm: UserUpdateDTOModel = {};
   orders: any[] = [];
@@ -44,7 +44,8 @@ export class UserProfileComponent implements OnInit {
     private propertyInquiryService: PropertyInquiryService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit() {
@@ -75,6 +76,26 @@ export class UserProfileComponent implements OnInit {
     } else if (this.activeTab === 6) {
       this.loadInquiriesToMe();
     }
+  }
+
+  ngAfterViewInit() {
+    this.setupScrollAnimations();
+  }
+
+  setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = this.elementRef.nativeElement.querySelectorAll('.field, .product-card-edit, .order-card, p-card, .tab-button');
+    elements.forEach((element: Element) => {
+      element.classList.add('animate-on-scroll');
+      observer.observe(element);
+    });
   }
 
   loadUserData() {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -24,7 +24,7 @@ import { UserService } from '../../services/user-service';
   templateUrl: './contact-component.html',
   styleUrl: './contact-component.scss'
 })
-export class ContactComponent {
+export class ContactComponent implements AfterViewInit {
   contactForm = {
     name: '',
     email: '',
@@ -36,8 +36,29 @@ export class ContactComponent {
   constructor(
     private messageService: MessageService,
     private adminInquiryService: AdminInquiryService,
-    private userService: UserService
+    private userService: UserService,
+    private elementRef: ElementRef
   ) {}
+
+  ngAfterViewInit() {
+    this.setupScrollAnimations();
+  }
+
+  setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = this.elementRef.nativeElement.querySelectorAll('.field, .contact-info-item, .faq-item, h1, p');
+    elements.forEach((element: Element) => {
+      element.classList.add('animate-on-scroll');
+      observer.observe(element);
+    });
+  }
 
   onSubmit() {
     if (this.isFormValid()) {

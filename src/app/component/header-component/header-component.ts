@@ -29,6 +29,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   categories: CategoryDTOModel[] = [];
   currentUser: any = null;
   showUserMenu = false;
+  showAdminMenu = false;
+
+  navigateToAdminTab(tab: number) {
+    this.showAdminMenu = false;
+    this.router.navigate(['/admin'], { queryParams: { tab: tab } });
+  }
   
   searchQuery = '';
   searchResults: any[] = [];

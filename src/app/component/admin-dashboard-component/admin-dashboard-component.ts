@@ -1,6 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -10,6 +11,8 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AdminService } from '../../services/admin-service';
 import { AdminStatisticsModel } from '../../models/admin/admin-model';
@@ -20,17 +23,19 @@ import { OrderService } from '../../services/order-service';
 import { ContactService } from '../../services/contact-service';
 import { PropertyInquiryService } from '../../services/property-inquiry-service';
 import { AdminInquiryService } from '../../services/admin-inquiry-service';
+import { CategoryService } from '../../services/category-service';
+import { CategoryDTOModel, CategoryCreateDTOModel, CategoryUpdateDTOModel } from '../../models/category/category-model';
 import { ProductDetailsComponent } from '../product-details-component/product-details-component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, SelectModule, ChartModule, ProductDetailsComponent],
+  imports: [CommonModule, FormsModule, CardModule, TableModule, ButtonModule, TagModule, ConfirmDialogModule, ToastModule, DialogModule, SelectModule, ChartModule, InputTextModule, TextareaModule, ProductDetailsComponent],
   providers: [ConfirmationService, MessageService],
   templateUrl: './admin-dashboard-component.html',
   styleUrl: './admin-dashboard-component.scss'
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, AfterViewInit {
   activeTab: number = 0;
   statistics: AdminStatisticsModel = new AdminStatisticsModel();
   users: UserProfileDTOModel[] = [];
@@ -62,6 +67,14 @@ export class AdminDashboardComponent implements OnInit {
   displayAdminInquiryDialog = false;
   selectedAdminInquiry: any = null;
   
+  categories: CategoryDTOModel[] = [];
+  displayCategoryDialog = false;
+  selectedCategory: CategoryDTOModel | null = null;
+  categoryForm = {
+    categoryName: '',
+    description: ''
+  };
+  
   inquiryStatusOptions = [
     { label: 'חדש', value: 'New' },
     { label: 'בטיפול', value: 'InProgress' },
@@ -89,14 +102,43 @@ export class AdminDashboardComponent implements OnInit {
     private contactService: ContactService,
     private propertyInquiryService: PropertyInquiryService,
     private adminInquiryService: AdminInquiryService,
+    private categoryService: CategoryService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.activeTab = +params['tab'];
+        this.cdr.detectChanges();
+      }
+    });
     this.loadData();
     this.initCharts();
+  }
+  
+  ngAfterViewInit() {
+    this.setupScrollAnimations();
+  }
+
+  setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = this.elementRef.nativeElement.querySelectorAll('.stat-card, .chart-card, .table-card, .tab-button');
+    elements.forEach((element: Element) => {
+      element.classList.add('animate-on-scroll');
+      observer.observe(element);
+    });
   }
   
   initCharts(): void {
@@ -189,7 +231,10 @@ export class AdminDashboardComponent implements OnInit {
         this.contactMessages = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error loading messages:', err)
+      error: (err) => {
+        this.contactMessages = [];
+        console.error('Error loading messages:', err);
+      }
     });
     
     this.propertyInquiryService.getAllInquiries().subscribe({
@@ -206,6 +251,14 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading admin inquiries:', err)
+    });
+    
+    this.categoryService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading categories:', err)
     });
   }
   
@@ -247,6 +300,7 @@ export class AdminDashboardComponent implements OnInit {
   
   setActiveTab(index: number): void {
     this.activeTab = index;
+    this.cdr.detectChanges();
   }
 
   deleteUser(userId: number): void {
@@ -373,14 +427,12 @@ export class AdminDashboardComponent implements OnInit {
     return (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
   }
   
+  getTotalInquiries(): number {
+    return this.propertyInquiries.length + this.adminInquiries.length;
+  }
+
   getTotalCommissions(): number {
-    const total = this.orders.reduce((sum, order) => {
-      const commission = this.calculateCommission(order);
-      console.log(`Order ${order.orderId} commission:`, commission);
-      return sum + commission;
-    }, 0);
-    console.log('Total commissions:', total);
-    return total;
+    return this.orders.reduce((total, order) => total + this.calculateCommission(order), 0);
   }
 
   viewUserDetails(userId: number): void {
@@ -550,6 +602,86 @@ export class AdminDashboardComponent implements OnInit {
           error: (err) => {
             this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה במחיקת הפנייה' });
             console.error('Error deleting admin inquiry:', err);
+          }
+        });
+      }
+    });
+  }
+  
+  openCategoryDialog(category?: CategoryDTOModel): void {
+    if (category) {
+      this.selectedCategory = category;
+      this.categoryForm = {
+        categoryName: category.categoryName,
+        description: category.description || ''
+      };
+    } else {
+      this.selectedCategory = null;
+      this.categoryForm = {
+        categoryName: '',
+        description: ''
+      };
+    }
+    this.displayCategoryDialog = true;
+  }
+  
+  saveCategory(): void {
+    if (!this.categoryForm.categoryName.trim()) {
+      this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'נא להזין שם קטגוריה' });
+      return;
+    }
+    
+    if (this.selectedCategory) {
+      const updateDto: CategoryUpdateDTOModel = {
+        categoryName: this.categoryForm.categoryName,
+        description: this.categoryForm.description
+      };
+      this.categoryService.updateCategory(this.selectedCategory.categoryId, updateDto).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הקטגוריה עודכנה בהצלחה' });
+          this.displayCategoryDialog = false;
+          this.loadData();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הקטגוריה' });
+          console.error('Error updating category:', err);
+        }
+      });
+    } else {
+      const createDto: CategoryCreateDTOModel = {
+        categoryName: this.categoryForm.categoryName,
+        description: this.categoryForm.description
+      };
+      this.categoryService.createCategory(createDto).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הקטגוריה נוספה בהצלחה' });
+          this.displayCategoryDialog = false;
+          this.loadData();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בהוספת הקטגוריה' });
+          console.error('Error creating category:', err);
+        }
+      });
+    }
+  }
+  
+  deleteCategory(categoryId: number): void {
+    this.confirmationService.confirm({
+      message: 'האם אתה בטוח שברצונך למחוק קטגוריה זו?',
+      header: 'אישור מחיקה',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'כן',
+      rejectLabel: 'לא',
+      accept: () => {
+        this.categoryService.deleteCategory(categoryId).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הקטגוריה נמחקה בהצלחה' });
+            this.loadData();
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה במחיקת הקטגוריה' });
+            console.error('Error deleting category:', err);
           }
         });
       }

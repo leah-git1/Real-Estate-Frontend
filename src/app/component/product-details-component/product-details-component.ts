@@ -110,10 +110,27 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   loadProduct(id: number): void {
     this.productService.getProductById(id).subscribe({
       next: (data) => {
+        console.log('Raw data from server:', data);
+        console.log('transactionType:', data.transactionType);
+        console.log('TransactionType before:', data.TransactionType);
+        
+        // נרמול השדה transactionType
+        if (data.transactionType && !data.TransactionType) {
+          data.TransactionType = data.transactionType === 'נופש' ? 'Vacation' : 
+                                 data.transactionType === 'מכירה' ? 'Sale' : 
+                                 data.transactionType === 'השכרה' ? 'Rent' : data.transactionType;
+        }
+        
+        console.log('TransactionType after:', data.TransactionType);
+        console.log('isEmbedded:', this.isEmbedded);
+        
         this.product = data;
         this.setupGallery(data);
-        if (data.TransactionType !== 'Sale' && !this.isEmbedded) {
+        if (data.TransactionType === 'Vacation') {
+          console.log('טוען תאריכים תפוסים עבור נופש');
           this.loadOccupiedDates();
+        } else {
+          console.log('לא טוען תאריכים - TransactionType:', data.TransactionType);
         }
         this.cdr.detectChanges();
       },
@@ -458,7 +475,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   submitContactForm() {
     const currentUser = this.userService.getCurrentUser();
     if (!currentUser) {
-      alert('יש להתחבר כדי ליצור קשר');
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'נדרשת התחברות',
+        detail: 'יש להתחבר כדי ליצור קשר'
+      });
       return;
     }
 
@@ -474,13 +495,21 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
 
     this.propertyInquiryService.createInquiry(inquiry).subscribe({
       next: () => {
-        alert('הפנייה נשלחה בהצלחה!');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'נשלח בהצלחה',
+          detail: 'הפנייה נשלחה למפרסם'
+        });
         this.showContactDialog = false;
         this.contactForm = { name: '', phone: '', email: '', message: '' };
       },
       error: (err) => {
         console.error('Error sending inquiry:', err);
-        alert('שגיאה בשליחת הפנייה');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'שגיאה בשליחת הפנייה'
+        });
       }
     });
   }

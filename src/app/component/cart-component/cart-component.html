@@ -1,33 +1,37 @@
-<div class="container p-5">
-  <h1 class="text-3xl font-bold mb-4">
-    <i class="pi pi-shopping-cart mr-2"></i>
-    הסל שלי
+<div class="container p-5 cart-page">
+  <h1 class="page-title text-3xl font-bold mb-4 flex align-items-center gap-3">
+    <i class="pi pi-shopping-cart"></i>
+    <span>הסל שלי</span>
   </h1>
 
-  <div *ngIf="cartItems.length === 0" class="text-center p-8 bg-white border-round shadow-1">
+  <div *ngIf="cartItems.length === 0" class="empty-state text-center p-8 bg-white border-round shadow-1">
     <i class="pi pi-shopping-cart text-6xl text-400 mb-4"></i>
     <h3 class="text-900 mb-3">הסל ריק</h3>
     <p class="text-600 mb-4">עדיין לא הוספת מוצרים לסל</p>
-    <button pButton label="המשך לקניות" icon="pi pi-arrow-right" (click)="continueShopping()"></button>
+    <button pButton label="המשך לקניות" icon="pi pi-arrow-left" iconPos="right" (click)="continueShopping()"></button>
   </div>
 
-  <div *ngIf="cartItems.length > 0" class="grid">
+  <div *ngIf="cartItems.length > 0" class="grid cart-content">
     <div class="col-12 lg:col-8">
-      <div class="card p-4 mb-3">
-        <h3 class="mb-4">פריטים בסל ({{ cartItems.length }})</h3>
+      <div class="card p-4 mb-3 cart-items-card">
+        <h3 class="mb-4 flex align-items-center gap-2">
+          <i class="pi pi-list"></i>
+          <span>פריטים בסל ({{ cartItems.length }})</span>
+        </h3>
         
-        <div *ngFor="let item of cartItems" class="border-1 border-200 border-round p-3 mb-3">
+        <div *ngFor="let item of cartItems; let i = index" class="cart-item border-1 border-200 border-round p-3 mb-3">
           <div class="grid">
             <div class="col-12 md:col-3">
               <img [src]="item.imageUrl" [alt]="item.title" 
                    style="width: 100%; height: 150px; object-fit: cover;" 
-                   class="border-round">
+                   class="border-round cart-item-image">
             </div>
             
             <div class="col-12 md:col-6">
               <h4 class="m-0 mb-2">{{ item.title }}</h4>
-              <p class="text-600 mb-2">
-                <i class="pi pi-map-marker mr-1"></i>{{ item.city }}
+              <p class="text-600 mb-2 flex align-items-center gap-2">
+                <i class="pi pi-map-marker"></i>
+                <span>{{ item.city }}</span>
               </p>
               <p class="mb-2">
                 <span class="p-tag" [ngClass]="{
@@ -38,29 +42,30 @@
               </p>
               
               <div *ngIf="item.transactionType !== 'מכירה'" class="mb-2">
-                <p class="text-600 mb-1 text-sm">
-                  <i class="pi pi-{{ item.transactionType === 'נופש' ? 'moon' : 'calendar' }} mr-1"></i>
-                  מחיר ל{{ item.transactionType === 'נופש' ? 'לילה' : 'חודש' }}: ₪{{ getItemBasePrice(item) | number }}
+                <p class="text-600 mb-1 text-sm flex align-items-center gap-2">
+                  <i class="pi pi-{{ item.transactionType === 'נופש' ? 'moon' : 'calendar' }}"></i>
+                  <span>מחיר ל{{ item.transactionType === 'נופש' ? 'לילה' : 'חודש' }}: ₪{{ getItemBasePrice(item) | number }}</span>
                 </p>
-                <p class="text-600 mb-1 text-sm" *ngIf="item.startDate && item.endDate">
-                  <i class="pi pi-calendar mr-1"></i>
-                  {{ getItemPeriod(item) }}
+                <p class="text-600 mb-1 text-sm flex align-items-center gap-2" *ngIf="item.startDate && item.endDate">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ getItemPeriod(item) }}</span>
                 </p>
               </div>
               
               <div *ngIf="item.transactionType === 'מכירה'" class="mb-2">
-                <p class="text-orange-600 text-sm font-semibold">
-                  <i class="pi pi-info-circle mr-1"></i>
-                  סיור בדירה בלבד - ללא תשלום
+                <p class="text-orange-600 text-sm font-semibold flex align-items-center gap-2">
+                  <i class="pi pi-info-circle"></i>
+                  <span>סיור בדירה בלבד - ללא תשלום</span>
                 </p>
               </div>
               
               <div *ngIf="item.startDate && item.endDate" class="mb-2">
-                <p class="text-600 mb-1">
-                  <i class="pi pi-calendar mr-1"></i>
-                  {{ item.startDate | date:'dd/MM/yyyy' }} - {{ item.endDate | date:'dd/MM/yyyy' }}
+                <p class="text-600 mb-1 flex align-items-center gap-2">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ item.startDate | date:'dd/MM/yyyy' }} - {{ item.endDate | date:'dd/MM/yyyy' }}</span>
                 </p>
                 <button pButton label="שנה תאריכים" icon="pi pi-pencil" 
+                        iconPos="right"
                         class="p-button-sm p-button-outlined" 
                         (click)="editDates(item)"></button>
               </div>
@@ -69,7 +74,8 @@
             <div class="col-12 md:col-3 text-left">
               <p class="text-primary font-bold text-2xl mb-3">₪{{ item.price | number }}</p>
               <button pButton icon="pi pi-trash" label="הסר" 
-                      class="p-button-danger p-button-outlined w-full" 
+                      iconPos="right"
+                      class="p-button-danger p-button-outlined w-full delete-btn" 
                       (click)="removeItem(item.productId)"></button>
             </div>
           </div>
@@ -78,8 +84,11 @@
     </div>
 
     <div class="col-12 lg:col-4">
-      <div class="card p-4 sticky" style="top: 20px;">
-        <h3 class="mb-4">סיכום הזמנה</h3>
+      <div class="card p-4 sticky summary-card" style="top: 20px;">
+        <h3 class="mb-4 flex align-items-center gap-2">
+          <i class="pi pi-calculator"></i>
+          <span>סיכום הזמנה</span>
+        </h3>
         
         <div class="flex justify-content-between mb-2">
           <span>סה"כ פריטים:</span>
@@ -91,8 +100,11 @@
           <span class="font-bold">₪{{ getSubtotal() | number }}</span>
         </div>
         
-        <div class="border-1 border-200 border-round p-3 mb-3">
-          <label class="block font-bold mb-2 text-sm">קוד הנחה</label>
+        <div class="border-1 border-200 border-round p-3 mb-3 discount-section">
+          <label class="block font-bold mb-2 text-sm flex align-items-center gap-2">
+            <i class="pi pi-tag"></i>
+            <span>קוד הנחה</span>
+          </label>
           <div class="flex gap-2 mb-2">
             <input type="text" pInputText [(ngModel)]="discountCode" 
                    placeholder="הכנס קוד" class="flex-grow-1" 
@@ -114,7 +126,7 @@
           <span class="font-bold">-₪{{ discountAmount | number }}</span>
         </div>
         
-        <div class="border-top-1 border-200 pt-3 mt-3 mb-3">
+        <div class="border-top-1 border-200 pt-3 mt-3 mb-3 total-section">
           <div class="flex justify-content-between align-items-center">
             <span class="text-xl font-bold">סה"כ לתשלום:</span>
             <span class="text-primary font-bold text-3xl">₪{{ getFinalPrice() | number }}</span>
@@ -122,10 +134,12 @@
         </div>
         
         <button pButton label="סיום הזמנה" icon="pi pi-check" 
-                class="w-full p-button-lg p-button-success mb-2" 
+                iconPos="right"
+                class="w-full p-button-lg p-button-success mb-2 checkout-btn" 
                 (click)="checkout()"></button>
         
-        <button pButton label="המשך לקניות" icon="pi pi-arrow-right" 
+        <button pButton label="המשך לקניות" icon="pi pi-arrow-left" 
+                iconPos="right"
                 class="w-full p-button-outlined" 
                 (click)="continueShopping()"></button>
       </div>
@@ -168,8 +182,10 @@
 
   <ng-template pTemplate="footer">
     <button pButton label="ביטול" icon="pi pi-times" (click)="closeDateDialog()" 
+            iconPos="right"
             class="p-button-text"></button>
     <button pButton label="שמור" icon="pi pi-check" (click)="saveDates()" 
+            iconPos="right"
             [disabled]="!selectedDates || !selectedDates[0] || !selectedDates[1] || !isRangeAvailable" 
             class="p-button-success"></button>
   </ng-template>

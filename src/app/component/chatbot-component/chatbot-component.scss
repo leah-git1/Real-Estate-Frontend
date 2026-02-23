@@ -15,19 +15,50 @@
   color: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  animation: pulse 2s infinite;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
 
   &:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
   }
 
   &.open {
     background: #EF5350;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
   }
 }
 

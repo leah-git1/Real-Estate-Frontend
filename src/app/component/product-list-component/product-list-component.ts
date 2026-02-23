@@ -27,6 +27,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   rows: number = 9;
   currentPage: number = 1;
   currentFilters: any = {};
+  loading: boolean = false;
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -86,6 +87,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('שגיאה בשליפת מוצרים:', err);
+        this.products = [];
+        this.totalRecords = 0;
       }
     });
   }

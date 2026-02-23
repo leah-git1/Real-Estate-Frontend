@@ -94,9 +94,19 @@ export class ProductCardComponent implements OnInit, OnChanges {
   loadProductDetails() {
     this.productService.getProductById(this.product.productId).subscribe({
       next: (data) => {
+        // נרמול השדה transactionType
+        if (data.transactionType && !data.TransactionType) {
+          data.TransactionType = data.transactionType === 'נופש' ? 'Vacation' : 
+                                 data.transactionType === 'מכירה' ? 'Sale' : 
+                                 data.transactionType === 'השכרה' ? 'Rent' : data.transactionType;
+        }
         this.productDetails = data;
+        console.log('Product details loaded:', this.productDetails);
+        console.log('TransactionType:', this.productDetails.TransactionType);
         this.showDetailsDialog = true;
-        this.loadOccupiedDates();
+        if (this.productDetails.TransactionType === 'Vacation') {
+          this.loadOccupiedDates();
+        }
       },
       error: (err) => console.error('Error loading product:', err)
     });
@@ -408,12 +418,20 @@ export class ProductCardComponent implements OnInit, OnChanges {
   submitContactForm() {
     const currentUser = this.userService.getCurrentUser();
     if (!currentUser) {
-      alert('יש להתחבר כדי ליצור קשר');
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'נדרשת התחברות',
+        detail: 'יש להתחבר כדי ליצור קשר'
+      });
       return;
     }
 
     if (!this.product.ownerId) {
-      alert('שגיאה: לא נמצא בעל הנכס');
+      this.messageService.add({
+        severity: 'error',
+        summary: 'שגיאה',
+        detail: 'לא נמצא בעל הנכס'
+      });
       return;
     }
 
@@ -429,13 +447,21 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
     this.propertyInquiryService.createInquiry(inquiry).subscribe({
       next: () => {
-        alert('הפנייה נשלחה בהצלחה!');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'נשלח בהצלחה',
+          detail: 'הפנייה נשלחה למפרסם'
+        });
         this.showContactDialog = false;
         this.contactForm = { name: '', phone: '', email: '', message: '' };
       },
       error: (err) => {
         console.error('Error sending inquiry:', err);
-        alert('שגיאה בשליחת הפנייה');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'שגיאה בשליחת הפנייה'
+        });
       }
     });
   }
