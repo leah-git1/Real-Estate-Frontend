@@ -9,6 +9,7 @@ export class CartService {
   private cartItems: CartItem[] = [];
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
   private cartVisibleSubject = new BehaviorSubject<boolean>(false);
+  private isTogglingCart = false;
 
   constructor() {
     const savedCart = localStorage.getItem('cart');
@@ -68,7 +69,13 @@ export class CartService {
   }
 
   showCart() {
+    if (this.isTogglingCart) return;
+    if (this.cartVisibleSubject.value === true) return;
+    this.isTogglingCart = true;
     this.cartVisibleSubject.next(true);
+    setTimeout(() => {
+      this.isTogglingCart = false;
+    }, 500);
   }
 
   hideCart() {

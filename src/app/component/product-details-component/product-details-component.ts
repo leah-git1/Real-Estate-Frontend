@@ -347,7 +347,11 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.showRatingDialog = false;
     
     if (wasAdded) {
-      this.favoritesService.showFavorites();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'נוסף למועדפים',
+        detail: 'המוצר נוסף בהצלחה למועדפים'
+      });
     } else {
       this.messageService.add({
         severity: 'info',

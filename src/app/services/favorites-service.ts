@@ -10,6 +10,7 @@ export class FavoritesService {
   private favoritesSubject = new BehaviorSubject<ProductModel[]>(this.loadFavorites());
   public favorites$ = this.favoritesSubject.asObservable();
   private favoritesVisibleSubject = new BehaviorSubject<boolean>(false);
+  private isTogglingVisibility = false;
 
   constructor() {}
 
@@ -69,7 +70,13 @@ export class FavoritesService {
   }
 
   showFavorites() {
+    if (this.isTogglingVisibility) return;
+    if (this.favoritesVisibleSubject.value === true) return;
+    this.isTogglingVisibility = true;
     this.favoritesVisibleSubject.next(true);
+    setTimeout(() => {
+      this.isTogglingVisibility = false;
+    }, 500);
   }
 
   hideFavorites() {
