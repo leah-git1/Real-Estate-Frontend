@@ -11,7 +11,6 @@ export class Order {
   orderItems: OrderItemModel[] = [];
 }
 
-
 export class OrderCreateDTOModel {
     userId: number = 0;
     orderItems: OrderItemDTOModel[] = [];

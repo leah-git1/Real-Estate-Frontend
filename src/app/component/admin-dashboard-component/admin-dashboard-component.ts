@@ -184,7 +184,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     };
   }
 
-
   loadData(): void {
     this.loading = true;
     this.adminService.getStatistics().subscribe({
