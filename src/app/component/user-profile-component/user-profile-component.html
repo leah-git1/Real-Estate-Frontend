@@ -1,3 +1,5 @@
+<p-toast position="top-center"></p-toast>
+
 <div class="container p-5" *ngIf="currentUser">
   <div class="mb-4 profile-header-main">
     <h1 class="text-3xl font-bold">שלום, {{ currentUser.fullName }}</h1>
@@ -74,7 +76,7 @@
             <div class="surface-100 border-round p-3 mb-3">
               <p class="text-sm text-600 m-0">
                 <i class="pi pi-info-circle mr-2"></i>
-                אימייל וסיסמה הם אופציונליים - מלא רק אם אתה רוצה לשנות אותם
+                אימייל הוא אופציונלי - מלא רק אם אתה רוצה לשנות אותו
               </p>
             </div>
           </div>
@@ -96,14 +98,11 @@
           <div class="col-12 md:col-6">
             <div class="field">
               <label class="block mb-2 font-semibold">
-                <i class="pi pi-lock mr-2"></i>סיסמה חדשה (אופציונלי)
+                <i class="pi pi-lock mr-2"></i>סיסמה
               </label>
-              <input pInputText type="password" [(ngModel)]="userForm.password" 
-                     #passwordInput="ngModel" minlength="8"
-                     class="w-full" placeholder="השאר ריק ללא שינוי" />
-              <small class="text-red-500" *ngIf="passwordInput.invalid && passwordInput.touched && userForm.password">
-                הסיסמה חייבת להכיל לפחות 8 תווים
-              </small>
+              <p-button label="החלפת סיסמה" icon="pi pi-key" 
+                        (onClick)="openPasswordDialog()" 
+                        styleClass="w-full p-button-outlined"></p-button>
             </div>
           </div>
 
@@ -415,6 +414,43 @@
     </div>
   </div>
 </div>
+
+<p-dialog [(visible)]="showPasswordDialog" [modal]="true" [style]="{width: '450px'}">
+  <ng-template pTemplate="header">
+    <h3>
+      <i class="pi pi-key mr-2"></i>
+      החלפת סיסמה
+    </h3>
+  </ng-template>
+  
+  <div class="p-4">
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">
+        <i class="pi pi-lock mr-2"></i>סיסמה נוכחית
+      </label>
+      <input pInputText type="password" [(ngModel)]="passwordChangeForm.oldPassword" 
+             class="w-full" placeholder="הזן את הסיסמה הנוכחית" />
+    </div>
+    
+    <div class="field">
+      <label class="block mb-2 font-semibold">
+        <i class="pi pi-lock mr-2"></i>סיסמה חדשה
+      </label>
+      <input pInputText type="password" [(ngModel)]="passwordChangeForm.newPassword" 
+             class="w-full" placeholder="הזן סיסמה חדשה (לפחות 8 תווים)" />
+      <small class="text-600 block mt-1">
+        <i class="pi pi-info-circle mr-1"></i>הסיסמה חייבת להכיל לפחות 8 תווים
+      </small>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="cancelPasswordChange()" class="p-button-text"></button>
+    <button pButton label="שנה סיסמה" icon="pi pi-check" 
+            (click)="changePassword()" class="p-button-success"></button>
+  </ng-template>
+</p-dialog>
 
 <p-dialog [(visible)]="showInquiryDialog" [modal]="true" [style]="{width: '600px'}" *ngIf="selectedInquiry">
   <ng-template pTemplate="header">

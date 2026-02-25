@@ -30,7 +30,11 @@ export class CartSidebarComponent implements OnInit {
 
   ngOnInit() {
     this.cartService.getCartVisible().subscribe(visible => {
-      this.visible = visible;
+      if (visible && !this.visible) {
+        this.visible = true;
+      } else if (!visible) {
+        this.visible = false;
+      }
     });
 
     this.cartService.getCart().subscribe(items => {

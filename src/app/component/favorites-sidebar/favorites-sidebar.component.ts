@@ -30,7 +30,11 @@ export class FavoritesSidebarComponent implements OnInit {
 
   ngOnInit() {
     this.favoritesService.getFavoritesVisible().subscribe(visible => {
-      this.visible = visible;
+      if (visible && !this.visible) {
+        this.visible = true;
+      } else if (!visible) {
+        this.visible = false;
+      }
     });
 
     this.favoritesService.favorites$.subscribe(items => {

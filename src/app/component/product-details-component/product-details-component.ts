@@ -376,6 +376,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.showRatingDialog = false;
     
     if (wasAdded) {
+      this.favoritesService.showFavorites();
       this.messageService.add({
         severity: 'success',
         summary: 'נוסף למועדפים',
@@ -454,6 +455,7 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     };
     
     this.cartService.addToCart(cartItem);
+    this.cartService.showCart();
   }
 
   getBuyerCommission(): number {

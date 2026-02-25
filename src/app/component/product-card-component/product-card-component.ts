@@ -222,6 +222,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
       this.availabilityMessage = '';
       this.isRangeAvailable = false;
       this.cartService.addToCart(cartItem);
+      this.cartService.showCart();
     }
   }
 
@@ -378,6 +379,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
     this.showRatingDialog = false;
     
     if (wasAdded) {
+      this.favoritesService.showFavorites();
       this.messageService.add({
         severity: 'success',
         summary: 'נוסף למועדפים',

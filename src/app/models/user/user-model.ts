@@ -20,6 +20,7 @@ export class UserUpdateDTOModel {
     fullName?: string;
     email?: string;
     password?: string;
+    oldPassword?: string;
     phone?: string;
     address?: string;
 }

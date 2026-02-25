@@ -1,0 +1,181 @@
+/* ULTIMATE GREEN TO PURPLE OVERRIDE - HIGHEST PRIORITY */
+
+/* Override ALL green color codes */
+[style*="#10b981"],
+[style*="#059669"],
+[style*="#047857"],
+[style*="#14b8a6"],
+[style*="#0d9488"],
+[style*="#22c55e"],
+[style*="#16a34a"],
+[style*="#15803d"],
+[style*="rgb(16, 185, 129)"],
+[style*="rgb(5, 150, 105)"],
+[style*="rgb(20, 184, 166)"],
+[style*="rgb(34, 197, 94)"],
+[style*="rgb(22, 163, 74)"] {
+    background-color: #667eea !important;
+    border-color: #667eea !important;
+    color: #667eea !important;
+}
+
+/* PrimeNG Calendar - Selected dates */
+.p-datepicker .p-datepicker-calendar td > span.p-highlight,
+.p-datepicker .p-datepicker-calendar td.p-datepicker-today > span.p-highlight,
+.p-datepicker .p-datepicker-calendar td > span:not(.p-disabled):hover {
+    background: #667eea !important;
+    color: white !important;
+    border-color: #667eea !important;
+}
+
+/* PrimeNG Paginator */
+.p-paginator .p-paginator-page.p-highlight {
+    background: #667eea !important;
+    border-color: #667eea !important;
+    color: white !important;
+}
+
+/* PrimeNG Buttons */
+.p-button.p-button-success,
+.p-button-success {
+    background: #667eea !important;
+    border-color: #667eea !important;
+}
+
+.p-button.p-button-success:hover,
+.p-button-success:hover {
+    background: #5568d3 !important;
+    border-color: #5568d3 !important;
+}
+
+/* PrimeNG Tags - WHITE BACKGROUND WITH PURPLE BORDER */
+.p-tag,
+span.p-tag {
+    background: #f3f4f6 !important;
+    background-color: #f3f4f6 !important;
+    background-image: none !important;
+    border: none !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 6px !important;
+}
+
+.p-tag.p-tag-success,
+span.p-tag.p-tag-success {
+    background: #d1fae5 !important;
+    background-color: #d1fae5 !important;
+    background-image: none !important;
+    color: #065f46 !important;
+}
+
+.p-tag.p-tag-warning,
+.p-tag.p-tag-warn,
+span.p-tag.p-tag-warning,
+span.p-tag.p-tag-warn {
+    background: #fef3c7 !important;
+    background-color: #fef3c7 !important;
+    background-image: none !important;
+    color: #92400e !important;
+}
+
+.p-tag.p-tag-info,
+span.p-tag.p-tag-info {
+    background: #dbeafe !important;
+    background-color: #dbeafe !important;
+    background-image: none !important;
+    color: #1e40af !important;
+}
+
+.p-tag.p-tag-danger,
+span.p-tag.p-tag-danger {
+    background: #fee2e2 !important;
+    background-color: #fee2e2 !important;
+    background-image: none !important;
+    color: #991b1b !important;
+}
+
+/* Custom severity for secondary and contrast */
+.p-tag.p-tag-secondary,
+.p-tag.p-tag-contrast,
+span.p-tag.p-tag-secondary,
+span.p-tag.p-tag-contrast {
+    background: #f3f4f6 !important;
+    background-color: #f3f4f6 !important;
+    background-image: none !important;
+    color: #4b5563 !important;
+}
+
+/* PrimeNG Badges */
+.p-badge.p-badge-success {
+    background-color: #667eea !important;
+}
+
+.p-badge.p-badge-warning {
+    background-color: #764ba2 !important;
+}
+
+/* PrimeNG Checkbox & Radio */
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-highlight,
+.p-radiobutton:not(.p-radiobutton-disabled) .p-radiobutton-box.p-highlight {
+    border-color: #667eea !important;
+    background: #667eea !important;
+}
+
+/* PrimeNG Input Focus */
+.p-inputtext:enabled:focus,
+.p-inputnumber-input:enabled:focus,
+textarea:focus,
+input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+}
+
+/* Override Tailwind/PrimeFlex green classes */
+.text-green-500, .text-green-600, .text-green-700, .text-green-800, .text-green-900,
+.text-teal-500, .text-teal-600, .text-cyan-500, .text-cyan-600 {
+    color: #667eea !important;
+}
+
+.bg-green-50, .bg-green-100, .bg-teal-50, .bg-teal-100, .bg-cyan-50, .bg-cyan-100 {
+    background-color: #f3f4ff !important;
+}
+
+.border-green-200, .border-green-300, .border-green-400, .border-green-500,
+.border-teal-200, .border-teal-300, .border-teal-400,
+.border-cyan-200, .border-cyan-300, .border-cyan-400 {
+    border-color: #c7d2fe !important;
+}
+
+/* Force override any remaining green elements */
+button[style*="background-color: rgb(16, 185, 129)"],
+button[style*="background: rgb(16, 185, 129)"],
+div[style*="background-color: rgb(16, 185, 129)"],
+span[style*="background-color: rgb(16, 185, 129)"],
+a[style*="background-color: rgb(16, 185, 129)"] {
+    background-color: #667eea !important;
+    background: #667eea !important;
+}
+
+button[style*="border-color: rgb(16, 185, 129)"],
+div[style*="border-color: rgb(16, 185, 129)"],
+span[style*="border-color: rgb(16, 185, 129)"] {
+    border-color: #667eea !important;
+}
+
+/* PrimeNG Highlight class */
+.p-highlight {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Override any green in hover/focus/active states */
+*:hover[style*="#10b981"],
+*:focus[style*="#10b981"],
+*:active[style*="#10b981"],
+*:hover[style*="rgb(16, 185, 129)"],
+*:focus[style*="rgb(16, 185, 129)"],
+*:active[style*="rgb(16, 185, 129)"] {
+    background-color: #5568d3 !important;
+    border-color: #5568d3 !important;
+}

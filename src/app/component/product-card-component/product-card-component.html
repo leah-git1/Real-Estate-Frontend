@@ -47,33 +47,33 @@
 
     <div class="actions">
       <ng-container *ngIf="!isMyProduct && isVacationType()">
-        <button class="btn btn-primary" (click)="addToCart(product)">
+        <button type="button" class="btn btn-primary" (click)="addToCart(product)">
           <i class="pi pi-shopping-cart"></i>
           הוסף לסל
         </button>
-        <button class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
+        <button type="button" class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
           <i class="pi pi-heart"></i>
         </button>
-        <button class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
+        <button type="button" class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
           <i class="pi pi-info-circle"></i>
         </button>
       </ng-container>
 
       <ng-container *ngIf="!isMyProduct && !isVacationType()">
-        <button class="btn btn-primary" (click)="openContactDialog()">
+        <button type="button" class="btn btn-primary" (click)="openContactDialog()">
           <i class="pi pi-phone"></i>
           יצירת קשר
         </button>
-        <button class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
+        <button type="button" class="btn btn-icon" (click)="addToFavorites(product)" pTooltip="הוסף למועדפים">
           <i class="pi pi-heart"></i>
         </button>
-        <button class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
+        <button type="button" class="btn btn-icon" (click)="viewDetails(product.productId)" pTooltip="פרטים">
           <i class="pi pi-info-circle"></i>
         </button>
       </ng-container>
 
       <ng-container *ngIf="isMyProduct">
-        <button class="btn btn-warning" (click)="editProduct()">
+        <button type="button" class="btn btn-warning" (click)="editProduct()">
           <i class="pi pi-pencil"></i>
           עריכה
         </button>

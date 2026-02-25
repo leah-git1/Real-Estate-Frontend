@@ -9,7 +9,7 @@ export class CartService {
   private cartItems: CartItem[] = [];
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
   private cartVisibleSubject = new BehaviorSubject<boolean>(false);
-  private isTogglingCart = false;
+  private lastShowTime = 0;
 
   constructor() {
     const savedCart = localStorage.getItem('cart');
@@ -44,7 +44,6 @@ export class CartService {
     }
     this.cartItems.push(cartItem);
     this.saveCart();
-    this.showCart();
   }
 
   private datesOverlap(start1: Date, end1: Date, start2: Date, end2: Date): boolean {
@@ -69,13 +68,10 @@ export class CartService {
   }
 
   showCart() {
-    if (this.isTogglingCart) return;
-    if (this.cartVisibleSubject.value === true) return;
-    this.isTogglingCart = true;
+    const now = Date.now();
+    if (now - this.lastShowTime < 1000) return;
+    this.lastShowTime = now;
     this.cartVisibleSubject.next(true);
-    setTimeout(() => {
-      this.isTogglingCart = false;
-    }, 500);
   }
 
   hideCart() {

@@ -7,6 +7,8 @@ import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { TimelineModule } from 'primeng/timeline';
 import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { UserService } from '../../services/user-service';
 import { OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
@@ -17,7 +19,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule, DialogModule, TimelineModule, TagModule],
+  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CardModule, DialogModule, TimelineModule, TagModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './user-profile-component.html',
   styleUrl: './user-profile-component.scss'
 })
@@ -37,6 +40,8 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   selectedInquiry: any = null;
   showInquiryDialog: boolean = false;
   showLogoutDialog: boolean = false;
+  showPasswordDialog: boolean = false;
+  passwordChangeForm = { oldPassword: '', newPassword: '' };
 
   constructor(
     private userService: UserService,
@@ -46,7 +51,8 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
@@ -151,7 +157,6 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   updateProfile() {
     console.log('Updating user:', this.currentUser.userId, this.userForm);
     
-    // ולידציה לטלפון
     if (this.userForm.phone) {
       const phoneRegex = /^0[2-9]\d{7,8}$/;
       if (!phoneRegex.test(this.userForm.phone)) {
@@ -166,21 +171,12 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
       address: this.userForm.address
     };
     
-    // הוסף אימייל רק אם הוזן
     if (this.userForm.email && this.userForm.email.trim().length > 0) {
       updateData.email = this.userForm.email.toLowerCase();
     }
     
-    // הוסף סיסמה רק אם הוזנה
-    if (this.userForm.password && this.userForm.password.trim().length > 0) {
-      updateData.password = this.userForm.password;
-    }
-    
-    console.log('Sending update data:', updateData);
-    
     this.userService.updateUser(this.currentUser.userId, updateData).subscribe({
       next: (res) => {
-        console.log('Update success:', res);
         alert('הפרטים עודכנו בהצלחה');
         this.currentUser.fullName = this.userForm.fullName;
         this.currentUser.phone = this.userForm.phone;
@@ -192,11 +188,57 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         window.location.reload();
       },
       error: (err) => {
-        console.error('Update error:', err);
         const errorMsg = err.error?.message || err.error || 'שגיאה בעדכון הפרטים';
         alert(errorMsg);
       }
     });
+  }
+
+  openPasswordDialog() {
+    this.passwordChangeForm = { oldPassword: '', newPassword: '' };
+    this.showPasswordDialog = true;
+  }
+
+  changePassword() {
+    if (!this.passwordChangeForm.oldPassword || !this.passwordChangeForm.newPassword) {
+      this.messageService.add({ severity: 'warn', summary: 'שדות חסרים', detail: 'נא למלא את כל השדות', life: 3000 });
+      return;
+    }
+    
+    if (this.passwordChangeForm.newPassword.length < 8) {
+      this.messageService.add({ severity: 'warn', summary: 'סיסמה קצרה', detail: 'הסיסמה החדשה חייבת להכיל לפחות 8 תווים', life: 3000 });
+      return;
+    }
+    
+    const updateData: UserUpdateDTOModel = {
+      password: this.passwordChangeForm.newPassword,
+      oldPassword: this.passwordChangeForm.oldPassword
+    };
+    
+    this.userService.updateUser(this.currentUser.userId, updateData).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הסיסמה שונתה בהצלחה', life: 3000 });
+        this.showPasswordDialog = false;
+        this.passwordChangeForm = { oldPassword: '', newPassword: '' };
+      },
+      error: (err) => {
+        console.error('Password change error:', err);
+        let errorMsg = 'שגיאה בשינוי הסיסמה';
+        
+        if (err.error?.message) {
+          errorMsg = err.error.message;
+        } else if (typeof err.error === 'string') {
+          errorMsg = err.error;
+        }
+        
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: errorMsg, life: 4000 });
+      }
+    });
+  }
+
+  cancelPasswordChange() {
+    this.showPasswordDialog = false;
+    this.passwordChangeForm = { oldPassword: '', newPassword: '' };
   }
 
   editProduct(productId: number) {
