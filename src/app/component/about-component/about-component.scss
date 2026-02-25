@@ -49,6 +49,34 @@ button.animate-on-scroll { transition-delay: 0.35s; }
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 25%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmerMove 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes shimmerMove {
+  0%, 100% {
+    transform: translate(-25%, -25%) rotate(0deg);
+  }
+  50% {
+    transform: translate(25%, 25%) rotate(180deg);
+  }
 }
 
 .hero-overlay {

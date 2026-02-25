@@ -12,15 +12,17 @@ import { GalleriaModule } from 'primeng/galleria';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 import { MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
+import { ValidationUtils } from '../../utils/validation.utils';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, DatePickerModule, FormsModule, DialogModule, InputTextModule],
+  imports: [CommonModule, ButtonModule, RouterModule, GalleriaModule, DatePickerModule, FormsModule, DialogModule, InputTextModule, TooltipModule],
   templateUrl: './product-details-component.html',
   styleUrl: './product-details-component.scss'
 })
@@ -31,6 +33,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   product: any = null;
   images: any[] = [];
   activeIndex: number = 0;
+  showLightbox: boolean = false;
+  zoomLevel: number = 1;
 
   rangeDates: Date[] | undefined;
   minDate: Date = new Date();
@@ -54,6 +58,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     email: '',
     message: ''
   };
+  emailError: string = '';
+  phoneError: string = '';
   
   private subscriptions: Subscription[] = [];
 
@@ -292,6 +298,29 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  openLightbox(index: number) {
+    this.activeIndex = index;
+    this.showLightbox = true;
+    this.zoomLevel = 1;
+  }
+
+  closeLightbox() {
+    this.showLightbox = false;
+    this.zoomLevel = 1;
+  }
+
+  zoomIn() {
+    if (this.zoomLevel < 3) {
+      this.zoomLevel += 0.5;
+    }
+  }
+
+  zoomOut() {
+    if (this.zoomLevel > 1) {
+      this.zoomLevel -= 0.5;
+    }
+  }
+
   nextImage() {
     this.activeIndex = (this.activeIndex + 1) % this.images.length;
     this.cdr.detectChanges();
@@ -487,6 +516,16 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    if (!ValidationUtils.isValidEmail(this.contactForm.email)) {
+      this.emailError = 'כתובת אימייל לא תקינה';
+      return;
+    }
+    
+    if (!ValidationUtils.isValidPhone(this.contactForm.phone)) {
+      this.phoneError = 'מספר טלפון לא תקין (פורמט: 0XX-XXXXXXX)';
+      return;
+    }
+
     const inquiry = {
       productId: this.product.productId,
       userId: currentUser.userId,
@@ -506,6 +545,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
         });
         this.showContactDialog = false;
         this.contactForm = { name: '', phone: '', email: '', message: '' };
+        this.emailError = '';
+        this.phoneError = '';
       },
       error: (err) => {
         console.error('Error sending inquiry:', err);

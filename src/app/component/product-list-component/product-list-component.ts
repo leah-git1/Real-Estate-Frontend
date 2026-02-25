@@ -6,7 +6,10 @@ import { CommonModule } from '@angular/common';
 import { ProductFilterComponent } from '../product-filter-component/product-filter-component';
 import { ProductCardComponent } from '../product-card-component/product-card-component';
 import { PaginatorModule } from 'primeng/paginator';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { Subscription } from 'rxjs';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-product-list',
@@ -15,10 +18,26 @@ import { Subscription } from 'rxjs';
     CommonModule, 
     PaginatorModule, 
     ProductFilterComponent, 
-    ProductCardComponent
+    ProductCardComponent,
+    ButtonModule,
+    TooltipModule
   ],
   templateUrl: './product-list-component.html',
   styleUrl: './product-list-component.scss',
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-in', style({ opacity: 1 }))
+      ])
+    ]),
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 
 export class ProductListComponent implements OnInit, OnDestroy {
@@ -28,6 +47,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   currentPage: number = 1;
   currentFilters: any = {};
   loading: boolean = false;
+  viewMode: 'grid' | 'list' = 'grid';
   private subscriptions: Subscription[] = [];
 
   constructor(

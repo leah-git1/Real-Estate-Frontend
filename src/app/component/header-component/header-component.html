@@ -1,4 +1,4 @@
-<header class="luxury-header">
+<header class="luxury-header" [class.scrolled]="isScrolled">
   <div class="header-wrapper">
     <div class="logo-section">
       <i class="pi pi-home logo-icon"></i>
@@ -114,7 +114,7 @@
         <div class="user-menu" *ngIf="isLoggedIn(); else loginLink" style="position: relative;" (mouseenter)="showUserMenu=true" (mouseleave)="showUserMenu=false">
           <a class="icon-link user-link" routerLink="/profile" [queryParams]="{tab: 0}" style="cursor: pointer; display: flex; align-items: center; gap: 5px; position: relative;">
             <i class="pi pi-user" style="font-size: 1.2rem;"></i>
-            <span class="user-badge" style="position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid white;"></span>
+            <span class="user-badge" style="position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(102, 126, 234, 0.4);"></span>
           </a>
           <div *ngIf="showUserMenu" class="user-dropdown-menu">
             <div class="user-info">
@@ -171,11 +171,11 @@
           </a>
         </ng-template>
         
-        <a routerLink="/cart" class="icon-link cart-link" pBadge [value]="cartItemCount.toString()" severity="danger">
+        <a routerLink="/cart" class="icon-link cart-link" pBadge [value]="cartItemCount.toString()" severity="contrast">
           <i class="pi pi-shopping-cart"></i>
         </a>
         
-        <a routerLink="/favorites" class="icon-link favorites-link" pBadge [value]="favoritesCount.toString()" severity="success">
+        <a routerLink="/favorites" class="icon-link favorites-link" pBadge [value]="favoritesCount.toString()" severity="danger">
           <i class="pi pi-heart"></i>
         </a>
       </div>

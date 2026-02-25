@@ -100,9 +100,17 @@ export class ContactComponent implements AfterViewInit {
   }
 
   isFormValid(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^0[2-9]\d{7,8}$/;
+    
+    const isEmailValid = emailRegex.test(this.contactForm.email);
+    const isPhoneValid = !this.contactForm.phone || phoneRegex.test(this.contactForm.phone);
+    
     return !!(
       this.contactForm.name &&
       this.contactForm.email &&
+      isEmailValid &&
+      isPhoneValid &&
       this.contactForm.subject &&
       this.contactForm.message
     );

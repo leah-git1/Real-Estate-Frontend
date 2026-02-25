@@ -19,7 +19,9 @@
           <span>פריטים בסל ({{ cartItems.length }})</span>
         </h3>
         
-        <div *ngFor="let item of cartItems; let i = index" class="cart-item border-1 border-200 border-round p-3 mb-3">
+        <div *ngFor="let item of cartItems; let i = index" 
+             class="cart-item border-1 border-200 border-round p-3 mb-3"
+             [attr.data-product-id]="item.productId">
           <div class="grid">
             <div class="col-12 md:col-3">
               <img [src]="item.imageUrl" [alt]="item.title" 
@@ -41,14 +43,18 @@
                 }">{{ item.transactionType }}</span>
               </p>
               
-              <div *ngIf="item.transactionType !== 'מכירה'" class="mb-2">
+              <div *ngIf="item.transactionType !== 'מכירה' && item.transactionType !== 'Sale'" class="mb-2">
                 <p class="text-600 mb-1 text-sm flex align-items-center gap-2">
-                  <i class="pi pi-{{ item.transactionType === 'נופש' ? 'moon' : 'calendar' }}"></i>
-                  <span>מחיר ל{{ item.transactionType === 'נופש' ? 'לילה' : 'חודש' }}: ₪{{ getItemBasePrice(item) | number }}</span>
+                  <i class="pi pi-moon"></i>
+                  <span>מחיר ללילה: ₪{{ getItemBasePrice(item) | number }}</span>
                 </p>
                 <p class="text-600 mb-1 text-sm flex align-items-center gap-2" *ngIf="item.startDate && item.endDate">
                   <i class="pi pi-calendar"></i>
-                  <span>{{ getItemPeriod(item) }}</span>
+                  <span>{{ calculateNights(item.startDate, item.endDate) }} לילות</span>
+                </p>
+                <p class="text-primary mb-1 text-sm font-bold flex align-items-center gap-2" *ngIf="item.startDate && item.endDate">
+                  <i class="pi pi-calculator"></i>
+                  <span>סה"כ: {{ calculateNights(item.startDate, item.endDate) }} לילות × ₪{{ getItemBasePrice(item) | number }} = ₪{{ getItemTotalWithoutCommission(item) | number }}</span>
                 </p>
               </div>
               
@@ -66,13 +72,17 @@
                 </p>
                 <button pButton label="שנה תאריכים" icon="pi pi-pencil" 
                         iconPos="right"
-                        class="p-button-sm p-button-outlined" 
+                        class="p-button-sm p-button-outlined edit-dates-btn" 
                         (click)="editDates(item)"></button>
               </div>
             </div>
             
             <div class="col-12 md:col-3 text-left">
-              <p class="text-primary font-bold text-2xl mb-3">₪{{ item.price | number }}</p>
+              <p class="font-bold text-2xl mb-3 item-price">₪{{ item.price | number }}</p>
+              <button pButton icon="pi pi-phone" label="יצירת קשר" 
+                      iconPos="right"
+                      class="p-button-outlined w-full mb-2 contact-btn" 
+                      (click)="openContactDialog(item)"></button>
               <button pButton icon="pi pi-trash" label="הסר" 
                       iconPos="right"
                       class="p-button-danger p-button-outlined w-full delete-btn" 
@@ -111,8 +121,8 @@
                    [disabled]="discountAmount > 0" />
             <button pButton [label]="discountAmount > 0 ? 'הסר' : 'החל'" 
                     [icon]="discountAmount > 0 ? 'pi pi-times' : 'pi pi-check'" 
-                    class="p-button-sm" 
-                    [ngClass]="discountAmount > 0 ? 'p-button-danger' : 'p-button-success'"
+                    class="p-button-sm apply-discount-btn" 
+                    [ngClass]="discountAmount > 0 ? 'p-button-danger' : ''"
                     (click)="discountAmount > 0 ? removeDiscount() : applyDiscount()"></button>
           </div>
           <small *ngIf="discountMessage" 
@@ -126,10 +136,10 @@
           <span class="font-bold">-₪{{ discountAmount | number }}</span>
         </div>
         
-        <div class="border-top-1 border-200 pt-3 mt-3 mb-3 total-section">
+        <div class="total-section border-round p-4 mb-3">
           <div class="flex justify-content-between align-items-center">
             <span class="text-xl font-bold">סה"כ לתשלום:</span>
-            <span class="text-primary font-bold text-3xl">₪{{ getFinalPrice() | number }}</span>
+            <span class="font-bold text-4xl">₪{{ getFinalPrice() | number }}</span>
           </div>
         </div>
         
@@ -140,7 +150,7 @@
         
         <button pButton label="המשך לקניות" icon="pi pi-arrow-left" 
                 iconPos="right"
-                class="w-full p-button-outlined" 
+                class="w-full p-button-outlined continue-shopping-btn" 
                 (click)="continueShopping()"></button>
       </div>
     </div>
@@ -150,7 +160,7 @@
 <p-dialog [(visible)]="showDateDialog" [modal]="true" [style]="{width: '600px'}" 
           (onHide)="closeDateDialog()" *ngIf="showDateDialog">
   <ng-template pTemplate="header">
-    <h3>עדכון תאריכים - {{ selectedItem?.title }}</h3>
+    <h3>עדכון תאריכים</h3>
   </ng-template>
   
   <div class="p-4">
@@ -188,5 +198,55 @@
             iconPos="right"
             [disabled]="!selectedDates || !selectedDates[0] || !selectedDates[1] || !isRangeAvailable" 
             class="p-button-success"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showContactDialog" [modal]="true" [style]="{width: '550px'}" header="יצירת קשר עם המפרסם">
+  <div class="p-3">
+    <div class="mb-3 p-3 bg-blue-50 border-round">
+      <div class="flex align-items-center gap-3 mb-2">
+        <i class="pi pi-user contact-icon" style="font-size: 1.5rem;"></i>
+        <div>
+          <p class="font-bold text-lg m-0">בעל הנכס: {{ ownerDetails?.fullName || 'טוען...' }}</p>
+          <p class="text-sm text-600 m-0">נכס: {{ contactProduct?.title }}</p>
+        </div>
+      </div>
+      <div class="border-top-1 border-blue-200 pt-2 mt-2">
+        <p class="text-sm m-0"><i class="pi pi-phone ml-2"></i><strong>ליצירת קשר:</strong> 1-800-{{ ownerDetails?.phone || 'טוען...' }}</p>
+      </div>
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">שם מלא *</label>
+      <input pInputText [(ngModel)]="contactForm.name" class="w-full" required />
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">טלפון *</label>
+      <input pInputText [(ngModel)]="contactForm.phone" class="w-full" required 
+             (ngModelChange)="phoneError = ''" />
+      <small class="text-red-500" *ngIf="phoneError">{{ phoneError }}</small>
+    </div>
+
+    <div class="field mb-3">
+      <label class="block mb-2 font-semibold">אימייל *</label>
+      <input pInputText type="email" [(ngModel)]="contactForm.email" class="w-full" required 
+             (ngModelChange)="emailError = ''" />
+      <small class="text-red-500" *ngIf="emailError">{{ emailError }}</small>
+    </div>
+
+    <div class="field mb-2">
+      <label class="block mb-2 font-semibold">הודעה</label>
+      <textarea [(ngModel)]="contactForm.message" rows="2" class="w-full p-2 border-1 border-300 border-round" 
+                placeholder="שתף פרטים נוספים..."></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="showContactDialog=false" class="p-button-text"></button>
+    <button pButton label="שליחה" icon="pi pi-send" 
+            (click)="submitContactForm()" 
+            [disabled]="!contactForm.name || !contactForm.phone || !contactForm.email"></button>
   </ng-template>
 </p-dialog>

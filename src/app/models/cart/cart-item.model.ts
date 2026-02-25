@@ -9,4 +9,5 @@ export interface CartItem {
   startDate?: Date;
   endDate?: Date;
   quantity: number;
+  ownerId?: number;
 }

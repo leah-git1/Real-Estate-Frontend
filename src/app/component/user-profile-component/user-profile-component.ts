@@ -36,6 +36,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   inquiriesToMe: any[] = [];
   selectedInquiry: any = null;
   showInquiryDialog: boolean = false;
+  showLogoutDialog: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -111,7 +112,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     this.orderService.getOrdersByUserId(this.currentUser.userId).subscribe({
       next: (data) => {
         console.log('Orders received:', data);
-        this.orders = data;
+        this.orders = data.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -241,8 +242,18 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
 
   logout() {
+    this.activeTab = 4;
+    this.cdr.detectChanges();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  confirmLogout() {
     this.userService.logout();
     this.router.navigate(['/']);
+  }
+  
+  cancelLogout() {
+    this.showLogoutDialog = false;
   }
 
   goToCart() {
@@ -361,5 +372,18 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
 
   viewInquiryProduct(productId: number) {
     this.router.navigate(['/product-details', productId]);
+  }
+
+  updateInquiryStatus(inquiryId: number, newStatus: string) {
+    this.propertyInquiryService.updateInquiryStatus(inquiryId, newStatus).subscribe({
+      next: () => {
+        this.loadInquiriesToMe();
+        if (this.selectedInquiry && this.selectedInquiry.inquiryId === inquiryId) {
+          this.selectedInquiry.status = newStatus;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error updating inquiry status:', err)
+    });
   }
 }

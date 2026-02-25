@@ -2,8 +2,8 @@
   <div class="flex justify-content-center align-items-center" style="min-height: 60vh;">
     <div class="card p-5 text-center" style="max-width: 600px;">
       <div *ngIf="orderSuccess">
-        <i class="pi pi-check-circle text-green-500 mb-4" style="font-size: 6rem;"></i>
-        <h1 class="text-3xl font-bold text-green-600 mb-3">ההזמנה הושלמה בהצלחה!</h1>
+        <i class="pi pi-check-circle success-icon mb-4" style="font-size: 6rem;"></i>
+        <h1 class="text-3xl font-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ההזמנה הושלמה בהצלחה!</h1>
         <p class="text-xl mb-2">מספר הזמנה: <strong>{{ orderId }}</strong></p>
         <p class="text-600 mb-4">תודה על ההזמנה! אישור נשלח לכתובת המייל שלך</p>
         

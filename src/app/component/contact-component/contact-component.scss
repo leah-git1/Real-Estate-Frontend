@@ -8,14 +8,46 @@
 .header-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 15px 15px 0 0;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 25%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmerMove 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes shimmerMove {
+  0%, 100% {
+    transform: translate(-25%, -25%) rotate(0deg);
+  }
+  50% {
+    transform: translate(25%, 25%) rotate(180deg);
+  }
 }
 
 .header-title {
   color: white !important;
+  font-weight: 700 !important;
 }
 
 .header-subtitle {
   color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
 }
 
 // Scroll animations

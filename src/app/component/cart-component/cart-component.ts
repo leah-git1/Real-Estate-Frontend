@@ -10,20 +10,34 @@ import { CartService } from '../../services/cart-service';
 import { UserService } from '../../services/user-service';
 import { ProductService } from '../../services/product-service';
 import { OrderService } from '../../services/order-service';
+import { MessageService } from 'primeng/api';
 import { CartItem } from '../../models/cart/cart-item.model';
 import { calculateTotalPrice } from '../../config/commission.config';
+import { ValidationUtils } from '../../utils/validation.utils';
 
 @Component({
   selector: 'app-cart-component',
   standalone: true,
   imports: [CommonModule, ButtonModule, DialogModule, DatePickerModule, InputTextModule, FormsModule],
+  providers: [MessageService],
   templateUrl: './cart-component.html',
   styleUrl: './cart-component.scss',
 })
 export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
   showDateDialog: boolean = false;
+  showContactDialog: boolean = false;
   selectedItem: CartItem | null = null;
+  contactProduct: CartItem | null = null;
+  ownerDetails: any = null;
+  contactForm = {
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  };
+  emailError: string = '';
+  phoneError: string = '';
   selectedDates: Date[] | undefined;
   minDate: Date = new Date();
   disabledDates: Date[] = [];
@@ -40,6 +54,7 @@ export class CartComponent implements OnInit {
     private userService: UserService,
     private productService: ProductService,
     private orderService: OrderService,
+    private messageService: MessageService,
     private router: Router
   ) {}
 
@@ -50,7 +65,18 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(productId: number) {
-    this.cartService.removeFromCart(productId);
+    const item = this.cartItems.find(i => i.productId === productId);
+    if (item) {
+      const element = document.querySelector(`[data-product-id="${productId}"]`);
+      if (element) {
+        element.classList.add('removing');
+        setTimeout(() => {
+          this.cartService.removeFromCart(productId);
+        }, 300);
+      } else {
+        this.cartService.removeFromCart(productId);
+      }
+    }
   }
 
   editDates(item: CartItem) {
@@ -167,20 +193,10 @@ export class CartComponent implements OnInit {
       this.selectedItem.startDate = this.selectedDates[0];
       this.selectedItem.endDate = this.selectedDates[1];
       
-      // עדכון מחיר לפי תאריכים חדשים
       const basePrice = this.selectedItem.basePrice || 0;
-      let finalPrice = basePrice;
-      
-      if (this.selectedItem.transactionType === 'נופש') {
-        const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
-        finalPrice = basePrice * nights;
-        // הוספת עמלה 3%
-        finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
-      } else if (this.selectedItem.transactionType === 'השכרה') {
-        const months = this.calculateMonths(this.selectedDates[0], this.selectedDates[1]);
-        // להשכרה: מספר חודשים + 1 חודש עמלה
-        finalPrice = basePrice * (months + 1);
-      }
+      const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
+      const totalBeforeCommission = basePrice * nights;
+      const finalPrice = calculateTotalPrice(totalBeforeCommission, 'Vacation');
       
       this.selectedItem.price = finalPrice;
       this.cartService.updateCart();
@@ -200,7 +216,7 @@ export class CartComponent implements OnInit {
   getTotalPrice(): number {
     return this.cartItems.reduce((sum, item) => {
       if (item.transactionType === 'מכירה') {
-        return sum; // לא מוסיפים מחיר למכירה - רק סיור
+        return sum;
       }
       return sum + item.price;
     }, 0);
@@ -259,9 +275,17 @@ export class CartComponent implements OnInit {
 
   getItemBasePrice(item: CartItem): number {
     if (item.transactionType === 'מכירה') {
-      return 0; // סיור בלבד
+      return 0;
     }
-    return item.basePrice || item.price; // מחזיר את המחיר הבסיסי
+    return item.basePrice || item.price;
+  }
+
+  getItemTotalWithoutCommission(item: CartItem): number {
+    if (!item.startDate || !item.endDate || !item.basePrice) {
+      return item.price;
+    }
+    const nights = this.calculateNights(item.startDate, item.endDate);
+    return item.basePrice * nights;
   }
 
   getItemPeriod(item: CartItem): string {
@@ -285,7 +309,6 @@ export class CartComponent implements OnInit {
       return;
     }
     
-    // בדיקה שלמוצרי השכרה/נופש יש תאריכים
     const invalidItems = this.cartItems.filter(item => 
       item.transactionType !== 'מכירה' && (!item.startDate || !item.endDate)
     );
@@ -301,5 +324,48 @@ export class CartComponent implements OnInit {
 
   continueShopping() {
     this.router.navigate(['/products']);
+  }
+
+  openContactDialog(item: CartItem) {
+    this.contactProduct = item;
+    this.showContactDialog = true;
+    if (item.ownerId) {
+      this.userService.getUserById(item.ownerId).subscribe({
+        next: (owner) => {
+          this.ownerDetails = owner;
+        },
+        error: (err) => console.error('Error loading owner details:', err)
+      });
+    }
+  }
+
+  submitContactForm() {
+    if (!this.contactForm.name || !this.contactForm.phone || !this.contactForm.email) {
+      return;
+    }
+    
+    if (!ValidationUtils.isValidEmail(this.contactForm.email)) {
+      this.emailError = 'כתובת אימייל לא תקינה';
+      return;
+    }
+    
+    if (!ValidationUtils.isValidPhone(this.contactForm.phone)) {
+      this.phoneError = 'מספר טלפון לא תקין (פורמט: 0XX-XXXXXXX)';
+      return;
+    }
+    
+    console.log('Contact form submitted:', this.contactForm);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'הצלחה',
+      detail: 'הפנייה נשלחה בהצלחה! ניצור איתך קשר בהקדם'
+    });
+    
+    this.showContactDialog = false;
+    this.contactForm = { name: '', phone: '', email: '', message: '' };
+    this.emailError = '';
+    this.phoneError = '';
+    this.contactProduct = null;
+    this.ownerDetails = null;
   }
 }

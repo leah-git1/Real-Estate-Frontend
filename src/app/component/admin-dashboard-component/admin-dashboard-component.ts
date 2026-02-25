@@ -262,38 +262,38 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   }
   
   updateCharts(): void {
-    if (!this.orders || this.orders.length === 0 || !this.users || this.users.length === 0) {
-      return;
+    if (this.orders && this.orders.length > 0) {
+      const ordersByStatus = this.orders.reduce((acc: any, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      }, {});
+      
+      this.ordersChartData = {
+        labels: ['התקבל', 'אושר', 'בטיפול', 'הסתיים', 'בוטל'],
+        datasets: [{
+          data: [
+            ordersByStatus['Pending'] || 0,
+            ordersByStatus['Confirmed'] || 0,
+            ordersByStatus['Processing'] || 0,
+            ordersByStatus['Delivered'] || 0,
+            ordersByStatus['Cancelled'] || 0
+          ],
+          backgroundColor: ['#FFA726', '#42A5F5', '#66BB6A', '#26A69A', '#EF5350']
+        }]
+      };
     }
     
-    const ordersByStatus = this.orders.reduce((acc: any, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
-      return acc;
-    }, {});
-    
-    this.ordersChartData = {
-      labels: ['התקבל', 'אושר', 'בטיפול', 'הסתיים', 'בוטל'],
-      datasets: [{
-        data: [
-          ordersByStatus['Pending'] || 0,
-          ordersByStatus['Confirmed'] || 0,
-          ordersByStatus['Processing'] || 0,
-          ordersByStatus['Delivered'] || 0,
-          ordersByStatus['Cancelled'] || 0
-        ],
-        backgroundColor: ['#FFA726', '#42A5F5', '#66BB6A', '#26A69A', '#EF5350']
-      }]
-    };
-    
-    const adminCount = this.users.filter(u => u.isAdmin).length;
-    const userCount = this.users.length - adminCount;
-    this.usersChartData = {
-      labels: ['משתמשים', 'מנהלים'],
-      datasets: [{
-        data: [userCount, adminCount],
-        backgroundColor: ['#66BB6A', '#FFA726']
-      }]
-    };
+    if (this.users && this.users.length > 0) {
+      const adminCount = this.users.filter(u => u.isAdmin).length;
+      const userCount = this.users.length - adminCount;
+      this.usersChartData = {
+        labels: ['משתמשים', 'מנהלים'],
+        datasets: [{
+          data: [userCount, adminCount],
+          backgroundColor: ['#66BB6A', '#FFA726']
+        }]
+      };
+    }
   }
 
   
@@ -536,7 +536,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     this.propertyInquiryService.updateInquiryStatus(inquiry.inquiryId, newStatus).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס הפנייה עודכן' });
-        this.loadData();
+        inquiry.status = newStatus;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });
@@ -576,7 +577,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     this.adminInquiryService.updateInquiryStatus(inquiry.inquiryId, newStatus).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'סטטוס הפנייה עודכן' });
-        this.loadData();
+        inquiry.status = newStatus;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בעדכון הסטטוס' });

@@ -188,7 +188,7 @@
                 <td>{{ order.orderDate | date:'dd/MM/yyyy' }}</td>
                 <td>₪{{ order.totalAmount | number }}</td>
                 <td>
-                  <p-select [options]="statusOptions" [(ngModel)]="order.status" 
+                  <p-select [options]="statusOptions" [(ngModel)]="order.status" appendTo="body"
                             (onChange)="updateOrderStatus(order, $event.value)" [style]="{'width': '150px'}">
                     <ng-template pTemplate="selectedItem">
                       <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)"></p-tag>
@@ -231,7 +231,7 @@
                 <td>{{ inquiry.phone }}</td>
                 <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
                 <td>
-                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" appendTo="body"
                             (onChange)="updateInquiryStatus(inquiry, $event.value)" [style]="{'width': '120px'}">
                     <ng-template pTemplate="selectedItem">
                       <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
@@ -271,7 +271,7 @@
                 <td>{{ inquiry.subject }}</td>
                 <td>{{ inquiry.createdAt | date:'dd/MM/yyyy' }}</td>
                 <td>
-                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" 
+                  <p-select [options]="inquiryStatusOptions" [(ngModel)]="inquiry.status" appendTo="body"
                             (onChange)="updateAdminInquiryStatus(inquiry, $event.value)" [style]="{'width': '120px'}">
                     <ng-template pTemplate="selectedItem">
                       <p-tag [value]="inquiry.status" [severity]="getMessageStatusSeverity(inquiry.status)"></p-tag>
@@ -343,7 +343,7 @@
 </p-dialog>
 
 <!-- Dialogs -->
-<p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{'width': '500px'}" header="פרטי משתמש">
+<p-dialog [(visible)]="displayUserDialog" [modal]="true" [style]="{'width': '500px'}" header="פרטי משתמש" styleClass="details-dialog">
   <div *ngIf="selectedUser" class="p-4">
     <div class="mb-3"><strong>מזהה:</strong> {{ selectedUser.userId }}</div>
     <div class="mb-3"><strong>שם מלא:</strong> {{ selectedUser.fullName }}</div>
@@ -358,7 +358,7 @@
   <app-product-details *ngIf="selectedProductId" [productId]="selectedProductId" [isEmbedded]="true"></app-product-details>
 </p-dialog>
 
-<p-dialog [(visible)]="displayOrderDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי הזמנה">
+<p-dialog [(visible)]="displayOrderDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי הזמנה" styleClass="details-dialog">
   <div *ngIf="selectedOrder" class="p-4">
     <div class="mb-3"><strong>מזהה:</strong> {{ selectedOrder.orderId }}</div>
     <div class="mb-3"><strong>תאריך:</strong> {{ selectedOrder.orderDate | date:'dd/MM/yyyy HH:mm' }}</div>
@@ -367,7 +367,7 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="displayInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה">
+<p-dialog [(visible)]="displayInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה" styleClass="details-dialog">
   <div *ngIf="selectedInquiry" class="p-4">
     <div class="mb-3"><strong>נכס:</strong> {{ selectedInquiry.productTitle }}</div>
     <div class="mb-3"><strong>מאת:</strong> {{ selectedInquiry.userName }}</div>
@@ -377,7 +377,7 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="displayAdminInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה למנהל">
+<p-dialog [(visible)]="displayAdminInquiryDialog" [modal]="true" [style]="{'width': '600px'}" header="פרטי פנייה למנהל" styleClass="details-dialog">
   <div *ngIf="selectedAdminInquiry" class="p-4">
     <div class="mb-3"><strong>שם:</strong> {{ selectedAdminInquiry.name }}</div>
     <div class="mb-3"><strong>אימייל:</strong> {{ selectedAdminInquiry.email }}</div>

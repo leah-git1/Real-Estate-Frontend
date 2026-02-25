@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { calculateBuyerCommission, calculateTotalPrice } from '../../config/commission.config';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
+import { ValidationUtils } from '../../utils/validation.utils';
 
 @Component({
   selector: 'app-product-card',
@@ -38,6 +39,8 @@ export class ProductCardComponent implements OnInit, OnChanges {
     email: '',
     message: ''
   };
+  emailError: string = '';
+  phoneError: string = '';
   selectedRating: number = 0;
   hoverRating: number = 0;
   productDetails: any = null;
@@ -195,22 +198,16 @@ export class ProductCardComponent implements OnInit, OnChanges {
 
   addToCartWithDates() {
     if (this.selectedDates && this.selectedDates[0] && this.selectedDates[1] && this.isRangeAvailable) {
-      let finalPrice = this.product.price;
-      
-      if (this.product.TransactionType === 'נופש') {
-        const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
-        finalPrice = this.product.price * nights;
-        finalPrice = calculateTotalPrice(finalPrice, 'Vacation');
-      } else if (this.product.TransactionType === 'השכרה') {
-        const months = this.calculateMonths(this.selectedDates[0], this.selectedDates[1]);
-        finalPrice = this.product.price * (months + 1);
-      }
+      const basePrice = this.product.price;
+      const nights = this.calculateNights(this.selectedDates[0], this.selectedDates[1]);
+      const totalBeforeCommission = basePrice * nights;
+      const finalPrice = calculateTotalPrice(totalBeforeCommission, 'Vacation');
       
       const cartItem: CartItem = {
         productId: this.product.productId,
         title: this.product.title,
         price: finalPrice,
-        basePrice: this.product.price,
+        basePrice: basePrice,
         imageUrl: this.imageUrl,
         city: this.product.city,
         transactionType: this.product.TransactionType,
@@ -218,8 +215,13 @@ export class ProductCardComponent implements OnInit, OnChanges {
         endDate: this.selectedDates[1],
         quantity: 1
       };
+      this.showDetailsDialog = false;
+      this.selectedDates = undefined;
+      this.productDetails = null;
+      this.disabledDates = [];
+      this.availabilityMessage = '';
+      this.isRangeAvailable = false;
       this.cartService.addToCart(cartItem);
-      this.onDialogHide();
     }
   }
 
@@ -336,6 +338,10 @@ export class ProductCardComponent implements OnInit, OnChanges {
     return this.product?.TransactionType === 'Sale' || this.product?.TransactionType === 'מכירה';
   }
 
+  isFavorite(): boolean {
+    return this.favoritesService.isFavorite(this.product.productId);
+  }
+
   isVacationType(): boolean {
     const product: any = this.product;
     const type = product?.TransactionType?.toLowerCase() || product?.transactionType?.toLowerCase();
@@ -439,6 +445,16 @@ export class ProductCardComponent implements OnInit, OnChanges {
       return;
     }
 
+    if (!ValidationUtils.isValidEmail(this.contactForm.email)) {
+      this.emailError = 'כתובת אימייל לא תקינה';
+      return;
+    }
+    
+    if (!ValidationUtils.isValidPhone(this.contactForm.phone)) {
+      this.phoneError = 'מספר טלפון לא תקין (פורמט: 0XX-XXXXXXX)';
+      return;
+    }
+
     const inquiry = {
       productId: this.product.productId,
       userId: currentUser.userId,
@@ -458,6 +474,8 @@ export class ProductCardComponent implements OnInit, OnChanges {
         });
         this.showContactDialog = false;
         this.contactForm = { name: '', phone: '', email: '', message: '' };
+        this.emailError = '';
+        this.phoneError = '';
       },
       error: (err) => {
         console.error('Error sending inquiry:', err);

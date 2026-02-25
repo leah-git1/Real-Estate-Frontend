@@ -13,6 +13,7 @@ import { UserService } from '../../services/user-service';
 import { ProductModel } from '../../models/product/product-model';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ValidationUtils } from '../../utils/validation.utils';
 
 @Component({
   selector: 'app-favorites',
@@ -38,6 +39,8 @@ export class FavoritesComponent implements OnInit {
     email: '',
     message: ''
   };
+  emailError: string = '';
+  phoneError: string = '';
 
   constructor(
     private favoritesService: FavoritesService,
@@ -110,6 +113,16 @@ export class FavoritesComponent implements OnInit {
   submitContact() {
     if (!this.contactProduct) return;
     
+    if (!ValidationUtils.isValidEmail(this.contactForm.email)) {
+      this.emailError = 'כתובת אימייל לא תקינה';
+      return;
+    }
+    
+    if (!ValidationUtils.isValidPhone(this.contactForm.phone)) {
+      this.phoneError = 'מספר טלפון לא תקין (פורמט: 0XX-XXXXXXX)';
+      return;
+    }
+    
     const currentUser = this.userService.getCurrentUser();
     const inquiry = {
       productId: this.contactProduct.productId,
@@ -126,6 +139,8 @@ export class FavoritesComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'הפנייה נשלחה בהצלחה' });
         this.showContactDialog = false;
         this.contactForm = { name: '', phone: '', email: '', message: '' };
+        this.emailError = '';
+        this.phoneError = '';
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בשליחת הפנייה' });

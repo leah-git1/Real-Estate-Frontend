@@ -90,4 +90,9 @@ getFullImageUrl(imageUrl: string): string {
     const params = new HttpParams().set('query', query);
     return this.http.get<ProductSummaryDTOModel[]>(`${this.apiUrl}/search`, { params });
   }
+
+  getFeaturedProducts(count: number = 5): Observable<ProductSummaryDTOModel[]> {
+    const params = new HttpParams().set('count', count.toString());
+    return this.http.get<ProductSummaryDTOModel[]>(`${this.apiUrl}/featured`, { params });
+  }
 }

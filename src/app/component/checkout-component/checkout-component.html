@@ -11,7 +11,7 @@
         <h3 class="mb-4"><i class="pi pi-wallet mr-2"></i>בחר אמצעי תשלום</h3>
         
         <div class="flex flex-column gap-3">
-          <div class="field-radiobutton p-3 border-round" [class.bg-primary-50]="paymentMethod === 'credit'">
+          <div class="field-radiobutton p-3 border-round" [class.selected-payment]="paymentMethod === 'credit'">
             <p-radiobutton name="payment" value="credit" [(ngModel)]="paymentMethod" inputId="credit"></p-radiobutton>
             <label for="credit" class="mr-2 cursor-pointer">
               <i class="pi pi-credit-card mr-2 text-xl"></i>
@@ -19,7 +19,7 @@
             </label>
           </div>
           
-          <div class="field-radiobutton p-3 border-round" [class.bg-primary-50]="paymentMethod === 'paypal'">
+          <div class="field-radiobutton p-3 border-round" [class.selected-payment]="paymentMethod === 'paypal'">
             <p-radiobutton name="payment" value="paypal" [(ngModel)]="paymentMethod" inputId="paypal"></p-radiobutton>
             <label for="paypal" class="mr-2 cursor-pointer">
               <i class="pi pi-paypal mr-2 text-xl"></i>

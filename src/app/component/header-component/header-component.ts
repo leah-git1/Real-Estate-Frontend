@@ -30,6 +30,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: any = null;
   showUserMenu = false;
   showAdminMenu = false;
+  isScrolled = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.isScrolled = window.pageYOffset > 50;
+  }
 
   navigateToAdminTab(tab: number) {
     this.showAdminMenu = false;

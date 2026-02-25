@@ -26,7 +26,11 @@
                 <div class="field mb-4">
                   <label class="block font-bold mb-2">אימייל *</label>
                   <input type="email" pInputText [(ngModel)]="contactForm.email" name="email" 
-                         required class="w-full" placeholder="example@email.com" />
+                         required email #emailInput="ngModel"
+                         class="w-full" placeholder="example@email.com" />
+                  <small class="text-red-500" *ngIf="emailInput.invalid && emailInput.touched">
+                    נא להזין כתובת אימייל תקינה
+                  </small>
                 </div>
               </div>
 
@@ -34,7 +38,11 @@
                 <div class="field mb-4">
                   <label class="block font-bold mb-2">טלפון</label>
                   <input type="tel" pInputText [(ngModel)]="contactForm.phone" name="phone" 
+                         pattern="^0[2-9]\d{7,8}$" #phoneInput="ngModel"
                          class="w-full" placeholder="050-1234567" />
+                  <small class="text-red-500" *ngIf="phoneInput.invalid && phoneInput.touched && contactForm.phone">
+                    מספר טלפון לא תקין (לדוגמה: 0501234567)
+                  </small>
                 </div>
               </div>
 

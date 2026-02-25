@@ -21,6 +21,9 @@ import { ToastModule } from 'primeng/toast';
 })
 export class AuthComponent {
   isLoginMode = true;
+  passwordStrength: number = 0;
+  passwordStrengthText: string = '';
+  passwordStrengthColor: string = '';
 
   loginData: UserLoginDTOModel = new UserLoginDTOModel();
   registerData: UserRegisterDTOModel = new UserRegisterDTOModel();
@@ -33,6 +36,32 @@ export class AuthComponent {
 
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
+    this.passwordStrength = 0;
+    this.passwordStrengthText = '';
+  }
+
+  onPasswordChange() {
+    const password = this.registerData.password;
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    
+    this.passwordStrength = strength;
+    
+    if (strength <= 1) {
+      this.passwordStrengthText = 'חלשה';
+      this.passwordStrengthColor = '#ef4444';
+    } else if (strength <= 3) {
+      this.passwordStrengthText = 'בינונית';
+      this.passwordStrengthColor = '#f59e0b';
+    } else {
+      this.passwordStrengthText = 'חזקה';
+      this.passwordStrengthColor = '#10b981';
+    }
   }
 
   onSubmit() {

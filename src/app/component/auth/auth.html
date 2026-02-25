@@ -38,10 +38,28 @@
 
                 <div *ngIf="!isLoginMode">
                     <p-password name="regPassword" [(ngModel)]="registerData.password" 
-                                [feedback]="true" [toggleMask]="true" styleClass="w-full"
+                                [feedback]="false" [toggleMask]="true" styleClass="w-full"
                                 inputStyleClass="w-full" required #passReg="ngModel"
+                                (ngModelChange)="onPasswordChange()"
                                 placeholder="בחר סיסמה חזקה">
                     </p-password>
+                    
+                    <div *ngIf="registerData.password.length > 0" class="password-strength-container mt-2">
+                      <div class="password-strength-bar">
+                        <div class="password-strength-fill" 
+                             [style.width.%]="(passwordStrength / 5) * 100"
+                             [style.background-color]="passwordStrengthColor"></div>
+                      </div>
+                      <div class="flex justify-content-between align-items-center mt-1">
+                        <small [style.color]="passwordStrengthColor" class="font-semibold">
+                          חוזק סיסמה: {{ passwordStrengthText }}
+                        </small>
+                        <small class="text-600">
+                          {{ passwordStrength }}/5
+                        </small>
+                      </div>
+                    </div>
+                    
                     <small class="p-error block mt-1" *ngIf="passReg.invalid && passReg.touched && registerData.password.length < 8">
                         הסיסמה חייבת להכיל לפחות 8 תווים.
                     </small>
@@ -77,7 +95,7 @@
                 </p-button>
 
                 <p-button [label]="isLoginMode ? 'עדיין אין לך חשבון? הירשם כאן' : 'כבר יש לך חשבון? התחבר כאן'"
-                    (onClick)="toggleMode()" [link]="true" styleClass="w-full" type="button">
+                    (onClick)="toggleMode()" styleClass="w-full p-button-text" type="button">
                 </p-button>
             </div>
         </form>

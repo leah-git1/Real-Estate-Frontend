@@ -127,7 +127,7 @@
         
         <div *ngFor="let order of orders" class="order-card mb-3">
           <div class="border-1 border-200 border-round overflow-hidden hover:shadow-3 transition-all transition-duration-300">
-            <div class="p-4 bg-primary-50 border-bottom-1 border-200">
+            <div class="p-4 order-header border-bottom-1 border-200">
               <div class="flex justify-content-between align-items-center">
                 <div>
                   <h4 class="m-0 mb-2">
@@ -149,7 +149,7 @@
             
             <div class="p-4">
               <div class="order-stepper mb-4">
-                <div class="stepper-container">
+                <div class="stepper-container-centered">
                   <div class="stepper-step" [class.completed]="isStepCompleted(order.status, 'Pending')" [class.active]="order.status === 'Pending'">
                     <div class="step-circle">
                       <i class="pi" [ngClass]="isStepCompleted(order.status, 'Pending') ? 'pi-check' : 'pi-inbox'"></i>
@@ -269,9 +269,9 @@
             <div class="flex-grow-1">
               <h4 class="m-0 mb-1 text-900">{{ product.title }}</h4>
               <div class="flex align-items-center gap-3 text-600 text-sm">
-                <span><i class="pi pi-map-marker mr-1"></i>{{ product.city }}</span>
-                <span *ngIf="product.rooms"><i class="pi pi-home mr-1"></i>{{ product.rooms }} חדרים</span>
-                <span *ngIf="product.beds"><i class="pi pi-moon mr-1"></i>{{ product.beds }} מיטות</span>
+                <span class="flex align-items-center gap-1"><i class="pi pi-map-marker"></i>{{ product.city }}</span>
+                <span *ngIf="product.rooms" class="flex align-items-center gap-1"><i class="pi pi-home"></i>{{ product.rooms }} חדרים</span>
+                <span *ngIf="product.beds" class="flex align-items-center gap-1"><i class="pi pi-moon"></i>{{ product.beds }} מיטות</span>
                 <span class="p-tag" [ngClass]="{
                   'p-tag-info': product.transactionType === 'Sale',
                   'p-tag-success': product.transactionType === 'Rent',
@@ -315,7 +315,10 @@
       <div *ngIf="activeTab === 4" class="card p-4 text-center">
         <i class="pi pi-sign-out text-6xl text-400 mb-3"></i>
         <h3 class="mb-3">האם אתה בטוח שברצונך להתנתק?</h3>
-        <p-button label="התנתק" icon="pi pi-sign-out" severity="danger" (onClick)="logout()"></p-button>
+        <div class="flex gap-2 justify-content-center">
+          <p-button label="ביטול" icon="pi pi-times" (onClick)="setActiveTab(0)" styleClass="p-button-text"></p-button>
+          <p-button label="התנתק" icon="pi pi-sign-out" severity="danger" (onClick)="confirmLogout()"></p-button>
+        </div>
       </div>
 
       <div *ngIf="activeTab === 5" class="card p-4">
@@ -372,10 +375,29 @@
             <p class="text-sm text-600 m-0 mb-2">
               <i class="pi pi-calendar mr-1"></i>{{ inquiry.createdAt | date:'dd/MM/yyyy HH:mm' }}
             </p>
+            <div class="mb-3 p-2 bg-blue-50 border-round">
+              <p class="text-xs text-600 mb-2 font-semibold">
+                <i class="pi pi-sync mr-1"></i>עדכן סטטוס:
+              </p>
+              <div class="flex gap-2 flex-wrap">
+                <button pButton label="חדש" icon="pi pi-info-circle" 
+                        (click)="updateInquiryStatus(inquiry.inquiryId, 'New')" 
+                        [disabled]="inquiry.status === 'New'"
+                        class="p-button-sm p-button-info"></button>
+                <button pButton label="בטיפול" icon="pi pi-sync" 
+                        (click)="updateInquiryStatus(inquiry.inquiryId, 'InProgress')" 
+                        [disabled]="inquiry.status === 'InProgress'"
+                        class="p-button-sm p-button-warning"></button>
+                <button pButton label="טופל" icon="pi pi-check" 
+                        (click)="updateInquiryStatus(inquiry.inquiryId, 'Resolved')" 
+                        [disabled]="inquiry.status === 'Resolved'"
+                        class="p-button-sm p-button-success"></button>
+              </div>
+            </div>
             <div class="flex gap-2">
               <p-button label="צפה בפרטים" icon="pi pi-eye" 
                         (onClick)="viewInquiryDetails(inquiry)" 
-                        styleClass="p-button-sm"></p-button>
+                        styleClass="p-button-sm p-button-outlined"></p-button>
               <p-button label="צפה בנכס" icon="pi pi-home" 
                         (onClick)="viewInquiryProduct(inquiry.productId)" 
                         styleClass="p-button-sm p-button-outlined"></p-button>
@@ -430,6 +452,23 @@
         <p class="text-600 text-sm mb-1">סטטוס</p>
         <p-tag [value]="getInquiryStatusLabel(selectedInquiry.status)" 
                [severity]="getInquiryStatusSeverity(selectedInquiry.status)"></p-tag>
+      </div>
+      <div class="col-12" *ngIf="activeTab === 6">
+        <p class="text-600 text-sm mb-2">עדכן סטטוס</p>
+        <div class="flex gap-2">
+          <button pButton label="חדש" icon="pi pi-info-circle" 
+                  (click)="updateInquiryStatus(selectedInquiry.inquiryId, 'New')" 
+                  [disabled]="selectedInquiry.status === 'New'"
+                  class="p-button-sm p-button-info"></button>
+          <button pButton label="בטיפול" icon="pi pi-sync" 
+                  (click)="updateInquiryStatus(selectedInquiry.inquiryId, 'InProgress')" 
+                  [disabled]="selectedInquiry.status === 'InProgress'"
+                  class="p-button-sm p-button-warning"></button>
+          <button pButton label="טופל" icon="pi pi-check" 
+                  (click)="updateInquiryStatus(selectedInquiry.inquiryId, 'Resolved')" 
+                  [disabled]="selectedInquiry.status === 'Resolved'"
+                  class="p-button-sm p-button-success"></button>
+        </div>
       </div>
     </div>
   </div>
@@ -540,5 +579,27 @@
   <ng-template pTemplate="footer">
     <button pButton label="סגור" icon="pi pi-times" 
             (click)="closeOrderDialog()" class="p-button-text"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showLogoutDialog" [modal]="true" [style]="{width: '450px'}" styleClass="logout-dialog">
+  <ng-template pTemplate="header">
+    <h3 class="logout-header">
+      <i class="pi pi-sign-out mr-2"></i>
+      אישור התנתקות
+    </h3>
+  </ng-template>
+  
+  <div class="text-center p-4">
+    <i class="pi pi-sign-out logout-icon"></i>
+    <p class="text-xl mt-3 mb-2 font-bold">האם אתה בטוח?</p>
+    <p class="text-600">הפעולה תנתק אותך מהמערכת</p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="ביטול" icon="pi pi-times" 
+            (click)="cancelLogout()" class="p-button-text"></button>
+    <button pButton label="התנתק" icon="pi pi-sign-out" 
+            (click)="confirmLogout()" class="p-button-danger"></button>
   </ng-template>
 </p-dialog>
