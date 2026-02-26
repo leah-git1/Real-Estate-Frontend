@@ -21,12 +21,20 @@
     </div>
 
     <!-- Messages -->
-    <div class="chat-messages">
+    <div class="chat-messages" #messagesContainer>
       <div *ngFor="let msg of messages" 
            [class]="msg.isBot ? 'message bot-message' : 'message user-message'">
         <div class="message-content">
           <p [innerHTML]="msg.text.replace(/\n/g, '<br>')"></p>
           <span class="timestamp">{{ msg.timestamp | date:'HH:mm' }}</span>
+        </div>
+      </div>
+      
+      <div *ngIf="isTyping" class="message bot-message">
+        <div class="message-content typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
       </div>
     </div>

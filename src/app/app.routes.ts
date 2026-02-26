@@ -12,6 +12,7 @@ import { CartComponent } from './component/cart-component/cart-component';
 import { CheckoutComponent } from './component/checkout-component/checkout-component';
 import { OrderSuccessComponent } from './component/order-success-component/order-success-component';
 import { ContactComponent } from './component/contact-component/contact-component';
+import { BlogComponent } from './component/blog-component/blog-component';
 import { FavoritesComponent } from './component/favorites-component/favorites-component';
 import { adminGuard } from './guards/admin.guard';
 
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   { path: 'contact', component: ContactComponent },
+  { path: 'blog', component: BlogComponent },
   { path: 'products', component: ProductListComponent },
   { path: 'auth', component: AuthComponent },
   { path: 'cart', component: CartComponent },

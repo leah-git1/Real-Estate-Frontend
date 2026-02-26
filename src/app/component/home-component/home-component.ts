@@ -204,10 +204,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           this.featuredProducts = [...response.data].sort(() => 0.5 - Math.random()).slice(0, 6);
           this.currentIndex = 0;
           this.cdr.detectChanges();
-          console.log('Featured products loaded:', this.featuredProducts);
         }
       },
-      error: (err) => console.error('Error loading products:', err)
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'שגיאה בטעינת נכסים',
+          life: 3000
+        });
+      }
     });
   }
 
@@ -279,5 +285,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   
   goToTestimonial(index: number) {
     this.currentTestimonialIndex = index;
+  }
+  
+  goToBlog() {
+    this.router.navigate(['/blog']);
   }
 }

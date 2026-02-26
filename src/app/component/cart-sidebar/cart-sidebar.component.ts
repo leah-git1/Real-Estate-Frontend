@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { CartService } from '../../services/cart-service';
 import { UserService } from '../../services/user-service';
 import { ProductService } from '../../services/product-service';
@@ -13,6 +14,7 @@ import { CartItem } from '../../models/cart/cart-item.model';
   selector: 'app-cart-sidebar',
   standalone: true,
   imports: [CommonModule, DrawerModule, ButtonModule],
+  providers: [MessageService],
   templateUrl: './cart-sidebar.component.html',
   styleUrl: './cart-sidebar.component.scss'
 })
@@ -25,7 +27,8 @@ export class CartSidebarComponent implements OnInit {
     private userService: UserService,
     private productService: ProductService,
     private orderService: OrderService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
@@ -70,7 +73,12 @@ export class CartSidebarComponent implements OnInit {
     );
     
     if (invalidItems.length > 0) {
-      alert('יש מוצרים ללא תאריכים. אנא עבור לסל המלא לבחירת תאריכים.');
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'חסרים תאריכים',
+        detail: 'יש מוצרים ללא תאריכים. אנא עבור לסל המלא לבחירת תאריכים.',
+        life: 4000
+      });
       this.router.navigate(['/cart']);
       return;
     }

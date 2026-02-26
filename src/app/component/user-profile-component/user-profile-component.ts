@@ -56,12 +56,8 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    console.log('UserProfileComponent ngOnInit started');
     this.currentUser = this.userService.getCurrentUser();
-    console.log('Current user:', this.currentUser);
-    
     if (!this.currentUser) {
-      console.log('No user found, redirecting to auth');
       this.router.navigate(['/auth']);
       return;
     }
@@ -70,8 +66,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     const tabParam = this.route.snapshot.queryParams['tab'];
     if (tabParam) {
       this.activeTab = +tabParam;
-      console.log('Initial active tab from URL:', this.activeTab);
-    }
+      }
     
     this.loadUserData();
     this.loadOrders();
@@ -114,15 +109,12 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
 
   loadOrders() {
-    console.log('Loading orders for user:', this.currentUser.userId);
     this.orderService.getOrdersByUserId(this.currentUser.userId).subscribe({
       next: (data) => {
-        console.log('Orders received:', data);
         this.orders = data.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading orders:', err);
         this.orders = [];
       }
     });
@@ -140,7 +132,6 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading products:', err);
         this.isLoadingProducts = false;
         this.myProducts = [];
         this.cdr.detectChanges();
@@ -155,12 +146,15 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
 
   updateProfile() {
-    console.log('Updating user:', this.currentUser.userId, this.userForm);
-    
     if (this.userForm.phone) {
       const phoneRegex = /^0[2-9]\d{7,8}$/;
       if (!phoneRegex.test(this.userForm.phone)) {
-        alert('מספר טלפון לא תקין. הזן מספר ישראלי תקין (לדוגמה: 0501234567)');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'מספר טלפון לא תקין. הזן מספר ישראלי תקין (לדוגמה: 0501234567)',
+          life: 4000
+        });
         return;
       }
     }
@@ -177,7 +171,12 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     
     this.userService.updateUser(this.currentUser.userId, updateData).subscribe({
       next: (res) => {
-        alert('הפרטים עודכנו בהצלחה');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'הצלחה',
+          detail: 'הפרטים עודכנו בהצלחה',
+          life: 3000
+        });
         this.currentUser.fullName = this.userForm.fullName;
         this.currentUser.phone = this.userForm.phone;
         this.currentUser.address = this.userForm.address;
@@ -185,11 +184,16 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
           this.currentUser.email = updateData.email;
         }
         this.userService.saveUserToStorage(this.currentUser);
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 1500);
       },
       error: (err) => {
         const errorMsg = err.error?.message || err.error || 'שגיאה בעדכון הפרטים';
-        alert(errorMsg);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: errorMsg,
+          life: 4000
+        });
       }
     });
   }
@@ -222,7 +226,6 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.passwordChangeForm = { oldPassword: '', newPassword: '' };
       },
       error: (err) => {
-        console.error('Password change error:', err);
         let errorMsg = 'שגיאה בשינוי הסיסמה';
         
         if (err.error?.message) {
@@ -266,7 +269,6 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
           this.loadMyProducts();
         },
         error: (err) => {
-          console.error('Error deleting product:', err);
           this.showDeleteDialog = false;
           this.productToDelete = null;
         }
@@ -311,10 +313,8 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
 
   setActiveTab(index: number) {
-    console.log('setActiveTab called with index:', index);
     this.activeTab = index;
     if (index === 2) {
-      console.log('Tab 2 clicked, loading products');
       this.loadMyProducts();
     } else if (index === 5) {
       this.loadMyInquiries();
@@ -370,8 +370,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.myInquiries = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error loading inquiries:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   loadInquiriesToMe() {
@@ -380,8 +379,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.inquiriesToMe = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error loading inquiries to me:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   viewInquiryDetails(inquiry: any) {
@@ -425,7 +423,6 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         }
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error updating inquiry status:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 }

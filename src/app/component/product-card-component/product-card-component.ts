@@ -104,15 +104,12 @@ export class ProductCardComponent implements OnInit, OnChanges {
                                  data.transactionType === 'השכרה' ? 'Rent' : data.transactionType;
         }
         this.productDetails = data;
-        console.log('Product details loaded:', this.productDetails);
-        console.log('TransactionType:', this.productDetails.TransactionType);
         this.showDetailsDialog = true;
         if (this.productDetails.TransactionType === 'Vacation') {
           this.loadOccupiedDates();
         }
       },
-      error: (err) => console.error('Error loading product:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   loadOccupiedDates(month?: number, year?: number) {
@@ -125,8 +122,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
           this.disabledDates = data.occupiedDates.map(dateStr => new Date(dateStr));
           this.cdr.detectChanges();
         },
-        error: (err) => console.error('Error fetching occupied dates:', err)
-      });
+        error: (err) => { /* Error handled */ } });
   }
 
   onMonthChange(event: any) {
@@ -136,13 +132,9 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   onDateChange(dates: Date[] | undefined) {
-    console.log('onDateChange called with:', dates);
-    console.log('Product TransactionType:', this.product.TransactionType);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
       if (this.product.TransactionType === 'השכרה' || this.product.TransactionType === 'Rent') {
-        console.log('Checking full months...');
         if (!this.isFullMonths(dates[0], dates[1])) {
-          console.log('NOT full months!');
           this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
           this.isRangeAvailable = false;
           setTimeout(() => {
@@ -188,7 +180,6 @@ export class ProductCardComponent implements OnInit, OnChanges {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('שגיאה בבדיקת זמינות:', err);
           this.availabilityMessage = 'שגיאה בבדיקת זמינות';
           this.isRangeAvailable = false;
           this.selectedDates = undefined;
@@ -418,7 +409,6 @@ export class ProductCardComponent implements OnInit, OnChanges {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error loading owner details:', err);
           this.showContactDialog = true;
         }
       });
@@ -480,7 +470,6 @@ export class ProductCardComponent implements OnInit, OnChanges {
         this.phoneError = '';
       },
       error: (err) => {
-        console.error('Error sending inquiry:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'שגיאה',

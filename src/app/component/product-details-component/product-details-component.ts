@@ -116,10 +116,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   loadProduct(id: number): void {
     this.productService.getProductById(id).subscribe({
       next: (data) => {
-        console.log('Raw data from server:', data);
-        console.log('transactionType:', data.transactionType);
-        console.log('TransactionType before:', data.TransactionType);
-        
         // נרמול השדה transactionType
         if (data.transactionType && !data.TransactionType) {
           data.TransactionType = data.transactionType === 'נופש' ? 'Vacation' : 
@@ -127,21 +123,15 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
                                  data.transactionType === 'השכרה' ? 'Rent' : data.transactionType;
         }
         
-        console.log('TransactionType after:', data.TransactionType);
-        console.log('isEmbedded:', this.isEmbedded);
-        
         this.product = data;
         this.setupGallery(data);
         if (data.TransactionType === 'Vacation') {
-          console.log('טוען תאריכים תפוסים עבור נופש');
           this.loadOccupiedDates();
         } else {
-          console.log('לא טוען תאריכים - TransactionType:', data.TransactionType);
-        }
+          }
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching product:', err);
         this.product = null;
         this.cdr.detectChanges();
       }
@@ -179,38 +169,28 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
     const targetMonth = month || this.currentMonth + 1;
     const targetYear = year || this.currentYear;
     
-    console.log('קורא ל-loadOccupiedDates עבור חודש:', targetMonth, 'שנה:', targetYear);
-    
     this.orderService.getOccupiedDates(this.product.productId, targetMonth, targetYear)
       .subscribe({
         next: (data) => {
-          console.log('תאריכים תפוסים שהתקבלו:', data.occupiedDates);
           this.disabledDates = data.occupiedDates.map(dateStr => {
             const date = new Date(dateStr);
-            console.log('ממיר תאריך:', dateStr, 'ל-', date);
             return date;
           });
           this.cdr.detectChanges();
         },
-        error: (err) => console.error('Error fetching occupied dates:', err)
-      });
+        error: (err) => { /* Error handled */ } });
   }
 
   onMonthChange(event: any) {
-    console.log('שינוי חודש:', event);
     this.currentMonth = event.month;
     this.currentYear = event.year;
     this.loadOccupiedDates(event.month + 1, event.year);
   }
 
   onDateChange(dates: Date[] | undefined) {
-    console.log('onDateChange נקרא עם:', dates);
-    console.log('Product TransactionType:', this.product?.TransactionType);
     if (dates && dates.length === 2 && dates[0] && dates[1]) {
       if (this.product && (this.product.TransactionType === 'Rent' || this.product.TransactionType === 'השכרה')) {
-        console.log('Checking full months...');
         if (!this.isFullMonths(dates[0], dates[1])) {
-          console.log('NOT full months!');
           this.availabilityMessage = '⚠️ בהשכרה ניתן להשכיר רק חודשים שלמים. בחר את אותו יום בחודש';
           this.isRangeAvailable = false;
           setTimeout(() => {
@@ -220,10 +200,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
           return;
         }
       }
-      console.log('בודק זמינות עבור טווח:', dates[0], 'עד', dates[1]);
       this.checkRangeAvailability(dates[0], dates[1]);
     } else {
-      console.log('לא נבחר טווח מלא, מאפס הודעה');
       this.availabilityMessage = '';
       this.isRangeAvailable = false;
     }
@@ -264,19 +242,14 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   checkRangeAvailability(startDate: Date, endDate: Date) {
-    console.log('קורא ל-API לבדיקת זמינות:', startDate, endDate);
-    
     this.productService.checkAvailability(this.product.productId, startDate, endDate)
       .subscribe({
         next: (isAvailable) => {
-          console.log('תשובה מה-API:', isAvailable);
           this.isRangeAvailable = isAvailable;
           if (isAvailable) {
             this.availabilityMessage = '✓ התאריכים זמינים להזמנה!';
-            console.log('הטווח זמין');
-          } else {
+            } else {
             this.availabilityMessage = '✗ התאריכים לא זמינים - יש חפיפה עם תאריכים תפוסים';
-            console.log('הטווח לא זמין, מאפס בחירה');
             setTimeout(() => {
               this.rangeDates = undefined;
               this.cdr.detectChanges();
@@ -285,7 +258,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('שגיאה בבדיקת זמינות:', err);
           this.availabilityMessage = 'שגיאה בבדיקת זמינות';
           this.isRangeAvailable = false;
           this.rangeDates = undefined;
@@ -332,10 +304,8 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isRentType(): boolean {
-    console.log('Full product:', this.product);
     const type = this.product?.TransactionType?.toLowerCase() || this.product?.transactionType?.toLowerCase();
     const result = type === 'vacation' || type === 'נופש' || type === 'rent' || type === 'השכרה';
-    console.log('isRentType check:', { type, result });
     return result;
   }
 
@@ -401,31 +371,19 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   canAddToCart(): boolean {
-    console.log('בודק אם ניתן להוסיף לסל:', {
-      product: !!this.product,
-      TransactionType: this.product?.TransactionType,
-      rangeDates: this.rangeDates,
-      isRangeAvailable: this.isRangeAvailable
-    });
-    
     if (!this.product) {
-      console.log('אין מוצר');
       return false;
     }
     
     if (this.product.TransactionType === 'Sale') {
-      console.log('מוצר למכירה - מותר');
       return true;
     }
     
     const canAdd = !!(this.rangeDates && this.rangeDates[0] && this.rangeDates[1] && this.isRangeAvailable);
-    console.log('תוצאה סופית:', canAdd);
     return canAdd;
   }
 
   addToCart() {
-    console.log('הוספה לסל:', this.product.title, 'תאריכים:', this.rangeDates);
-    
     let finalPrice = this.product.price;
     
     // חישוב מחיר לפי סוג עסקה
@@ -498,7 +456,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error loading owner details:', err);
           this.showContactDialog = true;
         }
       });
@@ -551,7 +508,6 @@ export class ProductDetailsComponent implements OnInit, OnChanges, OnDestroy {
         this.phoneError = '';
       },
       error: (err) => {
-        console.error('Error sending inquiry:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'שגיאה',

@@ -99,8 +99,7 @@ export class CartComponent implements OnInit {
         next: (data) => {
           this.disabledDates = data.occupiedDates.map(dateStr => new Date(dateStr));
         },
-        error: (err) => console.error('Error fetching occupied dates:', err)
-      });
+        error: (err) => { /* Error handled */ } });
   }
 
   onMonthChange(event: any) {
@@ -133,11 +132,7 @@ export class CartComponent implements OnInit {
     const startDate = new Date(start);
     const endDate = new Date(end);
     
-    console.log('Checking full months:', startDate.getDate(), 'vs', endDate.getDate());
-    
-    // בדיקה שהיום בחודש זהה
     if (startDate.getDate() !== endDate.getDate()) {
-      console.log('Days do not match - NOT full months');
       return false;
     }
     
@@ -145,9 +140,7 @@ export class CartComponent implements OnInit {
     const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
                        (endDate.getMonth() - startDate.getMonth());
     
-    console.log('Months diff:', monthsDiff);
     const result = monthsDiff >= 1;
-    console.log('Is full months:', result);
     return result;
   }
 
@@ -180,7 +173,6 @@ export class CartComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('שגיאה בבדיקת זמינות:', err);
           this.availabilityMessage = 'שגיאה בבדיקת זמינות';
           this.isRangeAvailable = false;
           this.selectedDates = undefined;
@@ -299,11 +291,7 @@ export class CartComponent implements OnInit {
   }
 
   checkout() {
-    console.log('Checkout clicked');
-    console.log('Is logged in:', this.userService.isLoggedIn());
-    
     if (!this.userService.isLoggedIn()) {
-      console.log('User not logged in, redirecting to auth');
       localStorage.setItem('returnUrl', '/checkout');
       this.router.navigate(['/auth']);
       return;
@@ -314,11 +302,15 @@ export class CartComponent implements OnInit {
     );
     
     if (invalidItems.length > 0) {
-      alert('יש מוצרים ללא תאריכים. אנא בחר תאריכים לכל המוצרים.');
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'חסרים תאריכים',
+        detail: 'יש מוצרים ללא תאריכים. אנא בחר תאריכים לכל המוצרים.',
+        life: 4000
+      });
       return;
     }
     
-    console.log('Navigating to checkout');
     this.router.navigate(['/checkout']);
   }
 
@@ -334,8 +326,7 @@ export class CartComponent implements OnInit {
         next: (owner) => {
           this.ownerDetails = owner;
         },
-        error: (err) => console.error('Error loading owner details:', err)
-      });
+        error: (err) => { /* Error handled */ } });
     }
   }
 
@@ -354,7 +345,6 @@ export class CartComponent implements OnInit {
       return;
     }
     
-    console.log('Contact form submitted:', this.contactForm);
     this.messageService.add({
       severity: 'success',
       summary: 'הצלחה',

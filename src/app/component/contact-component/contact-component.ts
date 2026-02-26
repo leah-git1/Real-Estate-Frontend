@@ -8,6 +8,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AdminInquiryService } from '../../services/admin-inquiry-service';
 import { UserService } from '../../services/user-service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-contact',
@@ -20,11 +21,20 @@ import { UserService } from '../../services/user-service';
     ButtonModule,
     ToastModule
   ],
+  animations: [
+    trigger('slideDown', [
+      state('closed', style({ height: '0', opacity: '0', overflow: 'hidden' })),
+      state('open', style({ height: '*', opacity: '1' })),
+      transition('closed <=> open', animate('300ms ease-in-out'))
+    ])
+  ],
   providers: [MessageService],
   templateUrl: './contact-component.html',
   styleUrl: './contact-component.scss'
 })
 export class ContactComponent implements AfterViewInit {
+  activeFaq: number | null = null;
+  
   contactForm = {
     name: '',
     email: '',
@@ -32,6 +42,41 @@ export class ContactComponent implements AfterViewInit {
     subject: '',
     message: ''
   };
+  
+  faqs = [
+    {
+      question: 'איך אני מפרסם נכס?',
+      answer: 'התחבר לחשבון האישי שלך, לחץ על "המוצרים שלי" ואז על "הוסף מוצר חדש". מלא את כל הפרטים הנדרשים והעלה תמונות איכותיות של הנכס.'
+    },
+    {
+      question: 'מה העמלות של האתר?',
+      answer: 'עמלות האתר: מכירה - 2% מסך העסקה, השכרה - חודש שכירות אחד, נופש - 8% מסך ההזמנה. העמלה משולמת רק לאחר סגירת עסקה מוצלחת.'
+    },
+    {
+      question: 'איך מבטלים הזמנה?',
+      answer: 'לביטול הזמנה, פנה לשירות הלקוחות בטלפון 03-1234567 או במייל support@realestate.co.il. ביטול עד 48 שעות לפני התאריך זכאי להחזר מלא.'
+    },
+    {
+      question: 'איך אני מעדכן נכס קיים?',
+      answer: 'היכנס לאיזור האישי, לחץ על "המוצרים שלי", בחר את הנכס שברצונך לעדכן ולחץ על כפתור העריכה. תוכל לשנות מחיר, תיאור, תמונות ועוד.'
+    },
+    {
+      question: 'מה אמצעי התשלום המקובלים?',
+      answer: 'אנו מקבלים תשלום בכרטיסי אשראי, העברה בנקאית, PayPal וביט, וכן תשלום במזומן במקרים מסוימים. כל התשלומים מאובטחים ומוצפנים.'
+    },
+    {
+      question: 'כמה זמן לוקח לאשר נכס?',
+      answer: 'אישור נכס לוקח בדרך כלל עד 24 שעות. אנו בודקים שהנכס עומד בתקנים שלנו ושכל הפרטים מלאים כראוי. תקבל הודעה למייל.'
+    },
+    {
+      question: 'האם יש אפשרות לראות את הנכס לפני ההזמנה?',
+      answer: 'כן! לחץ על "צור קשר" בדף הנכס כדי לתאם סיור עם בעל הנכס. אנו ממליצים לראות את הנכס לפני החלטה סופית.'
+    },
+    {
+      question: 'מה קורה אם יש בעיה עם הנכס?',
+      answer: 'אם יש בעיה עם הנכס, פנה אלינו מיד ונטפל בעניין. אנו מציעים אחריות מלאה על כל הנכסים באתר ונפעל לפתרון מהיר.'
+    }
+  ];
 
   constructor(
     private messageService: MessageService,
@@ -42,6 +87,10 @@ export class ContactComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.setupScrollAnimations();
+  }
+
+  toggleFaq(index: number) {
+    this.activeFaq = this.activeFaq === index ? null : index;
   }
 
   setupScrollAnimations() {

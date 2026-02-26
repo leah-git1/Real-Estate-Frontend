@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CategoryService } from '../../services/category-service';
 import { CategoryDTOModel } from '../../models/category/category-model';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './footer-component.html',
   styleUrl: './footer-component.scss'
 })
@@ -23,11 +23,9 @@ export class FooterComponent implements OnInit {
   ngOnInit() {
     this.categoryService.getCategories().subscribe({
       next: (data) => {
-        console.log('Categories loaded in footer:', data);
         this.categories = data.slice(0, 4);
       },
-      error: (err) => console.error('Error loading categories in footer:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   navigateTo(route: string) {

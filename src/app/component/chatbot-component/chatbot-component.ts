@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,10 +18,14 @@ interface Message {
   styleUrl: './chatbot-component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class ChatbotComponent {
+export class ChatbotComponent implements AfterViewChecked {
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  
   isOpen = false;
   messages: Message[] = [];
   userInput = '';
+  isTyping = false;
+  private shouldScroll = false;
   quickActions = [
     { label: 'נכסים למכירה', icon: 'pi-home', action: 'sale' },
     { label: 'נכסים להשכרה', icon: 'pi-key', action: 'rent' },
@@ -30,6 +34,19 @@ export class ChatbotComponent {
   ];
 
   constructor(private router: Router) {}
+
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+  
+  scrollToBottom(): void {
+    try {
+      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+    } catch(err) { }
+  }
 
   toggleChat() {
     this.isOpen = !this.isOpen;
@@ -44,10 +61,14 @@ export class ChatbotComponent {
     this.addUserMessage(this.userInput);
     const input = this.userInput.toLowerCase();
     this.userInput = '';
+    this.shouldScroll = true;
     
+    this.isTyping = true;
     setTimeout(() => {
+      this.isTyping = false;
       this.handleUserInput(input);
-    }, 500);
+      this.shouldScroll = true;
+    }, 1000);
   }
 
   handleUserInput(input: string) {
@@ -96,9 +117,11 @@ export class ChatbotComponent {
 
   addUserMessage(text: string) {
     this.messages.push({ text, isBot: false, timestamp: new Date() });
+    this.shouldScroll = true;
   }
 
   addBotMessage(text: string) {
     this.messages.push({ text, isBot: true, timestamp: new Date() });
+    this.shouldScroll = true;
   }
 }

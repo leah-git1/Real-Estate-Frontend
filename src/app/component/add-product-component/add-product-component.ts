@@ -55,13 +55,7 @@ export class AddProductComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('Checking if user is logged in...');
-    console.log('isLoggedIn:', this.userService.isLoggedIn());
-    console.log('currentUser:', this.userService.getCurrentUser());
-    
-    // בדיקה אם המשתמש מחובר
     if (!this.userService.isLoggedIn()) {
-      console.log('User not logged in, redirecting to auth...');
       this.messageService.add({ severity: 'warn', summary: 'התחברות נדרשת', detail: 'יש להתחבר כדי לפרסם מוצר' });
       setTimeout(() => {
         this.router.navigate(['/auth']);
@@ -69,10 +63,11 @@ export class AddProductComponent implements OnInit {
       return;
     }
 
-    console.log('User is logged in, loading categories...');
     this.categoryService.getCategories().subscribe({
       next: (data) => this.categories = data,
-      error: (err) => console.error('Error loading categories:', err)
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בטעינת קטגוריות' });
+      }
     });
   }
 
@@ -127,7 +122,6 @@ export class AddProductComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error uploading main image:', err);
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בהעלאת התמונה הראשית' });
       }
     });
@@ -144,7 +138,6 @@ export class AddProductComponent implements OnInit {
       this.product.productImages = urls.map(url => ({ additionalImageUrl: url || '' }));
       this.createProduct();
     }).catch(err => {
-      console.error('Error uploading additional images:', err);
       this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בהעלאת תמונות נוספות' });
     });
   }
@@ -160,11 +153,8 @@ export class AddProductComponent implements OnInit {
 
     // ממיר categoryId לnumber
     this.product.categoryId = Number(this.product.categoryId);
-    // מעדכן את ownerId מהמשתמש המחובר
     this.product.ownerId = currentUser.userId;
     
-    console.log('Sending product data:', this.product);
-    console.log('Product as JSON:', JSON.stringify(this.product));
     this.productService.createProduct(this.product).subscribe({
       next: (response) => {
         this.messageService.add({ severity: 'success', summary: 'הצלחה', detail: 'המוצר פורסם בהצלחה!' });
@@ -174,8 +164,6 @@ export class AddProductComponent implements OnInit {
         }, 1500);
       },
       error: (err) => {
-        console.error('Error creating product:', err);
-        console.error('Error details:', err.error);
         this.messageService.add({ severity: 'error', summary: 'שגיאה', detail: 'שגיאה בפרסום המוצר' });
       }
     });

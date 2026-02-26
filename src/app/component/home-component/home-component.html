@@ -233,6 +233,39 @@
     </div>
   </section>
 
+  <!-- Blog Section -->
+  <section class="blog-preview-section" @fadeInUp>
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <h2 class="section-title">מהבלוג שלנו</h2>
+        <p class="section-subtitle">מאמרים, טיפים ומידע שימושי בעולם הנדל"ן</p>
+      </div>
+      
+      <div class="blog-preview-grid">
+        <div class="blog-preview-card">
+          <i class="pi pi-book blog-preview-icon"></i>
+          <h3>מדריכים מקצועיים</h3>
+          <p>כל מה שצריך לדעת על רכישה, השכרה והשקעה בנדל"ן</p>
+        </div>
+        <div class="blog-preview-card">
+          <i class="pi pi-chart-line blog-preview-icon"></i>
+          <h3>מגמות שוק</h3>
+          <p>עדכונים שוטפים על מגמות ושינויים בשוק הנדל"ן</p>
+        </div>
+        <div class="blog-preview-card">
+          <i class="pi pi-lightbulb blog-preview-icon"></i>
+          <h3>טיפים מועילים</h3>
+          <p>עצות מעשיות לקונים, מוכרים ומשכירים</p>
+        </div>
+      </div>
+      
+      <div class="text-center mt-5">
+        <button pButton label="לכל המאמרים" icon="pi pi-arrow-left" 
+                class="p-button-lg blog-cta-button" (click)="goToBlog()"></button>
+      </div>
+    </div>
+  </section>
+
   <!-- Final CTA -->
   <section class="final-cta-section" @fadeInUp>
     <div class="container text-center">

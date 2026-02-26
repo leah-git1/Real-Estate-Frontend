@@ -74,19 +74,16 @@ export class EditProductComponent implements OnInit {
           url: img.additionalImageUrl
         })) || [];
       },
-      error: (err) => console.error('Error loading product:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   loadCategories() {
     this.categoryService.getCategories().subscribe({
       next: (data) => this.categories = data,
-      error: (err) => console.error('Error loading categories:', err)
-    });
+      error: (err) => { /* Error handled */ } });
   }
 
   onSubmit() {
-    console.log('onSubmit called');
     // תמיד נעדכן את הנתונים הבסיסיים תחילה
     if (this.mainImageFile) {
       this.uploadMainImage();
@@ -113,7 +110,6 @@ export class EditProductComponent implements OnInit {
         this.deleteMarkedImages();
       },
       error: (err) => {
-        console.error('Error updating product:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'שגיאה',
@@ -154,7 +150,6 @@ export class EditProductComponent implements OnInit {
         setTimeout(() => this.navigateBack(), 1500);
       }
     }).catch(err => {
-      console.error('Error deleting images:', err);
       this.messageService.add({
         severity: 'error',
         summary: 'שגיאה',
@@ -172,7 +167,6 @@ export class EditProductComponent implements OnInit {
         this.updateBasicData();
       },
       error: (err) => {
-        console.error('Error uploading main image:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'שגיאה',
@@ -204,7 +198,6 @@ export class EditProductComponent implements OnInit {
       });
       setTimeout(() => this.navigateBack(), 1500);
     }).catch(err => {
-      console.error('Error uploading additional images:', err);
       this.messageService.add({
         severity: 'error',
         summary: 'שגיאה',

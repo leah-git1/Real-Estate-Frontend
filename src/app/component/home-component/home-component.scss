@@ -734,6 +734,87 @@ button.animate-on-scroll { transition-delay: 0.35s; }
   }
 }
 
+.blog-preview-section {
+  padding: 5rem 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+.blog-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.blog-preview-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: all 0.4s ease;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    
+    .blog-preview-icon {
+      transform: scale(1.1) rotate(5deg);
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 1.5rem 0 1rem;
+  }
+  
+  p {
+    color: #6c757d;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+}
+
+.blog-preview-icon {
+  font-size: 3rem;
+  color: #667eea;
+  display: inline-block;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+  border-radius: 50%;
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.blog-cta-button {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  font-size: 1.2rem !important;
+  padding: 1.2rem 2.5rem !important;
+  color: white !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5) !important;
+    background: linear-gradient(135deg, #764ba2, #667eea) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2rem;

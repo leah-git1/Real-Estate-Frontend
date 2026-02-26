@@ -112,18 +112,15 @@
         </p-card>
 
         <p-card header="שאלות נפוצות">
-          <div class="flex flex-column gap-3">
-            <div class="faq-item">
-              <div class="font-bold mb-1">איך אני מפרסם מוצר?</div>
-              <div class="text-600 text-sm">התחבר לחשבון ולחץ על "פרסם מוצר"</div>
-            </div>
-            <div class="faq-item">
-              <div class="font-bold mb-1">מה העמלות?</div>
-              <div class="text-600 text-sm">מכירה: 2%, השכרה: חודש שלם, נופש: 8%</div>
-            </div>
-            <div class="faq-item">
-              <div class="font-bold mb-1">איך מבטלים הזמנה?</div>
-              <div class="text-600 text-sm">פנה לשירות הלקוחות בטלפון או במייל</div>
+          <div class="faq-list">
+            <div *ngFor="let faq of faqs; let i = index" class="faq-item-interactive" [class.active]="activeFaq === i" (click)="toggleFaq(i)">
+              <div class="faq-question">
+                <span>{{ faq.question }}</span>
+                <i class="pi" [class.pi-chevron-down]="activeFaq !== i" [class.pi-chevron-up]="activeFaq === i"></i>
+              </div>
+              <div class="faq-answer" [@slideDown]="activeFaq === i ? 'open' : 'closed'" *ngIf="activeFaq === i">
+                {{ faq.answer }}
+              </div>
             </div>
           </div>
         </p-card>
