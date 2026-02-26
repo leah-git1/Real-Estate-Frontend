@@ -189,7 +189,7 @@
                   <div class="col-12" *ngFor="let item of order.orderItems.slice(0, 2)">
                     <div class="flex align-items-center gap-3 p-2 bg-gray-50 border-round">
                       <img *ngIf="item.product?.imageUrl" 
-                           [src]="item.product.imageUrl" 
+                           [src]="getFullImageUrl(item.product.imageUrl)" 
                            [alt]="item.product?.title"
                            style="width: 60px; height: 60px; object-fit: cover;"
                            class="border-round" />
@@ -568,7 +568,7 @@
       <div *ngFor="let item of selectedOrder.orderItems" class="mb-3 pb-3 border-bottom-1 border-200">
         <div class="flex gap-3">
           <img *ngIf="item.product?.imageUrl" 
-               [src]="item.product.imageUrl" 
+               [src]="getFullImageUrl(item.product.imageUrl)" 
                [alt]="item.product?.title"
                style="width: 100px; height: 100px; object-fit: cover;"
                class="border-round" />
