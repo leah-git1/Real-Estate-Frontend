@@ -1,59 +1,130 @@
-# RealEstateClient
+# 🏠 Real Estate Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+A modern real estate platform built with **Angular 21** and **PrimeNG**, allowing users to browse, filter, and book properties for sale, rent, or vacation.
 
-## Development server
+---
 
-To start a local development server, run:
+## ✨ Features
+
+- 🔍 **Property Search & Filtering** — Filter by city, type, price, rooms, and more
+- 🏡 **Property Listings** — Browse properties for Sale, Rent, or Vacation
+- 🛒 **Cart & Checkout** — Add properties to cart and complete bookings
+- 📦 **Order History** — View and track all past orders with status timeline
+- ❤️ **Favorites** — Save and manage favorite properties
+- 👤 **User Profile** — Update personal details, manage listings, and change password
+- 🏗️ **Add / Edit Properties** — Owners can publish and manage their own listings
+- 💬 **Property Inquiries** — Send and receive inquiries about properties
+- 🤖 **Chatbot** — Built-in assistant for user support
+- 🛡️ **Admin Dashboard** — Full system management for admins
+- 📝 **Blog** — Real estate tips and articles
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Version |
+|---|---|
+| Angular | 21.1 |
+| PrimeNG | 21.1 |
+| PrimeFlex | 4.0 |
+| PrimeIcons | 7.0 |
+| Chart.js | 4.5 |
+| TypeScript | 5.9 |
+| RxJS | 7.8 |
+| Vitest | 4.0 |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js `>= 18`
+- npm `>= 11`
+- Angular CLI `>= 21`
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd Real-Estate-Frontend
+
+# Install dependencies
+npm install
+```
+
+### Running the App
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Navigate to `http://localhost:4200/` — the app reloads automatically on file changes.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 📁 Project Structure
 
-```bash
-ng generate component component-name
+```
+src/
+├── app/
+│   ├── component/
+│   │   ├── home-component/          # Landing page
+│   │   ├── product-list-component/  # Property listings
+│   │   ├── product-details-component/ # Single property view
+│   │   ├── product-filter-component/  # Search & filters
+│   │   ├── product-card-component/    # Property card UI
+│   │   ├── cart-component/          # Shopping cart
+│   │   ├── checkout-component/      # Checkout flow
+│   │   ├── order-success-component/ # Order confirmation
+│   │   ├── user-profile-component/  # User dashboard
+│   │   ├── add-product-component/   # Add new listing
+│   │   ├── edit-product-component/  # Edit listing
+│   │   ├── favorites-component/     # Saved properties
+│   │   ├── admin-dashboard-component/ # Admin panel
+│   │   ├── chatbot-component/       # AI assistant
+│   │   ├── blog-component/          # Blog & articles
+│   │   ├── about-component/         # About page
+│   │   ├── contact-component/       # Contact page
+│   │   ├── auth/                    # Login & Register
+│   │   ├── header-component/        # Navigation bar
+│   │   ├── footer-component/        # Footer
+│   │   ├── cart-sidebar/            # Slide-in cart
+│   │   └── favorites-sidebar/       # Slide-in favorites
+│   ├── models/                      # TypeScript interfaces & DTOs
+│   ├── services/                    # API services
+│   ├── guards/                      # Route guards
+│   ├── config/                      # App configuration
+│   └── utils/                       # Utility functions
+└── styles.scss                      # Global styles
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## 📜 Available Scripts
 
-## Building
+| Command | Description |
+|---|---|
+| `ng serve` | Start development server |
+| `ng build` | Build for production |
+| `ng test` | Run unit tests with Vitest |
+| `ng build --watch` | Build and watch for changes |
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## 🔐 Authentication
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The app uses token-based authentication. Users can:
+- Register / Login
+- Update profile details
+- Change password securely
 
-## Running unit tests
+Admin users have access to the full admin dashboard.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+---
 
-```bash
-ng test
-```
+## 🌐 Backend
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This frontend connects to a .NET backend API running at `https://localhost:44305`.  
+Make sure the backend server is running before starting the frontend.
